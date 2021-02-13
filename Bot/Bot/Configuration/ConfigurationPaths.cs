@@ -7,5 +7,7 @@ namespace Bot.Configuration
     public static class ConfigurationPaths
     {
         public const string Yahoo = "Yahoo";
+
+        public const string Sql = "Sql";
     }
 }
