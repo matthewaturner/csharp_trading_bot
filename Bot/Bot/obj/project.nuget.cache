@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "GdrnTavq5zogXkbqRnHkUT6p7XtLFumB59gC3rb9ZcwgzgbSPtTBj5nOpEd1eeY8UmbsymaSKvhucElT1tocJA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\matur\\source\\repos\\csharp_trading_bot\\Bot\\Bot\\Bot.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.configuration\\6.0.0-preview.1.21102.12\\microsoft.extensions.configuration.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\6.0.0-preview.1.21102.12\\microsoft.extensions.configuration.abstractions.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.configuration.binder\\6.0.0-preview.1.21102.12\\microsoft.extensions.configuration.binder.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.0-preview.1.21102.12\\microsoft.extensions.dependencyinjection.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\6.0.0-preview.1.21102.12\\microsoft.extensions.dependencyinjection.abstractions.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.logging\\6.0.0-preview.1.21102.12\\microsoft.extensions.logging.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0-preview.1.21102.12\\microsoft.extensions.logging.abstractions.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.logging.configuration\\6.0.0-preview.1.21102.12\\microsoft.extensions.logging.configuration.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.logging.console\\6.0.0-preview.1.21102.12\\microsoft.extensions.logging.console.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.options\\6.0.0-preview.1.21102.12\\microsoft.extensions.options.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\6.0.0-preview.1.21102.12\\microsoft.extensions.options.configurationextensions.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\microsoft.extensions.primitives\\6.0.0-preview.1.21102.12\\microsoft.extensions.primitives.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.0-preview.1.21102.12\\system.diagnostics.diagnosticsource.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0-preview.1.21102.12\\system.runtime.compilerservices.unsafe.6.0.0-preview.1.21102.12.nupkg.sha512",
+    "C:\\Users\\matur\\.nuget\\packages\\system.text.json\\6.0.0-preview.1.21102.12\\system.text.json.6.0.0-preview.1.21102.12.nupkg.sha512"
+  ],
+  "logs": []
+}

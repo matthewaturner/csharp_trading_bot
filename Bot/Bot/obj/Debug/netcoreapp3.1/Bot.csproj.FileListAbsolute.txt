@@ -1,0 +1,12 @@
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.exe
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.deps.json
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.runtimeconfig.json
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.runtimeconfig.dev.json
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.dll
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\bin\Debug\netcoreapp3.1\Bot.pdb
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.AssemblyInfoInputs.cache
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.AssemblyInfo.cs
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.csproj.CoreCompileInputs.cache
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.dll
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.pdb
+C:\Users\matur\source\repos\csharp_trading_bot\Bot\Bot\obj\Debug\netcoreapp3.1\Bot.genruntimeconfig.cache
