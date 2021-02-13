@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Bot.Configuration
 {
-    public class ConfigurationPaths
+    public static class ConfigurationPaths
     {
         public const string Yahoo = "Yahoo";
     }
