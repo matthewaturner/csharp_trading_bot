@@ -1,5 +1,6 @@
 ﻿using Bot.Brokerage;
 using Bot.Brokerage.Interfaces;
+using Bot.DataStorage;
 using Bot.DataStorage.Models;
 using Bot.Interfaces.Trading;
 using Bot.Trading.Interfaces;
@@ -11,11 +12,15 @@ namespace Bot.Trading
 {
     public class TradingEngine : ITradingEngine
     {
-        private IBroker Broker;
+        private ITickStorage TickStorage;
 
-        public TradingEngine(IBroker broker, List<IStrategy> strategies)
+        private List<IStrategy> Strategies;
+
+        public TradingEngine(ITickStorage tickStorage, List<IStrategy> strategies)
         {
-            this.Broker = broker != null ? broker : throw new ArgumentNullException(nameof(broker));
+            this.TickStorage = tickStorage != null ? tickStorage : throw new ArgumentNullException(nameof(tickStorage));
+            this.Strategies = strategies != null ? strategies : throw new ArgumentNullException(nameof(strategies));
+        }
         }
 
         public void RunStrategies()
