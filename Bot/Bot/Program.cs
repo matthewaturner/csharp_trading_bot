@@ -45,7 +45,7 @@ namespace Bot
             //YahooDataSource yahoo = (YahooDataSource)provider.GetService(typeof(YahooDataSource));
             ITickStorage tickStorage = (ITickStorage)provider.GetService(typeof(ITickStorage));
 
-            var ticks = tickStorage.GetTicksAsync("MSFT", TickInterval.Day, new DateTime(2010, 1, 1), new DateTime(2011, 1, 1)).Result;
+            var ticks = tickStorage.GetTicksAsync("AMC", TickInterval.Day, new DateTime(1970, 1, 1), DateTime.Now).Result;
 
             foreach (Tick t in ticks)
             {

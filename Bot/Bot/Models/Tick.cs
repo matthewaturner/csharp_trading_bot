@@ -71,5 +71,10 @@ namespace Bot.DataStorage.Models
                 $"Open:{Open} High:{High} Low:{Low} " +
                 $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
         }
+
+        public string PrimaryKey()
+        {
+            return Symbol + DateTime.ToString("O") + TickInterval.ToString();
+        }
     }
 }
