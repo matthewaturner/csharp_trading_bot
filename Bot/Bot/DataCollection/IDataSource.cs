@@ -3,15 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Bot.DataStorage
+namespace Bot.DataCollection
 {
-    interface ITickStorage
+    public interface IDataSource
     {
         /// <summary>
-        /// Get ticks for a symbol for some interval and over a range of time.
+        /// Gets a list of ticks for a certain interval over a period of time.
         /// </summary>
         /// <param name="symbol"></param>
-        /// <param name="interval">Tick interval.</param>
+        /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>

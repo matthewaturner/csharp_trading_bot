@@ -7,10 +7,13 @@ namespace Bot.DataStorage.Models
 {
     public class Tick
     {
+        public Tick()
+        { }
+
         public Tick(
             string symbol,
+            TickInterval interval,
             DateTime dateTime,
-            TickLength tickLength,
             double open,
             double high,
             double low,
@@ -20,7 +23,7 @@ namespace Bot.DataStorage.Models
         {
             Symbol = symbol;
             DateTime = dateTime.Date;
-            TickLength = tickLength;
+            TickInterval = interval;
             Open = open;
             High = high;
             Low = low;
@@ -42,7 +45,7 @@ namespace Bot.DataStorage.Models
         [Key]
         [Column(Order = 3)]
         [Required]
-        public TickLength TickLength { get; set; }
+        public TickInterval TickInterval { get; set; }
 
         [Required]
         public double Open { get; set; }
@@ -61,5 +64,12 @@ namespace Bot.DataStorage.Models
 
         [Required]
         public double Volume { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Symbol} {DateTime.StandardToString()} " +
+                $"Open:{Open} High:{High} Low:{Low} " +
+                $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
+        }
     }
 }
