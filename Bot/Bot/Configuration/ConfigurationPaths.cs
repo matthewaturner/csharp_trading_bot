@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Bot.Configuration
 {
     public static class ConfigurationPaths
@@ -9,5 +6,7 @@ namespace Bot.Configuration
         public const string Yahoo = "Yahoo";
 
         public const string Sql = "Sql";
+
+        public const string KeyVault = "KeyVault";
     }
 }

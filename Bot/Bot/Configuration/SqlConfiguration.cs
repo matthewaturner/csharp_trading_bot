@@ -3,6 +3,6 @@ namespace Bot.Configuration
 {
     public class SqlConfiguration
     {
-        public string ConnectionString { get; set; }
+        public string ConnectionStringSecretName { get; set; }
     }
 }

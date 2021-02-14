@@ -1,7 +1,9 @@
 ﻿using Bot.Configuration;
-using Bot.DataCollection.Yahoo;
+using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
+using Core;
+using Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,19 +17,7 @@ namespace Bot
     {
         public static void Main(string[] args)
         {
-            HttpClient httpClient = new HttpClient();
-
             IServiceCollection services = new ServiceCollection();
-
-            //for Connection
-            DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
-            var factory = DbProviderFactories.GetFactory("System.Data.SqlClient");
-            DbConnection connection = factory.CreateConnection();
-
-            // inject singletons
-            services.AddSingleton<HttpClient>();
-            services.AddSingleton<YahooDataProvider>();
-            services.AddSingleton<TickStorage>();
 
             // setup configurations
             IConfiguration configuration = new ConfigurationBuilder()
@@ -39,13 +29,28 @@ namespace Bot
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
             services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<PriceContext>(configuration.GetSection(ConfigurationPaths.Sql));
+            services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
+
+            // entity framework stuff
+            DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
+
+            // inject singletons
+            services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
+            services.AddSingleton<HttpClient>();
+            services.AddSingleton<IDataSource, YahooDataSource>();
+            services.AddSingleton<ITickStorage, TickStorage>();
 
             IServiceProvider provider = services.BuildServiceProvider();
 
-            YahooDataProvider yahoo = (YahooDataProvider)provider.GetService(typeof(YahooDataProvider));
-            TickStorage tickStorage = (TickStorage)provider.GetService(typeof(TickStorage));
+            //YahooDataSource yahoo = (YahooDataSource)provider.GetService(typeof(YahooDataSource));
+            ITickStorage tickStorage = (ITickStorage)provider.GetService(typeof(ITickStorage));
 
-            tickStorage.SaveTick(new Tick("test", DateTime.Now, TickLength.Day, 1, 2, 3, 4, 5, 6));
+            var ticks = tickStorage.GetTicksAsync("MSFT", TickInterval.Day, new DateTime(2010, 1, 1), new DateTime(2011, 1, 1)).Result;
+
+            foreach (Tick t in ticks)
+            {
+                Console.WriteLine(t.ToString());
+            }
         }
     }
 }
