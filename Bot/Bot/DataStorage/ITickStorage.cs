@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Bot.DataStorage
 {
-    interface ITickStorage
+    public interface ITickStorage
     {
         /// <summary>
         /// Get ticks for a symbol for some interval and over a range of time.
