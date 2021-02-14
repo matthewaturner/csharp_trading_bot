@@ -28,7 +28,7 @@ namespace Bot
                 .Build();
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
             services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
-            services.Configure<PriceContext>(configuration.GetSection(ConfigurationPaths.Sql));
+            services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
 
             // entity framework stuff

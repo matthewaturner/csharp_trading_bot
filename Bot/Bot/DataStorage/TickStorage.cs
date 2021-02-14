@@ -14,7 +14,7 @@ namespace Bot.DataStorage
     public class TickStorage : ITickStorage
     {
         SqlConfiguration sqlConfig;
-        PriceContext context;
+        TickContext context;
         IDataSource dataSource;
 
         public TickStorage(
@@ -26,7 +26,7 @@ namespace Bot.DataStorage
             this.sqlConfig = sqlConfig.Value;
 
             string connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
-            context = new PriceContext(connectionString);
+            context = new TickContext(connectionString);
             context.Database.CreateIfNotExists();
         }
 

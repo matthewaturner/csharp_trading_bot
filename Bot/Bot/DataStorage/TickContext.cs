@@ -2,9 +2,9 @@
 
 namespace Bot.DataStorage.Models
 {
-    public class PriceContext : DbContext
+    public class TickContext : DbContext
     {
-        public PriceContext(string connectionString)
+        public TickContext(string connectionString)
             : base(connectionString)
         { }
 
