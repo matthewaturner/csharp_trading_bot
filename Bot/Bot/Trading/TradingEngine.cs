@@ -21,7 +21,7 @@ namespace Bot.Trading
             this.TickStorage = tickStorage != null ? tickStorage : throw new ArgumentNullException(nameof(tickStorage));
             this.Strategies = strategies != null ? strategies : throw new ArgumentNullException(nameof(strategies));
         }
-        }
+        
 
         public void RunStrategies()
         {
