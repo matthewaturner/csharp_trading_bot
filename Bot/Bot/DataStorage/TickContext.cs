@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Brokerages;
 using System.Data.Entity;
 
 namespace Bot.DataStorage.Models

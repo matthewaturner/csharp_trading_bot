@@ -9,7 +9,7 @@ using Bot.DataCollection;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
-using Bot.Models;
+using Bot.Brokerages;
 
 namespace Bot.DataStorage
 {
@@ -18,7 +18,7 @@ namespace Bot.DataStorage
         private SqlConfiguration sqlConfig;
         private TickContext context;
         private IDataSource dataSource;
-        private readonly string connectionString;
+        private string connectionString;
 
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
@@ -28,7 +28,7 @@ namespace Bot.DataStorage
             this.dataSource = dataSource;
             this.sqlConfig = sqlConfig.Value;
 
-            string connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
+            connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
             context = new TickContext(connectionString);
             context.Database.CreateIfNotExists();
             context.Configuration.AutoDetectChangesEnabled = false;

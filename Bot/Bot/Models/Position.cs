@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bot.Models
+namespace Bot.Brokerages
 {
     public class Position
     {

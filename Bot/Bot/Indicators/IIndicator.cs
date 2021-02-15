@@ -1,5 +1,5 @@
 ﻿
-using Bot.Models;
+using Bot.Brokerages;
 
 namespace Bot.Indicators
 {

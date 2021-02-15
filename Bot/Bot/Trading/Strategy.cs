@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Brokerages;
 using Bot.Interfaces.Trading;
 using System.Collections.Generic;
 

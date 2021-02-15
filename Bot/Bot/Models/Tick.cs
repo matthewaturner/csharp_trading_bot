@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Bot.Models
+namespace Bot.Brokerages
 {
     public class Tick
     {

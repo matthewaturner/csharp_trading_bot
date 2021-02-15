@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Bot.Models
+namespace Bot.Brokerages
 {
     public class Portfolio
     {

@@ -1,8 +1,7 @@
-﻿using Bot.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Bot.Models
+namespace Bot.Brokerages
 {
     public class BackTestingBroker : IBroker
     {
