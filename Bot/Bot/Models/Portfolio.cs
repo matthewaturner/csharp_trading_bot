@@ -1,8 +1,7 @@
-﻿using Bot.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Bot.Brokerage
+namespace Bot.Models
 {
     public class Portfolio
     {

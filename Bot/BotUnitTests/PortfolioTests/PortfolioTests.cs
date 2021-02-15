@@ -1,4 +1,4 @@
-﻿using Bot.Brokerage;
+﻿using Bot.Models;
 using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

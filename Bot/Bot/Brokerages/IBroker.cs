@@ -1,5 +1,4 @@
-﻿using Bot.Trading;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Bot.Models
 {
