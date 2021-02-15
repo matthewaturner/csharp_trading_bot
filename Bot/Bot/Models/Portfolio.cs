@@ -1,8 +1,6 @@
-﻿using Bot.Interfaces.Trading;
-using Bot.Trading;
+﻿using Bot.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Bot.Brokerage
 {

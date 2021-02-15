@@ -1,5 +1,5 @@
 ﻿using Bot.Brokerage;
-using Bot.Trading;
+using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PortfolioTests

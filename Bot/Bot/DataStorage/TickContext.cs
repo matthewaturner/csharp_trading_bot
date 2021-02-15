@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using Bot.Models;
+using System.Data.Entity;
 
 namespace Bot.DataStorage.Models
 {

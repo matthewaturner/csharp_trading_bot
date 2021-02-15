@@ -1,6 +1,5 @@
 ﻿
-using Bot.DataStorage.Models;
-using System;
+using Bot.Models;
 
 namespace Bot.Indicators
 {

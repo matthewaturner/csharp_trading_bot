@@ -1,11 +1,9 @@
-﻿using Bot.Trading.Interfaces;
+﻿
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Bot.Trading
+namespace Bot.Models
 {
-    public class Trade : ITrade
+    public class Trade
     {
         public Guid TradeId { get; set; }
 
