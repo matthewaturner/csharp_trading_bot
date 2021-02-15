@@ -6,7 +6,7 @@ namespace Bot.Trading.Interfaces
 {
     public interface ITradingEngine
     {
-        public void RunStrategies();
+        public void Run(DateTime startDate, DateTime endDate, TimeSpan timeSpan);
 
     }
 }

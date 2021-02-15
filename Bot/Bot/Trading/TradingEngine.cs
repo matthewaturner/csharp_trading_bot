@@ -1,8 +1,13 @@
-﻿using Bot.DataStorage;
+﻿using Bot.Brokerages;
+using Bot.DataStorage;
+using Bot.DataStorage.Models;
 using Bot.Interfaces.Trading;
 using Bot.Trading.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bot.Trading
 {
@@ -10,20 +15,31 @@ namespace Bot.Trading
     {
         private ITickStorage TickStorage;
 
-        private List<IStrategy> Strategies;
+        private IStrategy Strategy;
 
-        public TradingEngine(ITickStorage tickStorage, List<IStrategy> strategies)
-        {
-            this.TickStorage = tickStorage != null ? tickStorage : throw new ArgumentNullException(nameof(tickStorage));
-            this.Strategies = strategies != null ? strategies : throw new ArgumentNullException(nameof(strategies));
-        }
-        
+        private IList<Tick> TickData;
 
-        public void RunStrategies()
+        public TradingEngine(
+            ITickStorage tickStorage,
+            IStrategy strategy)
         {
-            //calculate indicators
-            //loop through the strategies to get trade signals
-            //send trades to broker
+            this.TickStorage = tickStorage ?? throw new ArgumentNullException(nameof(tickStorage));
+            this.Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
+        }       
+
+        public void Run(DateTime startDate, DateTime endDate, TimeSpan timeSpan)
+        {
+            var currentDate = startDate;
+            while (currentDate < endDate)
+            {
+                if (currentDate > DateTime.UtcNow)
+                {
+                    TimeSpan waitTime = currentDate - DateTime.UtcNow;
+                    Thread.Sleep(waitTime);
+                }                   
+
+            }            
         }
+
     }
 }
