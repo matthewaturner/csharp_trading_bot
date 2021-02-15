@@ -3,9 +3,8 @@ using Bot.Trading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace BotUnitTests.BrokerUnitTests
+namespace BrokerUnitTests
 {
     [TestClass]
     public class BackTestingBrokerUnitTests

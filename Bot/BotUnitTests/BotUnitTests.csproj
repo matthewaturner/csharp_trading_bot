@@ -17,4 +17,10 @@
     <ProjectReference Include="..\Bot\Bot.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="IndicatorTests\MSFT.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

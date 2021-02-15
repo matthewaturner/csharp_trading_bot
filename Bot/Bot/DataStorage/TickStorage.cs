@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Bot.DataCollection;
 using System.Threading.Tasks;
-using System.Data.Entity.Migrations;
 using System.Data.SqlClient;
 using System.Data;
 
@@ -16,9 +15,9 @@ namespace Bot.DataStorage
     public class TickStorage : ITickStorage
     {
         private SqlConfiguration sqlConfig;
-        private PriceContext context;
+        private TickContext context;
         private IDataSource dataSource;
-        private string connectionString;
+        private readonly string connectionString;
 
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
