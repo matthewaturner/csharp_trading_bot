@@ -1,13 +1,10 @@
 ﻿using Bot.Brokerages;
 using Bot.DataStorage;
-using Bot.DataStorage.Models;
 using Bot.Interfaces.Trading;
 using Bot.Trading.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace Bot.Trading
 {
@@ -17,28 +14,43 @@ namespace Bot.Trading
 
         private IStrategy Strategy;
 
+        private string Ticker;
+
+        private TickInterval TickInterval;
+
         private IList<Tick> TickData;
 
         public TradingEngine(
             ITickStorage tickStorage,
-            IStrategy strategy)
+            IStrategy strategy,
+            string ticker,
+            TickInterval tickInterval)
         {
             this.TickStorage = tickStorage ?? throw new ArgumentNullException(nameof(tickStorage));
             this.Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
-        }       
+            this.Ticker = !string.IsNullOrEmpty(ticker) ? ticker : throw new ArgumentNullException(nameof(ticker));
+            this.TickInterval = tickInterval;
+        }
 
-        public void Run(DateTime startDate, DateTime endDate, TimeSpan timeSpan)
+        /// <summary>
+        /// BackFill Data for any dates previous to current date
+        /// </summary>
+        public void InitializeTickData(DateTime startDate, DateTime endDate)
         {
-            var currentDate = startDate;
-            while (currentDate < endDate)
-            {
-                if (currentDate > DateTime.UtcNow)
-                {
-                    TimeSpan waitTime = currentDate - DateTime.UtcNow;
-                    Thread.Sleep(waitTime);
-                }                   
+            this.TickData = this.TickStorage.GetTicksAsync(this.Ticker, this.TickInterval, startDate, endDate).Result;
+        }
 
-            }            
+        /// <summary>
+        /// Run the <see cref="TradingEngine.Strategy"/> on <see cref="Tick"/> between the provided DateTimes based on the provided <see cref="Bot.Brokerages.TickInterval"/>
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="tickInterval"></param>
+        public void Run(DateTime startDate, DateTime endDate, TickInterval tickInterval)
+        {
+            this.TickInterval = tickInterval;
+            this.InitializeTickData(startDate, endDate);
+            this.TickData.OrderBy(f => f.DateTime).ToList().ForEach(t => this.Strategy.OnTick(t));         
         }
 
     }
