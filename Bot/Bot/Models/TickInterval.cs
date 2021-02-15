@@ -1,4 +1,6 @@
-﻿namespace Bot.Models
+﻿using System;
+
+namespace Bot.Models
 {
     public enum TickInterval
     {

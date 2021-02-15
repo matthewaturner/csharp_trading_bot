@@ -1,10 +1,15 @@
-﻿using Bot.Models;
+﻿using Bot.Indicators;
+using Bot.Models;
 using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
     public interface IStrategy
     {
-        public void OnTick(IList<Tick> ticks);
+        int Lookback { get; }
+
+        bool Hydrated { get; }
+
+        void OnTick(Tick ticks);
     }
 }
