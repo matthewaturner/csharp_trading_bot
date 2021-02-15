@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Bot.DataStorage.Models
+namespace Bot.Brokerages
 {
     public class Tick
     {
@@ -70,6 +70,11 @@ namespace Bot.DataStorage.Models
             return $"{Symbol} {DateTime.StandardToString()} " +
                 $"Open:{Open} High:{High} Low:{Low} " +
                 $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
+        }
+
+        public string PrimaryKey()
+        {
+            return Symbol + DateTime.ToString("O") + TickInterval.ToString();
         }
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bot.Brokerage
+﻿
+namespace Bot.Brokerages
 {
     public enum PositionType
     {

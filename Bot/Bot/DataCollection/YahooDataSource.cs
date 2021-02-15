@@ -1,5 +1,5 @@
 ﻿using Bot.Configuration;
-using Bot.DataStorage.Models;
+using Bot.Brokerages;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

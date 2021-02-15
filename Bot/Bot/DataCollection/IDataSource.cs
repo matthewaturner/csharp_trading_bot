@@ -1,4 +1,4 @@
-﻿using Bot.DataStorage.Models;
+﻿using Bot.Brokerages;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

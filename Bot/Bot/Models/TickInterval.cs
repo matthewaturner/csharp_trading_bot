@@ -1,4 +1,4 @@
-﻿namespace Bot.DataStorage.Models
+﻿namespace Bot.Brokerages
 {
     public enum TickInterval
     {

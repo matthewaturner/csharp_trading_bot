@@ -1,10 +1,7 @@
-﻿using Bot.Interfaces.Trading;
-using Bot.Trading;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Bot.Brokerage
+namespace Bot.Brokerages
 {
     public class Portfolio
     {

@@ -1,11 +1,8 @@
-﻿using Bot.Brokerage;
-using Bot.Trading;
+﻿using Bot.Brokerages;
+using Bot.Brokerages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace BotUnitTests.PortfolioTests
+namespace PortfolioTests
 {
     [TestClass]
     public class PortfolioTests
