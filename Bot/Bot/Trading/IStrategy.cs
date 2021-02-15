@@ -5,6 +5,6 @@ namespace Bot.Interfaces.Trading
 {
     public interface IStrategy
     {
-        public List<string> OnTick(Dictionary<string, List<Tick>> stockData);
+        public void OnTick(Tick data);
     }
 }

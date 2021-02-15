@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Bot.Brokerages;
+using System;
 
 namespace Bot.Trading.Interfaces
 {
     public interface ITradingEngine
     {
-        public void RunStrategies();
+        public void Run(DateTime startDate, DateTime endDate, TickInterval tickInterval);
 
     }
 }
