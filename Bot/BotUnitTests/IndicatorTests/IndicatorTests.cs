@@ -30,29 +30,29 @@ namespace IndicatorTests
         public void SMA_Hydration()
         {
             IIndicator<double> sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
-            Assert.IsFalse(sma.IsHydrated());
+            Assert.IsFalse(sma.Hydrated);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(29).ToList());
-            Assert.IsFalse(sma.IsHydrated());
+            Assert.IsFalse(sma.Hydrated);
 
             Assert.ThrowsException<IndicatorNotHydratedException>(() => sma.Value);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(30).ToList());
-            Assert.IsTrue(sma.IsHydrated());
+            Assert.IsTrue(sma.Hydrated);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(60).ToList());
-            Assert.IsTrue(sma.IsHydrated());
+            Assert.IsTrue(sma.Hydrated);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(61).ToList());
-            Assert.IsTrue(sma.IsHydrated());
+            Assert.IsTrue(sma.Hydrated);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(62).ToList());
-            Assert.IsTrue(sma.IsHydrated());
+            Assert.IsTrue(sma.Hydrated);
         }
 
         [TestMethod]
@@ -71,18 +71,18 @@ namespace IndicatorTests
         public void MAC_Hydration()
         {
             IIndicator<int> mac = new MovingAverageCrossover(16, 64, (Tick t) => t.AdjClose);
-            Assert.IsFalse(mac.IsHydrated());
+            Assert.IsFalse(mac.Hydrated);
 
             ReplayData(mac, msftData.Take(15).ToList());
-            Assert.IsFalse(mac.IsHydrated());
+            Assert.IsFalse(mac.Hydrated);
 
             ReplayData(mac, msftData.Skip(15).Take(48).ToList());
-            Assert.IsFalse(mac.IsHydrated());
+            Assert.IsFalse(mac.Hydrated);
 
             Assert.ThrowsException<IndicatorNotHydratedException>(() => mac.Value);
 
             ReplayData(mac, msftData.Skip(63).Take(1).ToList());
-            Assert.IsTrue(mac.IsHydrated());
+            Assert.IsTrue(mac.Hydrated);
         }
 
         [TestMethod]

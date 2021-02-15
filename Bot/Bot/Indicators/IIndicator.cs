@@ -11,16 +11,21 @@ namespace Bot.Indicators
         public T Value { get; }
 
         /// <summary>
-        /// Updates the indicator with a new row of data.
+        /// Gets the number of windows until the indicator is hydrated.
         /// </summary>
-        /// <param name="tick"></param>
-        public void OnTick(Tick tick);
+        public int Lookback { get; }
 
         /// <summary>
         /// Returns whether this indicator has accepted enough data to 
         /// be 'hydrated'.
         /// </summary>
         /// <returns></returns>
-        public bool IsHydrated();
+        public bool Hydrated { get; }
+
+        /// <summary>
+        /// Updates the indicator with a new row of data.
+        /// </summary>
+        /// <param name="tick"></param>
+        public void OnTick(Tick tick);
     }
 }

@@ -11,8 +11,6 @@ namespace Bot.Indicators
         private double[] data;
         private double average;
         private int index;
-        private int lookback;
-        private bool isHydrated;
 
         public SimpleMovingAverage(int lookback, Func<Tick, double> transform)
         {
@@ -21,7 +19,9 @@ namespace Bot.Indicators
             data = new double[lookback];
             index = 0;
             average = 0;
-            isHydrated = false;
+
+            Hydrated = false;
+            Lookback = lookback;
         }
 
         public double Value
@@ -36,17 +36,21 @@ namespace Bot.Indicators
             }
         }
 
+        public bool Hydrated { get; private set; }
+
+        public int Lookback { get; private set; }
+
         public void OnTick(Tick tick)
         {
-            average = average - (data[index] / lookback);
-            data[index] = this.transform(tick);
-            average = average + (data[index] / lookback);
+            average = average - (data[index] / Lookback);
+            data[index] = transform(tick);
+            average = average + (data[index] / Lookback);
 
-            index = (index + 1) % lookback;
+            index = (index + 1) % Lookback;
 
-            if (!isHydrated && index == 0)
+            if (!Hydrated && index == 0)
             {
-                isHydrated = true;
+                Hydrated = true;
             }
         }
 

@@ -21,13 +21,14 @@ namespace Bot.Indicators
 
             shortMA = new SimpleMovingAverage(shortLookback, transform);
             longMA = new SimpleMovingAverage(longLookback, transform);
+            Lookback = longLookback;
         }
 
         public int Value
         {
             get
             {
-                if (!IsHydrated())
+                if (!Hydrated)
                 {
                     throw new IndicatorNotHydratedException();
 
@@ -36,9 +37,11 @@ namespace Bot.Indicators
             }
         }
 
-        public bool IsHydrated()
+        public int Lookback { get; private set; }
+
+        public bool Hydrated
         {
-            return shortMA.IsHydrated() && longMA.IsHydrated();
+            get { return shortMA.Hydrated && longMA.Hydrated; }
         }
 
         public void OnTick(Tick tick)
