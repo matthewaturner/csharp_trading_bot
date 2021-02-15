@@ -1,6 +1,6 @@
-﻿using Bot.Brokerages;
-using Bot.DataStorage;
-using Bot.Interfaces.Trading;
+﻿using Bot.DataStorage;
+using Bot.Models;
+using Bot.Strategies;
 using Bot.Trading.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -11,13 +11,9 @@ namespace Bot.Trading
     public class TradingEngine : ITradingEngine
     {
         private ITickStorage TickStorage;
-
         private IStrategy Strategy;
-
         private string Ticker;
-
         private TickInterval TickInterval;
-
         private IList<Tick> TickData;
 
         public TradingEngine(
@@ -50,8 +46,7 @@ namespace Bot.Trading
         {
             this.TickInterval = tickInterval;
             this.InitializeTickData(startDate, endDate);
-            this.TickData.OrderBy(f => f.DateTime).ToList().ForEach(t => this.Strategy.OnTick(t));         
+            this.TickData.OrderBy(f => f.DateTime).ToList().ForEach(t => Strategy.OnTick(t));         
         }
-
     }
 }

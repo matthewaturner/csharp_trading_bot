@@ -9,7 +9,7 @@ using Bot.DataCollection;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
-using Bot.Brokerages;
+using Bot.Models;
 
 namespace Bot.DataStorage
 {

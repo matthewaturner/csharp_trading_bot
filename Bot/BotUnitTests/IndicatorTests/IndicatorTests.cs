@@ -1,6 +1,6 @@
 ﻿using Bot.DataStorage.Models;
 using Bot.Indicators;
-using Bot.Brokerages;
+using Bot.Models;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -29,14 +29,14 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Hydration()
         {
-            IIndicator<double> sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            IIndicator sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             Assert.IsFalse(sma.Hydrated);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(29).ToList());
             Assert.IsFalse(sma.Hydrated);
 
-            Assert.ThrowsException<IndicatorNotHydratedException>(() => sma.Value);
+            Assert.ThrowsException<NotHydratedException>(() => sma.Value);
 
             sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             ReplayData(sma, msftData.Take(30).ToList());
@@ -58,7 +58,7 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Values()
         {
-            IIndicator<double> sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            IIndicator sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
             IList<double> smaResults = msftResults[nameof(SimpleMovingAverage)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -70,7 +70,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Hydration()
         {
-            IIndicator<int> mac = new MovingAverageCrossover(16, 64, (Tick t) => t.AdjClose);
+            IIndicator mac = new MovingAverageCrossover(16, 64, (Tick t) => t.AdjClose);
             Assert.IsFalse(mac.Hydrated);
 
             ReplayData(mac, msftData.Take(15).ToList());
@@ -79,7 +79,7 @@ namespace IndicatorTests
             ReplayData(mac, msftData.Skip(15).Take(48).ToList());
             Assert.IsFalse(mac.Hydrated);
 
-            Assert.ThrowsException<IndicatorNotHydratedException>(() => mac.Value);
+            Assert.ThrowsException<NotHydratedException>(() => mac.Value);
 
             ReplayData(mac, msftData.Skip(63).Take(1).ToList());
             Assert.IsTrue(mac.Hydrated);
@@ -88,7 +88,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Values()
         {
-            IIndicator<int> mac = new MovingAverageCrossover(10, 30, (Tick t) => t.AdjClose);
+            IIndicator mac = new MovingAverageCrossover(10, 30, (Tick t) => t.AdjClose);
             IList<int> macResults = msftResults[nameof(MovingAverageCrossover)]
                 .Select(obj => (int)obj)
                 .ToList();
@@ -102,7 +102,7 @@ namespace IndicatorTests
         }
 
         public void ReplayAndCompare<T>(
-            IIndicator<T> indicator, 
+            IIndicator indicator, 
             IList<Tick> data, 
             IList<T> results, 
             Func<T, T, int> compareFunc)
@@ -111,8 +111,8 @@ namespace IndicatorTests
             for (int i=0; i<data.Count; i++)
             {
                 indicator.OnTick(data[i]);
-                values.Add(indicator.Value);
-                if (compareFunc(indicator.Value, results[i]) != 0)
+                values.Add((T)indicator.Value);
+                if (compareFunc((T)indicator.Value, results[i]) != 0)
                 {
                     Assert.Fail($"Values {indicator.Value} and {results[i]} " +
                         $"are unequal at line {i}.");
@@ -120,7 +120,7 @@ namespace IndicatorTests
             }
         }
 
-        public void ReplayData<T>(IIndicator<T> indicator, IList<Tick> data)
+        public void ReplayData(IIndicator indicator, IList<Tick> data)
         {
             foreach (Tick t in data)
             {

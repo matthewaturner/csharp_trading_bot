@@ -1,11 +1,11 @@
 ﻿
-using Bot.Brokerages;
+using Bot.Models;
 using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
 {
-    public class SimpleMovingAverage : IIndicator<double>
+    public class SimpleMovingAverage : IIndicator
     {
         private readonly Func<Tick, double> transform;
         private double[] data;
@@ -15,7 +15,6 @@ namespace Bot.Indicators
         public SimpleMovingAverage(int lookback, Func<Tick, double> transform)
         {
             this.transform = transform;
-            this.lookback = lookback;
             data = new double[lookback];
             index = 0;
             average = 0;
@@ -24,13 +23,13 @@ namespace Bot.Indicators
             Lookback = lookback;
         }
 
-        public double Value
+        public object Value
         {
             get
             {
-                if (!IsHydrated())
+                if (!Hydrated)
                 {
-                    throw new IndicatorNotHydratedException();
+                    throw new NotHydratedException();
                 }
                 return average;
             }
@@ -52,11 +51,6 @@ namespace Bot.Indicators
             {
                 Hydrated = true;
             }
-        }
-
-        public bool IsHydrated()
-        {
-            return isHydrated;
         }
     }
 }

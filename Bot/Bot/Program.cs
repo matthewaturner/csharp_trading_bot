@@ -2,7 +2,7 @@
 using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
-using Bot.Brokerages;
+using Bot.Models;
 using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;

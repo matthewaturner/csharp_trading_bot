@@ -1,10 +1,10 @@
-﻿using Bot.Brokerages;
+﻿using Bot.Models;
 using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
 {
-    public class MovingAverageCrossover : IIndicator<int>
+    public class MovingAverageCrossover : IIndicator
     {
         private SimpleMovingAverage shortMA;
         private SimpleMovingAverage longMA;
@@ -24,25 +24,24 @@ namespace Bot.Indicators
             Lookback = longLookback;
         }
 
-        public int Value
+        public object Value
         {
             get
             {
                 if (!Hydrated)
                 {
-                    throw new IndicatorNotHydratedException();
-
+                    throw new NotHydratedException();
                 }
-                return Helpers.CompareDoubles(shortMA.Value, longMA.Value);
+                return Helpers.CompareDoubles((double)shortMA.Value, (double)longMA.Value);
             }
         }
-
-        public int Lookback { get; private set; }
 
         public bool Hydrated
         {
             get { return shortMA.Hydrated && longMA.Hydrated; }
         }
+
+        public int Lookback { get; private set; }
 
         public void OnTick(Tick tick)
         {

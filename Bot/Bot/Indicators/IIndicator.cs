@@ -1,14 +1,10 @@
 ﻿
-using Bot.Brokerages;
+using Bot.Models;
 
 namespace Bot.Indicators
 {
-    public interface IIndicator<T>
+    public interface IIndicator
     {
-        /// <summary>
-        /// Gets the value of the indicator at the current time step.
-        /// </summary>
-        public T Value { get; }
 
         /// <summary>
         /// Gets the number of windows until the indicator is hydrated.
@@ -21,6 +17,11 @@ namespace Bot.Indicators
         /// </summary>
         /// <returns></returns>
         public bool Hydrated { get; }
+
+        /// <summary>
+        /// Gets the value of the indicator at this point in time;
+        /// </summary>
+        public object Value { get; }
 
         /// <summary>
         /// Updates the indicator with a new row of data.
