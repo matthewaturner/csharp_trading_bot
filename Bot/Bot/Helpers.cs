@@ -1,5 +1,5 @@
 ﻿
-using Bot.Brokerages;
+using Bot.Models;
 using System;
 
 namespace Bot

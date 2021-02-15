@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Bot.Brokerages
+namespace Bot.Models
 {
     public interface IBroker
     {

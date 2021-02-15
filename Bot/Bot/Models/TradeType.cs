@@ -2,7 +2,7 @@
 /// Enum for trade type.
 /// </summary>
 
-namespace Bot.Brokerages
+namespace Bot.Models
 {
     public enum TradeType
     {

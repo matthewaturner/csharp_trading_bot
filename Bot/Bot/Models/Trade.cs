@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Bot.Brokerages
+namespace Bot.Models
 {
     public class Trade
     {
