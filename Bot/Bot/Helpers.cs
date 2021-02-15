@@ -161,5 +161,29 @@ namespace Bot
             DateTime easterSunday = new DateTime(year, month, day);
             return date.Date.CompareTo(easterSunday.Date.AddDays(-2)) == 0;
         }
+
+        /// <summary>
+        /// Compares doubles to six decimal places.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static int CompareDoubles(double a, double b)
+        {
+            double diff = a- b;
+            if (diff < -.000001)
+            {
+                return -1;
+            }
+            else if (diff < .000001)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
     }
 }
