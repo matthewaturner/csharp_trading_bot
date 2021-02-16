@@ -6,42 +6,47 @@ namespace Bot.Models
     public interface IBroker
     {
         /// <summary>
-        /// Gets portfolio of positions.
+        /// Portfolio held by the broker.
         /// </summary>
-        /// <returns></returns>
-        public Portfolio GetPortfolio();
+        Portfolio Portfolio { get; }
 
         /// <summary>
-        /// Gets history of trades over some time period.
+        /// List of open orders.
         /// </summary>
-        public void GetTradeHistory(DateTime start, DateTime end);
+        IList<Order> OpenOrders { get; }
 
         /// <summary>
-        /// Gets list of outstanding trades.
+        /// Order history.
         /// </summary>
-        public IList<Trade> GetOutstandingTrades();
+        IList<Order> OrderHistory { get; }
 
         /// <summary>
-        /// Gets the status of a trade.
+        /// Gets the status of an order.
         /// </summary>
-        public Trade GetTradeStatus();
+        public Order GetOrder(string orderId);
 
         /// <summary>
         /// Send a trade to the brokerage.
         /// </summary>
         /// <returns></returns>
-        public void ExecuteTrade(Trade trade);
+        public void PlaceOrder(Order order);
 
         /// <summary>
         /// Cancel a trade.
         /// </summary>
         /// <param name="trade"></param>
-        public void CancelTrade(Trade trade);
+        public void CancelOrder(Order order);
 
         /// <summary>
         /// Gets a quote for a symbol.
         /// </summary>
         /// <param name="symbol"></param>
         public void GetQuote(string symbol);
+
+        /// <summary>
+        /// Gets tick data from the trade engine to update
+        /// the portfolio with.
+        /// </summary>
+        public void OnTick(Tick tick);
     }
 }

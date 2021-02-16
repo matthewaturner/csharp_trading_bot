@@ -4,31 +4,37 @@ namespace Bot.Models
 {
     public class Position
     {
-        public string Name;
-
-        public PositionType _Type;
-
-        public double Size;
-
-        public double EntryPrice;
-
-        public Position(string name, PositionType type, double size, double entryPrice)
+        public Position(string symbol, int quantity, double entryPrice)
         {
-            this.Name = name != null ? name : throw new ArgumentNullException(nameof(name));
-            this.Size = size;
-            this.EntryPrice = entryPrice;
-            this._Type = type;
+            Symbol = symbol;
+            Quantity = quantity;
+            CostBasis = entryPrice;
         }
 
-        public double GetPositionInitialValue()
+        public Position(Position p)
+            : this(p.Symbol, p.Quantity, p.CostBasis)
+        { }
+
+        public string Symbol { get; set; }
+
+        public int Quantity { get; set; }
+
+        public double CostBasis { get; set; }
+
+        public void Close(int quantity, double exitPrice)
         {
-            return this.Size * this.EntryPrice;
+            Quantity -= quantity;
         }
 
-        public double GetCurrentPositionValue(double CurrentPrice)
+        public void Open(int quantity, double entryPrice)
         {
-            return this.Size * CurrentPrice;
+            CostBasis = ((CostBasis * Quantity) + (entryPrice * quantity)) / (Quantity + quantity);
+            Quantity += quantity;
         }
 
+        public double Value(double currentPrice)
+        {
+            return Quantity*currentPrice;
+        }
     }
 }

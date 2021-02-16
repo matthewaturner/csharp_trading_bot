@@ -15,15 +15,15 @@ namespace BrokerUnitTests
             var portfolio = new Portfolio(1000);
             var broker = new BackTestingBroker(portfolio);
 
-            var trade = new Trade()
+            var trade = new Order()
             {
                 Ticker = "GME",
                 Price = 420.69,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
-            Assert.ThrowsException<Exception>(() => broker.ExecuteTrade(trade));
+            Assert.ThrowsException<Exception>(() => broker.PlaceOrder(trade));
         }
 
         [TestMethod]
@@ -32,10 +32,10 @@ namespace BrokerUnitTests
             var portfolio = new Portfolio(1000);
             var broker = new BackTestingBroker(portfolio);
 
-            var trades = new List<Trade>()
+            var trades = new List<Order>()
             {
-                new Trade(){Ticker = "GME", Price = 90, Units = 10, TradeType = TradeType.Buy },
-                new Trade(){Ticker = "AMC", Price = 10, Units = 20, TradeType = TradeType.Buy }
+                new Order(){Ticker = "GME", Price = 90, Units = 10, Type = OrderType.Buy },
+                new Order(){Ticker = "AMC", Price = 10, Units = 20, Type = OrderType.Buy }
             };
 
             Assert.ThrowsException<Exception>(() => broker.BulkExecuteTrade(trades));
@@ -48,15 +48,15 @@ namespace BrokerUnitTests
             var portfolio = new Portfolio(startingCash);
             var broker = new BackTestingBroker(portfolio);
 
-            var trade = new Trade()
+            var trade = new Order()
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
-            broker.ExecuteTrade(trade);
+            broker.PlaceOrder(trade);
             var expectedAvailableCash = startingCash - trade.GetTradeValue();
             var expectedPostion = new Position("GME", PositionType.StockLong, 10, 100);
             var actualPosition = broker.Portfolio.CurrentPositions[expectedPostion.Name];
@@ -75,10 +75,10 @@ namespace BrokerUnitTests
             var portfolio = new Portfolio(startingCash);
             var broker = new BackTestingBroker(portfolio);
 
-            var trades = new List<Trade>()
+            var trades = new List<Order>()
             {
-                new Trade(){Ticker = "GME", Price = 100, Units = 10, TradeType = TradeType.Buy },
-                new Trade(){Ticker = "AMC", Price = 10, Units = 20, TradeType = TradeType.Buy }
+                new Order(){Ticker = "GME", Price = 100, Units = 10, Type = OrderType.Buy },
+                new Order(){Ticker = "AMC", Price = 10, Units = 20, Type = OrderType.Buy }
             };
 
             broker.BulkExecuteTrade(trades);
@@ -108,25 +108,25 @@ namespace BrokerUnitTests
             var portfolio = new Portfolio(startingCash);
             var broker = new BackTestingBroker(portfolio);
 
-            var buy = new Trade()
+            var buy = new Order()
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
-            broker.ExecuteTrade(buy);
+            broker.PlaceOrder(buy);
 
-            var sell = new Trade() 
+            var sell = new Order() 
             {
                 Ticker = "GME",
                 Price = 1000,
                 Units = -10,
-                TradeType = TradeType.Sell
+                Type = OrderType.Sell
             };
 
-            broker.ExecuteTrade(sell);
+            broker.PlaceOrder(sell);
             var expectedAvailableCash = sell.GetTradeValue();
 
             Assert.AreEqual(expectedAvailableCash, broker.Portfolio.AvailableCash);

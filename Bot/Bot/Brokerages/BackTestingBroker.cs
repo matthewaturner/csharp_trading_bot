@@ -1,42 +1,74 @@
-﻿using System;
+﻿using Bot.Exceptions;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot.Models
 {
     public class BackTestingBroker : IBroker
     {
-        public Portfolio Portfolio;
 
-        public BackTestingBroker(Portfolio portfolio)
+        public BackTestingBroker(double initialFunds)
         {
-            this.Portfolio = portfolio != null ? portfolio : throw new ArgumentNullException(nameof(portfolio));
+            Portfolio = new Portfolio(initialFunds);
+            OpenOrders = new List<Order>();
+            OrderHistory = new List<Order>();
         }
 
-        public void BulkExecuteTrade(List<Trade> trades)
+        public Portfolio Portfolio { get; private set; }
+
+        public IList<Order> OpenOrders { get; private set; }
+
+        public IList<Order> OrderHistory { get; private set; }
+
+        public void PlaceOrder(Order order)
         {
-            foreach (var trade in trades)
+            bool holdingSymbol = HoldingSymbol(order.Symbol);
+
+            switch (order.Type)
             {
-                this.ExecuteTrade(trade);                
+                case OrderType.BuyToOpen:
+                    return;
+
+                case OrderType.SellToClose:
+                    if (!holdingSymbol)
+                    {
+                        throw new InvalidOrderException("Cannot close a position which is not held.");
+                    }
+
+                    return;
             }
         }
 
-        public void ExecuteTrade(Trade trade)
+        public void GetQuote(string symbol)
         {
-            if (trade.TradeType == TradeType.Buy)
-            {
-                if (trade.GetTradeValue() <= Portfolio.AvailableCash)
-                {
-                    Portfolio.EnterPosition(trade);
-                }
-                else if (trade.TradeType == TradeType.Buy)
-                {
-                    throw new Exception("Error: Not enough cash to execute trade");
-                }
-            }
-            else if (trade.TradeType == TradeType.Sell)
-            {
-                Portfolio.ExitPosition(trade);
-            }
+            throw new NotImplementedException();
         }
+
+        public void GetTradeHistory(DateTime start, DateTime end)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Order GetTradeStatus()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnTick(Tick tick)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Order GetOrder(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CancelOrder(Order order)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

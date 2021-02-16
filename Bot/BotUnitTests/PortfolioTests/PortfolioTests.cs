@@ -11,12 +11,12 @@ namespace PortfolioTests
         {
             var expectedAvailableCash = 0;
             var portfolio = new Portfolio(1000);
-            var trade = new Trade() 
+            var trade = new Order() 
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
             portfolio.EnterPosition(trade);
@@ -30,12 +30,12 @@ namespace PortfolioTests
             var expectedPostion = new Position("GME", PositionType.StockLong, 10, 100);
 
             var portfolio = new Portfolio(1000);
-            var trade = new Trade()
+            var trade = new Order()
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
             portfolio.EnterPosition(trade);
@@ -53,22 +53,22 @@ namespace PortfolioTests
         {
             var expectedAvailableCash = 10000;
             var portfolio = new Portfolio(1000);
-            var buy = new Trade()
+            var buy = new Order()
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
             portfolio.EnterPosition(buy);
 
-            var sell = new Trade()
+            var sell = new Order()
             {
                 Ticker = "GME",
                 Price = 1000,
                 Units = -10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
             portfolio.ExitPosition(sell);
@@ -80,24 +80,24 @@ namespace PortfolioTests
         public void Portfolio_ExitPosition_Sell()
         {
             var portfolio = new Portfolio(1000);
-            var buy = new Trade()
+            var buy = new Order()
             {
                 Ticker = "GME",
                 Price = 100,
                 Units = 10,
-                TradeType = TradeType.Sell
+                Type = OrderType.Sell
             };
 
             portfolio.EnterPosition(buy);
 
             Assert.IsTrue(portfolio.CurrentPositions.Count == 1);
 
-            var sell = new Trade()
+            var sell = new Order()
             {
                 Ticker = "GME",
                 Price = 1000,
                 Units = -10,
-                TradeType = TradeType.Buy
+                Type = OrderType.Buy
             };
 
             portfolio.ExitPosition(sell);
