@@ -1,34 +1,25 @@
-﻿using System;
-
+﻿
 namespace Bot.Models
 {
     public class Position
     {
-        public Position(string symbol, int quantity, double entryPrice)
+        public Position(string symbol, int quantity)
         {
             Symbol = symbol;
             Quantity = quantity;
-            CostBasis = entryPrice;
         }
-
-        public Position(Position p)
-            : this(p.Symbol, p.Quantity, p.CostBasis)
-        { }
 
         public string Symbol { get; set; }
 
         public int Quantity { get; set; }
 
-        public double CostBasis { get; set; }
-
-        public void Close(int quantity, double exitPrice)
+        public void Sell(int quantity)
         {
             Quantity -= quantity;
         }
 
-        public void Open(int quantity, double entryPrice)
+        public void Buy(int quantity)
         {
-            CostBasis = ((CostBasis * Quantity) + (entryPrice * quantity)) / (Quantity + quantity);
             Quantity += quantity;
         }
 

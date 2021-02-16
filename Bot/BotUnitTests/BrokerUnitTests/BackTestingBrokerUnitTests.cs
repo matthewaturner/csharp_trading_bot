@@ -9,6 +9,7 @@ namespace BrokerUnitTests
     [TestClass]
     public class BackTestingBrokerUnitTests
     {
+        /*
         [TestMethod]
         public void ExecuteTrade_Buy_ThrowException()
         {
@@ -131,5 +132,6 @@ namespace BrokerUnitTests
 
             Assert.AreEqual(expectedAvailableCash, broker.Portfolio.AvailableCash);
         }
+        */
     }
 }

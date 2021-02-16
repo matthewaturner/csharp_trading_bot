@@ -23,15 +23,13 @@ namespace Bot.Models
 
         public void PlaceOrder(Order order)
         {
-            bool holdingSymbol = HoldingSymbol(order.Symbol);
-
             switch (order.Type)
             {
                 case OrderType.BuyToOpen:
                     return;
 
                 case OrderType.SellToClose:
-                    if (!holdingSymbol)
+                    if (!Portfolio.Positions.ContainsKey(order.Symbol))
                     {
                         throw new InvalidOrderException("Cannot close a position which is not held.");
                     }

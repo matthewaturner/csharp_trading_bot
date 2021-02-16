@@ -1,4 +1,5 @@
 ﻿using Bot.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,77 +9,98 @@ namespace Bot.Models
     {
         public Portfolio()
         {
-            Positions = new List<Position>();
+            Positions = new Dictionary<string, Position>();
             CashBalance = 0;
         }
 
-        public Portfolio(double initialFunds)
+        public Portfolio(double initialCash)
         {
-            Positions = new List<Position>();
-            CashBalance = initialFunds;
+            Positions = new Dictionary<string, Position>();
+            CashBalance = initialCash;
         }
 
-        public Portfolio(IList<Position> positions, double initialFunds)
+        public Portfolio(IDictionary<string, Position> positions, double initialCash)
         {
             Positions = positions;
-            CashBalance = initialFunds;
+            CashBalance = initialCash;
         }
-
-        public double TotalValue { get; set; }
 
         public double CashBalance { get; set; }
 
-        public IList<Position> Positions { get; set; }
+        public IDictionary<string, Position> Positions { get; set; }
 
-        public void OpenPosition(string symbol, int quantity, double entryPrice)
+        public double GetTotalValue(IDictionary<string, double> currentPrices)
+        {
+            double totalValue = 0;
+
+            foreach(KeyValuePair<string, Position> kvp in Positions)
+            {
+                if (!currentPrices.ContainsKey(kvp.Key))
+                {
+                    throw new ArgumentNullException("currentPrices must contain prices for all held symbols.");
+                }
+
+                totalValue += kvp.Value.Quantity * currentPrices[kvp.Key];
+            }
+
+            return totalValue;
+        }
+
+        public void BuySymbol(string symbol, int quantity, double currentPrice)
         {
             if (quantity < 1)
             {
                 throw new InvalidOrderException("Quantity cannot be less than 1.");
             }
 
-            if (HoldingSymbol(symbol))
+            if (CashBalance < quantity*currentPrice)
             {
-                Positions[GetPositionIndex(symbol)].Open(quantity, entryPrice);
+                throw new InvalidOrderException("Order exceeds cash value of portfolio.");
+            }
+
+            // buy
+            if (Positions.ContainsKey(symbol))
+            {
+                Positions[symbol].Buy(quantity);
             }
             else
             {
-                Positions.Add(new Position(symbol, quantity, entryPrice));
+                Positions[symbol] = new Position(symbol, quantity);
             }
 
-            CashBalance -= quantity * entryPrice;
+            // remove zero positions
+            if (Positions[symbol].Quantity == 0)
+            {
+                Positions.Remove(symbol);
+            }
+
+            CashBalance -= quantity*currentPrice;
         }
 
-        public void ClosePosition(string symbol, int quantity, double exitPrice)
+        public void SellSymbol(string symbol, int quantity, double currentPrice)
         {
-            if (!HoldingSymbol(symbol))
-            {
-                throw new InvalidOrderException("Cannot close a position which is not held.");
-            }
-
             if (quantity < 1)
             {
                 throw new InvalidOrderException("Quantity cannot be less than 1.");
             }
 
-            int index = GetPositionIndex(symbol);
-            Positions[index].Close(quantity, exitPrice);
-            if (Positions[index].Quantity == 0)
+            if (Positions.ContainsKey(symbol))
             {
-                Positions.RemoveAt(index);
+                Positions[symbol].Sell(quantity);
+            }
+            else
+            {
+                Positions[symbol] = new Position(symbol, -quantity);
             }
 
-            CashBalance += quantity * exitPrice;
-        }
+            // remove zero positions
+            if (Positions[symbol].Quantity == 0)
+            {
+                Positions.Remove(symbol);
+            }
 
-        public bool HoldingSymbol(string symbol)
-        {
-            return Positions.Any(pos => string.CompareOrdinal(pos.Symbol, symbol) == 0);
-        }
 
-        public int GetPositionIndex(string symbol)
-        {
-            return Positions.TakeWhile(pos => string.CompareOrdinal(pos.Symbol, symbol) != 0).Count();
+            CashBalance += quantity*currentPrice;
         }
     }
 }
