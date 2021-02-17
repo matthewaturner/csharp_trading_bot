@@ -16,12 +16,9 @@ namespace Bot
         /// <returns></returns>
         public static int Compare(DateTime t1, DateTime t2, TickInterval interval)
         {
-            if (interval != TickInterval.Day)
-            {
-                throw new NotImplementedException();
-            }
-
-            return DateTime.Compare(t1.Date, t2.Date);
+            return DateTime.Compare(
+                t1.NormalizeToTickInterval(interval),
+                t2.NormalizeToTickInterval(interval));
         }
 
         /// <summary>
@@ -32,6 +29,22 @@ namespace Bot
         public static string StandardToString(this DateTime dt)
         {
             return dt.ToString("yyyy-MM-dd HH:mm");
+        }
+
+        /// <summary>
+        /// Returns a datetime with anything more specific than the tick interval stripped.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static DateTime NormalizeToTickInterval(this DateTime dt, TickInterval interval)
+        {
+            if (interval != TickInterval.Day)
+            {
+                throw new NotImplementedException();
+            }
+
+            return dt.Date;
         }
 
         /// <summary>

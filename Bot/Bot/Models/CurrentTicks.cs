@@ -4,11 +4,11 @@ using System.Text;
 
 namespace Bot.Models
 {
-    public class CurrentPrices
+    public class CurrentTicks : ICurrentTicks
     {
         private Dictionary<string, Tick> currentTicks;
 
-        public CurrentPrices(string[] symbols)
+        public CurrentTicks(string[] symbols)
         {
             currentTicks = new Dictionary<string, Tick>();
             foreach (string s in symbols)
