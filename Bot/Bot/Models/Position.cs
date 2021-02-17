@@ -3,22 +3,28 @@ namespace Bot.Models
 {
     public class Position
     {
-        public Position(string symbol, int quantity)
+        public Position(string symbol, double quantity)
         {
             Symbol = symbol;
             Quantity = quantity;
         }
 
+        public Position(Position positionToCopy)
+        {
+            Symbol = positionToCopy.Symbol;
+            Quantity = positionToCopy.Quantity;
+        }
+
         public string Symbol { get; set; }
 
-        public int Quantity { get; set; }
+        public double Quantity { get; set; }
 
-        public void Sell(int quantity)
+        public void Sell(double quantity)
         {
             Quantity -= quantity;
         }
 
-        public void Buy(int quantity)
+        public void Buy(double quantity)
         {
             Quantity += quantity;
         }

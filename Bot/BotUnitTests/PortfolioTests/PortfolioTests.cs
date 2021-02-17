@@ -8,14 +8,14 @@ namespace PortfolioTests
     [TestClass]
     public class PortfolioTests
     {
+        /*
         [TestMethod]
         public void EnterPositionSucceeds()
         {
-            var currentPrices = new Dictionary<string, double>()
-            { { "GME", 110 }, };
+
 
             var portfolio = new Portfolio(1000);
-            portfolio.BuySymbol("GME", 10, 100.0);
+            portfolio.("GME", 10, 100.0);
 
             Assert.AreEqual(0, portfolio.CashBalance);
             Assert.AreEqual(1, portfolio.Positions.Count);
@@ -57,5 +57,6 @@ namespace PortfolioTests
             Assert.AreEqual(1100.0, portfolio.CashBalance);
             Assert.AreEqual(0, portfolio.Positions.Count);
         }
+        */
     }
 }

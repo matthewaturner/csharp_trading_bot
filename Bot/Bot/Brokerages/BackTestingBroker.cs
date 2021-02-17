@@ -7,10 +7,12 @@ namespace Bot.Models
 {
     public class BackTestingBroker : IBroker
     {
+        private ICurrentTicks currentTicks;
 
-        public BackTestingBroker(double initialFunds)
+        public BackTestingBroker(ICurrentTicks currentTicks, double initialFunds)
         {
-            Portfolio = new Portfolio(initialFunds);
+            this.currentTicks = currentTicks;
+            Portfolio = new Portfolio(currentTicks, initialFunds);
             OpenOrders = new List<Order>();
             OrderHistory = new List<Order>();
         }
@@ -21,52 +23,68 @@ namespace Bot.Models
 
         public IList<Order> OrderHistory { get; private set; }
 
+        /// <summary>
+        /// Placing an order just puts it into the open orders list.
+        /// </summary>
+        /// <param name="order"></param>
         public void PlaceOrder(Order order)
         {
-            switch (order.Type)
+            if (!currentTicks.HasSymbol(order.Symbol))
             {
-                case OrderType.BuyToOpen:
-                    return;
+                throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
+            }
 
-                case OrderType.SellToClose:
-                    if (!Portfolio.Positions.ContainsKey(order.Symbol))
-                    {
-                        throw new InvalidOrderException("Cannot close a position which is not held.");
-                    }
+            order.OrderId = Guid.NewGuid().ToString();
+            OpenOrders.Add(order);
+            OrderHistory.Add(order);
+        }
 
-                    return;
+        public IList<Order> GetOrderHistory(DateTime start, DateTime end)
+        {
+            return OrderHistory.Where(order => order.PlacementTime >= start && order.PlacementTime < end).ToList();
+        }
+
+        /// <summary>
+        /// Open orders execute at the open price of the next tick.
+        /// </summary>
+        /// <param name="tick"></param>
+        public void OnTick()
+        {
+            foreach (Order order in OpenOrders)
+            {
+                if (!Portfolio.ValidateOrder(order, currentTicks[order.Symbol].Close, out string message))
+                {
+                    throw new InvalidOrderException($"Order could not be validated. {message}");
+                }
+
+                order.Fill(currentTicks[order.Symbol].Open, currentTicks[order.Symbol].DateTime);
+                Portfolio.ExecuteOrder(order, order.ExecutionPrice);
+                OpenOrders.Remove(order);
             }
         }
 
-        public void GetQuote(string symbol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void GetTradeHistory(DateTime start, DateTime end)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Order GetTradeStatus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnTick(Tick tick)
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <summary>
+        /// Gets the status of an order.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public Order GetOrder(string orderId)
         {
-            throw new NotImplementedException();
+            return OrderHistory.FirstOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
         }
 
-        public void CancelOrder(Order order)
+        /// <summary>
+        /// Cancels an order if it hasn't been filled yet.
+        /// </summary>
+        /// <param name="orderId"></param>
+        public void CancelOrder(string orderId)
         {
-            throw new NotImplementedException();
-        }
+            Order order = OpenOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) != 0);
 
+            if (order != null)
+            {
+                OpenOrders.Remove(order);
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace Bot.Models
     {
         Open,
         Cancelled,
+        Rejected,
         Filled
     }
 }

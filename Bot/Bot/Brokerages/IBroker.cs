@@ -21,32 +21,34 @@ namespace Bot.Models
         IList<Order> OrderHistory { get; }
 
         /// <summary>
-        /// Gets the status of an order.
+        /// Gets the history of orders.
         /// </summary>
-        public Order GetOrder(string orderId);
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public IList<Order> GetOrderHistory(DateTime start, DateTime end);
 
         /// <summary>
-        /// Send a trade to the brokerage.
+        /// Places an order.
         /// </summary>
         /// <returns></returns>
         public void PlaceOrder(Order order);
 
         /// <summary>
-        /// Cancel a trade.
+        /// Gets the status of an order.
         /// </summary>
-        /// <param name="trade"></param>
-        public void CancelOrder(Order order);
+        public Order GetOrder(string orderId);
 
         /// <summary>
-        /// Gets a quote for a symbol.
+        /// Cancel an order if it hasn't been filled yet.
         /// </summary>
-        /// <param name="symbol"></param>
-        public void GetQuote(string symbol);
+        /// <param name="order"></param>
+        public void CancelOrder(string orderId);
 
         /// <summary>
-        /// Gets tick data from the trade engine to update
+        /// Gets tick data from the order engine to update
         /// the portfolio with.
         /// </summary>
-        public void OnTick(Tick tick);
+        public void OnTick();
     }
 }
