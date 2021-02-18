@@ -8,22 +8,41 @@ namespace BrokerUnitTests
     [TestClass]
     public class BackTestingBrokerUnitTests
     {
-        /*
+        Ticks ticks;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            ticks = new Ticks(new string[] { "GME", "MSFT", "AMC" });
+
+            var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
+            var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
+            var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
+
+            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("MSFT", msftTick);
+            latestTicks.Add("GME", gmeTick);
+            latestTicks.Add("AMC", amcTick);
+            ticks.Update(latestTicks);
+        }
+
         [TestMethod]
         public void PlaceOrderSucceeds()
         {
-            var broker = new BackTestingBroker(, 1000);
+            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 3000);
 
-            var order = new Order()
-            {
-                Symbol = "GME",
-                TargetPrice = 420.69,
-                Quantity = 10,
-                Type = OrderType.Buy
-            };
+            broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
 
-            Assert.ThrowsException<Exception>(() => broker.PlaceOrder(order));
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(10.0, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
         }
+        /*
 
         [TestMethod]
         public void BulkExecuteTrade_Buy_ThrowException()

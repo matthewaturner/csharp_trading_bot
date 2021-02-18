@@ -7,12 +7,12 @@ namespace Bot.Models
 {
     public class BackTestingBroker : IBroker
     {
-        private ICurrentTicks currentTicks;
+        private ITicks ticks;
 
-        public BackTestingBroker(ICurrentTicks currentTicks, double initialFunds)
+        public BackTestingBroker(ITicks ticks, double initialFunds)
         {
-            this.currentTicks = currentTicks;
-            Portfolio = new Portfolio(currentTicks, initialFunds);
+            this.ticks = ticks;
+            Portfolio = new Portfolio(initialFunds);
             OpenOrders = new List<Order>();
             OrderHistory = new List<Order>();
         }
@@ -27,9 +27,11 @@ namespace Bot.Models
         /// Placing an order just puts it into the open orders list.
         /// </summary>
         /// <param name="order"></param>
-        public void PlaceOrder(Order order)
+        public void PlaceOrder(OrderRequest request)
         {
-            if (!currentTicks.HasSymbol(order.Symbol))
+            Order order = new Order(request);
+
+            if (!ticks.HasSymbol(order.Symbol))
             {
                 throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
             }
@@ -39,6 +41,12 @@ namespace Bot.Models
             OrderHistory.Add(order);
         }
 
+        /// <summary>
+        /// Returns order history.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         public IList<Order> GetOrderHistory(DateTime start, DateTime end)
         {
             return OrderHistory.Where(order => order.PlacementTime >= start && order.PlacementTime < end).ToList();
@@ -50,16 +58,32 @@ namespace Bot.Models
         /// <param name="tick"></param>
         public void OnTick()
         {
-            foreach (Order order in OpenOrders)
+            Order order = OpenOrders.FirstOrDefault();
+            while (order != null)
             {
-                if (!Portfolio.ValidateOrder(order, currentTicks[order.Symbol].Close, out string message))
+                OrderState state = PreviewOrder(order);
+                if (state == OrderState.Rejected)
                 {
-                    throw new InvalidOrderException($"Order could not be validated. {message}");
+                    throw new InvalidOrderException($"Order could not be validated.");
                 }
 
-                order.Fill(currentTicks[order.Symbol].Open, currentTicks[order.Symbol].DateTime);
-                Portfolio.ExecuteOrder(order, order.ExecutionPrice);
-                OpenOrders.Remove(order);
+                switch (order.Type)
+                {
+                    case OrderType.Buy:
+                        Portfolio.Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                        break;
+
+                    case OrderType.Sell:
+                        Portfolio.Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                        break;
+                }
+
+                // mark order as filled and remove it from the open orders list,
+                // it will remain in the order history list
+                order.Fill(ticks[order.Symbol].AdjOpen, ticks[order.Symbol].DateTime);
+                OpenOrders.RemoveAt(0);
+
+                order = OpenOrders.FirstOrDefault();
             }
         }
 
@@ -85,6 +109,34 @@ namespace Bot.Models
             {
                 OpenOrders.Remove(order);
             }
+        }
+
+        /// <summary>
+        /// Basically just returns if an order is valid or not.
+        /// </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        public OrderState PreviewOrder(Order order)
+        {
+            double currentPrice = ticks[order.Symbol].AdjOpen;
+            double orderPrice = currentPrice * order.Quantity;
+
+            switch (order.Type)
+            {
+                // logic is the same for now
+                case OrderType.Buy:
+                case OrderType.Sell:
+                    if (orderPrice > Portfolio.CashBalance)
+                    {
+                        return OrderState.Rejected;
+                    }
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return OrderState.Open;
         }
     }
 }

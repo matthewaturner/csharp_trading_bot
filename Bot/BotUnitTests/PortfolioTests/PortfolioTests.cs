@@ -1,23 +1,28 @@
 ﻿using Bot.Models;
-using Bot.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace PortfolioTests
 {
     [TestClass]
     public class PortfolioTests
     {
-        CurrentTicks currentTicks;
+        Ticks ticks;
 
         public void Setup()
         {
-            currentTicks = new CurrentTicks(new string[] { "gme", "msft", "amc" });
+            ticks = new Ticks(new string[] { "gme", "msft", "amc" });
 
             var msftTick = new Tick("msft", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
             var gmeTick = new Tick("gme", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
             var amcTick = new Tick("amc", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
+
+            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("msft", msftTick);
+            latestTicks.Add("gme", gmeTick);
+            latestTicks.Add("amc", amcTick);
+            ticks.Update(latestTicks);
         }
 
         /*

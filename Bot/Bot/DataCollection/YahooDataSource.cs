@@ -88,7 +88,7 @@ namespace Bot.DataCollection
                     double low      = Math.Round(double.Parse(tickStrings[3]), 4);
                     double close    = Math.Round(double.Parse(tickStrings[4]), 4);
                     double adjClose = Math.Round(double.Parse(tickStrings[5]), 4);
-                    double volume   = Math.Round(double.Parse(tickStrings[6]), 4);
+                    int volume      = int.Parse(tickStrings[6]);
 
                     tick = new Tick(symbol, interval, dateTime, open, high, low, close, adjClose, volume);
                     tickList.Add(tick);

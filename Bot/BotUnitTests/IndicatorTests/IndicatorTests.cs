@@ -190,7 +190,7 @@ namespace IndicatorTests
                     double low = double.Parse(fields[3]);
                     double close = double.Parse(fields[4]);
                     double adjClose = double.Parse(fields[5]);
-                    double volume = double.Parse(fields[6]);
+                    int volume = int.Parse(fields[6]);
 
                     Tick tick = new Tick(
                         symbol, interval, dateTime, open, high, low, close, adjClose, volume);
