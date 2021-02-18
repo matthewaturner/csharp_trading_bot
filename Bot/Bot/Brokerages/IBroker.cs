@@ -6,42 +6,49 @@ namespace Bot.Models
     public interface IBroker
     {
         /// <summary>
-        /// Gets portfolio of positions.
+        /// Portfolio held by the broker.
+        /// </summary>
+        Portfolio Portfolio { get; }
+
+        /// <summary>
+        /// List of open orders.
+        /// </summary>
+        IList<Order> OpenOrders { get; }
+
+        /// <summary>
+        /// Order history.
+        /// </summary>
+        IList<Order> OrderHistory { get; }
+
+        /// <summary>
+        /// Gets the history of orders.
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public IList<Order> GetOrderHistory(DateTime start, DateTime end);
+
+        /// <summary>
+        /// Places an order.
         /// </summary>
         /// <returns></returns>
-        public Portfolio GetPortfolio();
+        public void PlaceOrder(Order order);
 
         /// <summary>
-        /// Gets history of trades over some time period.
+        /// Gets the status of an order.
         /// </summary>
-        public void GetTradeHistory(DateTime start, DateTime end);
+        public Order GetOrder(string orderId);
 
         /// <summary>
-        /// Gets list of outstanding trades.
+        /// Cancel an order if it hasn't been filled yet.
         /// </summary>
-        public IList<Trade> GetOutstandingTrades();
+        /// <param name="order"></param>
+        public void CancelOrder(string orderId);
 
         /// <summary>
-        /// Gets the status of a trade.
+        /// Gets tick data from the order engine to update
+        /// the portfolio with.
         /// </summary>
-        public Trade GetTradeStatus();
-
-        /// <summary>
-        /// Send a trade to the brokerage.
-        /// </summary>
-        /// <returns></returns>
-        public void ExecuteTrade(Trade trade);
-
-        /// <summary>
-        /// Cancel a trade.
-        /// </summary>
-        /// <param name="trade"></param>
-        public void CancelTrade(Trade trade);
-
-        /// <summary>
-        /// Gets a quote for a symbol.
-        /// </summary>
-        /// <param name="symbol"></param>
-        public void GetQuote(string symbol);
+        public void OnTick();
     }
 }

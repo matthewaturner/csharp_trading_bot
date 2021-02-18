@@ -1,108 +1,77 @@
 ﻿using Bot.Models;
+using Bot.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System;
 
 namespace PortfolioTests
 {
     [TestClass]
     public class PortfolioTests
     {
-        [TestMethod]
-        public void Portfolio_EnterPosition_SubtractsCash()
+        CurrentTicks currentTicks;
+
+        public void Setup()
         {
-            var expectedAvailableCash = 0;
+            currentTicks = new CurrentTicks(new string[] { "gme", "msft", "amc" });
+
+            var msftTick = new Tick("msft", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
+            var gmeTick = new Tick("gme", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
+            var amcTick = new Tick("amc", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
+        }
+
+        /*
+        [TestMethod]
+        public void GetTotalValue()
+        {
+            var msftPos = new Position("msft", 10.0);
+            var gmePos = new Position("gme", -5.0);
+            var amcPos = new Position("amc", 12.0);
+            double cashBalance = 100.0;
+
             var portfolio = new Portfolio(1000);
-            var trade = new Trade() 
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                TradeType = TradeType.Buy
-            };
+            portfolio.("GME", 10, 100.0);
 
-            portfolio.EnterPosition(trade);
-
-            Assert.AreEqual(expectedAvailableCash, portfolio.AvailableCash);
+            Assert.AreEqual(0, portfolio.CashBalance);
+            Assert.AreEqual(1, portfolio.Positions.Count);
+            Assert.AreEqual(1100.0, portfolio.GetTotalValue(currentPrices));
         }
 
         [TestMethod]
-        public void Portfolio_EnterPosition_PositionExists()
+        public void EnterPositionInsufficientCash()
         {
-            var expectedPostion = new Position("GME", PositionType.StockLong, 10, 100);
-
-            var portfolio = new Portfolio(1000);
-            var trade = new Trade()
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                TradeType = TradeType.Buy
-            };
-
-            portfolio.EnterPosition(trade);
-
-            var actualPosition = portfolio.CurrentPositions["GME"];
-
-            Assert.AreEqual(expectedPostion.EntryPrice, actualPosition.EntryPrice);
-            Assert.AreEqual(expectedPostion.Name, actualPosition.Name);
-            Assert.AreEqual(expectedPostion.Size, actualPosition.Size);
-            Assert.AreEqual(expectedPostion._Type, actualPosition._Type);
+            Portfolio portfolio = new Portfolio(100);
+            Assert.ThrowsException<InvalidOrderException>(
+                () => portfolio.BuySymbol("GME", 10, 100.0));
         }
 
         [TestMethod]
-        public void Portfolio_ExitPosition_PositionRemoved()
+        public void EnterExitPositionRemoved()
         {
-            var expectedAvailableCash = 10000;
             var portfolio = new Portfolio(1000);
-            var buy = new Trade()
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                TradeType = TradeType.Buy
-            };
 
-            portfolio.EnterPosition(buy);
+            portfolio.BuySymbol("GME", 10, 100.0);
+            Assert.AreEqual(0, portfolio.CashBalance);
+            Assert.AreEqual(1, portfolio.Positions.Count);
 
-            var sell = new Trade()
-            {
-                Ticker = "GME",
-                Price = 1000,
-                Units = -10,
-                TradeType = TradeType.Buy
-            };
-
-            portfolio.ExitPosition(sell);
-
-            Assert.AreEqual(expectedAvailableCash, portfolio.AvailableCash);
+            portfolio.SellSymbol("GME", 10, 90.0);
+            Assert.AreEqual(900.0, portfolio.CashBalance);
+            Assert.AreEqual(0, portfolio.Positions.Count);
         }
 
         [TestMethod]
-        public void Portfolio_ExitPosition_Sell()
+        public void ShortSaleExitPositionRemoved()
         {
             var portfolio = new Portfolio(1000);
-            var buy = new Trade()
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                TradeType = TradeType.Sell
-            };
 
-            portfolio.EnterPosition(buy);
+            portfolio.SellSymbol("GME", 10, 100.0);
+            Assert.AreEqual(2000.0, portfolio.CashBalance);
+            Assert.AreEqual(portfolio.Positions.Count, 1);
 
-            Assert.IsTrue(portfolio.CurrentPositions.Count == 1);
-
-            var sell = new Trade()
-            {
-                Ticker = "GME",
-                Price = 1000,
-                Units = -10,
-                TradeType = TradeType.Buy
-            };
-
-            portfolio.ExitPosition(sell);
-
-            Assert.IsTrue(portfolio.CurrentPositions.Count == 0);
+            portfolio.BuySymbol("GME", 10, 90.0);
+            Assert.AreEqual(1100.0, portfolio.CashBalance);
+            Assert.AreEqual(0, portfolio.Positions.Count);
         }
+        */
     }
 }

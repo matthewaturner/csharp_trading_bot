@@ -22,7 +22,7 @@ namespace Bot.Models
             double volume)
         {
             Symbol = symbol;
-            DateTime = dateTime.Date;
+            DateTime = dateTime.NormalizeToTickInterval(interval);
             TickInterval = interval;
             Open = open;
             High = high;

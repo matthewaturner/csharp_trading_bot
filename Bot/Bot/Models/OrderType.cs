@@ -4,7 +4,7 @@
 
 namespace Bot.Models
 {
-    public enum TradeType
+    public enum OrderType
     {
         Buy,
         Sell

@@ -1,34 +1,37 @@
-﻿using System;
-
+﻿
 namespace Bot.Models
 {
     public class Position
     {
-        public string Name;
-
-        public PositionType _Type;
-
-        public double Size;
-
-        public double EntryPrice;
-
-        public Position(string name, PositionType type, double size, double entryPrice)
+        public Position(string symbol, double quantity)
         {
-            this.Name = name != null ? name : throw new ArgumentNullException(nameof(name));
-            this.Size = size;
-            this.EntryPrice = entryPrice;
-            this._Type = type;
+            Symbol = symbol;
+            Quantity = quantity;
         }
 
-        public double GetPositionInitialValue()
+        public Position(Position positionToCopy)
         {
-            return this.Size * this.EntryPrice;
+            Symbol = positionToCopy.Symbol;
+            Quantity = positionToCopy.Quantity;
         }
 
-        public double GetCurrentPositionValue(double CurrentPrice)
+        public string Symbol { get; set; }
+
+        public double Quantity { get; set; }
+
+        public void Sell(double quantity)
         {
-            return this.Size * CurrentPrice;
+            Quantity -= quantity;
         }
 
+        public void Buy(double quantity)
+        {
+            Quantity += quantity;
+        }
+
+        public double Value(double currentPrice)
+        {
+            return Quantity*currentPrice;
+        }
     }
 }
