@@ -20,7 +20,6 @@ namespace Bot.DataStorage
         private IDataSource dataSource;
         private ISqlDataContext sqlContext;
 
-
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
             IKeyVaultManager kvManager,
@@ -111,6 +110,15 @@ namespace Bot.DataStorage
             return sqlTicks;
         }
 
+        /// <summary>
+        /// Sync SqlDataContext with data from the datasource
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="tradeEndInclusive"></param>
+        /// <returns></returns>
         private async Task<IList<Tick>> SyncTickData(
             string symbol,
             TickInterval interval,
@@ -131,13 +139,22 @@ namespace Bot.DataStorage
             return sourceTicks;
         }
 
-        public void DeleteTicksForSymbol(string symbol, TickInterval interval)
+        /// <summary>
+        /// Delete the rows in SqlDataContext that match the given symbol and tick interval
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        private void DeleteTicksForSymbol(string symbol, TickInterval interval)
         {
             string  sqlCommand = "DELETE FROM " + this.sqlConfig.TicksTableName + " WHERE [Symbol] = '" + symbol + "' AND [TickInterval] = " + (int)interval;
             int deletedRows = this.sqlContext.ExecuteCommand(sqlCommand);
             Console.WriteLine("Deleted " + deletedRows + " rows from dbo.[Ticks] where symbol = " + symbol);                
         }
 
+        /// <summary>
+        /// Insert all ticks to SqlDataContext
+        /// </summary>
+        /// <param name="ticks"></param>
         private void BulkInsertTicks(IEnumerable<Tick> ticks)
         {
             DataTable data = new DataTable();

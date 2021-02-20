@@ -9,11 +9,17 @@ namespace Bot.DataStorage
     public class SqlDataContext : ISqlDataContext
     {
         private readonly string ConnectionString;
+
         public SqlDataContext(string connectionString)
         {
             this.ConnectionString = !String.IsNullOrEmpty(connectionString) ? connectionString : throw new ArgumentNullException(nameof(connectionString));
         }
 
+        /// <summary>
+        /// Execute a Sql Command
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public int ExecuteCommand(string command)
         {
             int rowsAffected = 0;
@@ -38,6 +44,12 @@ namespace Bot.DataStorage
             return rowsAffected;
         }
 
+        /// <summary>
+        /// Bulk Insert Data from the data table into the given tablename
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="columnMappings"></param>
+        /// <param name="tableName"></param>
         public void BulkInsert(DataTable data, IEnumerable<SqlBulkCopyColumnMapping> columnMappings, string tableName)
         {
             try
