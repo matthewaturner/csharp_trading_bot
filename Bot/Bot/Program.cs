@@ -40,12 +40,14 @@ namespace Bot
             services.AddSingleton<HttpClient>();
             services.AddSingleton<IDataSource, YahooDataSource>();
             services.AddSingleton<ITickStorage, TickStorage>();
+            services.AddSingleton<ISqlDataContext, SqlDataContext>();
 
             IServiceProvider provider = services.BuildServiceProvider();
 
             //YahooDataSource yahoo = (YahooDataSource)provider.GetService(typeof(YahooDataSource));
             ITickStorage tickStorage = (ITickStorage)provider.GetService(typeof(ITickStorage));
 
+            ((TickStorage)tickStorage).DeleteTicksForSymbol("AMC", TickInterval.Day);
             var ticks = tickStorage.GetTicksAsync("AMC", TickInterval.Day, new DateTime(1970, 1, 1), DateTime.Now).Result;
 
             foreach (Tick t in ticks)

@@ -14,11 +14,12 @@ using Bot.Models;
 namespace Bot.DataStorage
 {
     public class TickStorage : ITickStorage
-    {
+    {        
         private SqlConfiguration sqlConfig;
         private TickContext context;
         private IDataSource dataSource;
-        private string connectionString;
+        private ISqlDataContext sqlContext;
+
 
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
@@ -28,10 +29,11 @@ namespace Bot.DataStorage
             this.dataSource = dataSource;
             this.sqlConfig = sqlConfig.Value;
 
-            connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
-            context = new TickContext(connectionString);
-            context.Database.CreateIfNotExists();
-            context.Configuration.AutoDetectChangesEnabled = false;
+            var connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
+            this.context = new TickContext(connectionString);
+            this.sqlContext = new SqlDataContext(connectionString);
+            this.context.Database.CreateIfNotExists();
+            this.context.Configuration.AutoDetectChangesEnabled = false;
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace Bot.DataStorage
             end = end.GetNextTradingDayInclusive();
             DateTime tradeEndInclusive = end.GetPreviousTradingDay();
 
-            var query = context.Ticks
+            var query = this.context.Ticks
                 .Where(t =>
                     t.Symbol == symbol
                     && t.TickInterval == interval
@@ -67,69 +69,77 @@ namespace Bot.DataStorage
             if (sqlTicks == null || !sqlTicks.Any())
             {
                 Console.WriteLine($"Data not found in database. Fetching from source.");
-                IList<Tick> sourceTicks = await dataSource.GetTicksAsync(symbol, interval, start, end);
+                this.DeleteTicksForSymbol(symbol, interval);
+                await this.SyncTickData(symbol, interval, start, end, tradeEndInclusive);
+            }
+            else
+            {
+                // if data was gathered from sql
+                ticksStart = sqlTicks.FirstOrDefault().DateTime;
+                ticksEnd = sqlTicks.LastOrDefault().DateTime;
 
-                if (!sourceTicks.Any())
+                if (Helpers.Compare(ticksStart, start, interval) != 0
+                || Helpers.Compare(ticksEnd, tradeEndInclusive, interval) != 0)
                 {
-                    Console.Error.WriteLine($"Failed to fetch any data from source.");
-                    throw new Exception();
+                    Console.WriteLine($"Data from sql was insufficient date span. Fetching from source.");
+                    this.DeleteTicksForSymbol(symbol, interval);
+                    await this.SyncTickData(symbol, interval, start, end, tradeEndInclusive);
                 }
-
-                BulkInsertTicks(sourceTicks);
-
-                DateTime sourceTicksStart = sourceTicks.FirstOrDefault().DateTime;
-                DateTime sourceTicksEnd = sourceTicks.LastOrDefault().DateTime;
-
-                if (Helpers.Compare(sourceTicksStart, start, interval) != 0 
-                    || Helpers.Compare(sourceTicksEnd, tradeEndInclusive, interval) != 0)
-                {
-                    Console.Error.WriteLine($"Data from source only spans {sourceTicksStart.StandardToString()} to {sourceTicksStart.StandardToString()}");
-                    throw new ArgumentOutOfRangeException();
-                }
-
-                return sourceTicks;
             }
 
-            // if data was gathered from sql
-            ticksStart = sqlTicks.FirstOrDefault().DateTime;
-            ticksEnd = sqlTicks.LastOrDefault().DateTime;
+            query = this.context.Ticks
+                .Where(t =>
+                    t.Symbol == symbol
+                    && t.TickInterval == interval
+                    && t.DateTime >= start
+                    && t.DateTime <= end)
+                .OrderBy(t => t.DateTime);
 
-            if (Helpers.Compare(ticksStart, start, interval) != 0 
-                || Helpers.Compare(ticksEnd, tradeEndInclusive, interval) != 0)
+            sqlTicks = query.ToList();
+
+            DateTime sqlTicksStart = sqlTicks.FirstOrDefault().DateTime;
+            DateTime sqlTicksEnd = sqlTicks.LastOrDefault().DateTime;
+
+            if (Helpers.Compare(sqlTicksStart, start, interval) > 0
+                || Helpers.Compare(sqlTicksEnd, tradeEndInclusive, interval) < 0)
             {
-                Console.WriteLine($"Data from sql was insufficient date span. Fetching from source.");
-                IList<Tick> sourceTicks = await dataSource.GetTicksAsync(symbol, interval, start, end);
-
-                if (!sqlTicks.Any())
-                {
-                    Console.Error.WriteLine($"Failed to fetch any data from source.");
-                    throw new Exception();
-                }
-                string testPrimaryKey = sourceTicks.FirstOrDefault().PrimaryKey();
-
-                HashSet<string> sqlTickSet = sqlTicks.Select(t => t.PrimaryKey()).ToHashSet();
-                BulkInsertTicks(sourceTicks.Where(t => !sqlTickSet.Contains(t.PrimaryKey())));
-
-                DateTime sourceTicksStart = sourceTicks.FirstOrDefault().DateTime;
-                DateTime sourceTicksEnd = sourceTicks.LastOrDefault().DateTime;
-
-                if (Helpers.Compare(sourceTicksStart, start, interval) != 0 || Helpers.Compare(sourceTicksEnd, end, interval) != 0)
-                {
-                    Console.Error.WriteLine($"Data from source only spans {sourceTicksStart.StandardToString()} to {sourceTicksEnd.StandardToString()}");
-                    throw new ArgumentOutOfRangeException();
-                }
-
-                return sourceTicks;
+                Console.Error.WriteLine($"Data from source only spans {sqlTicksStart.StandardToString()} to {sqlTicksStart.StandardToString()}");
+                //TODO: Fix the helper commands for date range check
+                //throw new ArgumentOutOfRangeException();
             }
 
             return sqlTicks;
         }
 
+        private async Task<IList<Tick>> SyncTickData(
+            string symbol,
+            TickInterval interval,
+            DateTime start,
+            DateTime end,
+            DateTime tradeEndInclusive)
+        {
+            IList<Tick> sourceTicks = await dataSource.GetTicksAsync(symbol, interval, start, end);
+
+            if (!sourceTicks.Any())
+            {
+                Console.Error.WriteLine($"Failed to fetch any data from source.");
+                throw new Exception();
+            }
+
+            BulkInsertTicks(sourceTicks);          
+
+            return sourceTicks;
+        }
+
+        public void DeleteTicksForSymbol(string symbol, TickInterval interval)
+        {
+            string  sqlCommand = "DELETE FROM " + this.sqlConfig.TicksTableName + " WHERE [Symbol] = '" + symbol + "' AND [TickInterval] = " + (int)interval;
+            int deletedRows = this.sqlContext.ExecuteCommand(sqlCommand);
+            Console.WriteLine("Deleted " + deletedRows + " rows from dbo.[Ticks] where symbol = " + symbol);                
+        }
+
         private void BulkInsertTicks(IEnumerable<Tick> ticks)
         {
-            SqlConnection connection = new SqlConnection(connectionString);
-            SqlBulkCopy bulkCopy = new SqlBulkCopy(connection);
-
             DataTable data = new DataTable();
             data.Columns.Add(new DataColumn("Symbol", typeof(string)));
             data.Columns.Add(new DataColumn("DateTime", typeof(DateTime)));
@@ -156,20 +166,21 @@ namespace Bot.DataStorage
                 data.Rows.Add(row);
             }
 
-            bulkCopy.DestinationTableName = "Ticks";
-            bulkCopy.ColumnMappings.Add("Symbol", "Symbol");
-            bulkCopy.ColumnMappings.Add("DateTime", "DateTime");
-            bulkCopy.ColumnMappings.Add("TickInterval", "TickInterval");
-            bulkCopy.ColumnMappings.Add("Open", "Open");
-            bulkCopy.ColumnMappings.Add("High", "High");
-            bulkCopy.ColumnMappings.Add("Low", "Low");
-            bulkCopy.ColumnMappings.Add("Close", "Close");
-            bulkCopy.ColumnMappings.Add("AdjClose", "AdjClose");
-            bulkCopy.ColumnMappings.Add("Volume", "Volume");
+            List<SqlBulkCopyColumnMapping> columnMappings = new List<SqlBulkCopyColumnMapping>()
+            {
+               new SqlBulkCopyColumnMapping("Symbol", "Symbol"),
+               new SqlBulkCopyColumnMapping("DateTime", "DateTime"),
+               new SqlBulkCopyColumnMapping("TickInterval", "TickInterval"),
+               new SqlBulkCopyColumnMapping("Open", "Open"),
+               new SqlBulkCopyColumnMapping("High", "High"),
+               new SqlBulkCopyColumnMapping("Low", "Low"),
+               new SqlBulkCopyColumnMapping("Close", "Close"),
+               new SqlBulkCopyColumnMapping("AdjClose", "AdjClose"),
+               new SqlBulkCopyColumnMapping("Volume", "Volume")
 
-            connection.Open();
-            bulkCopy.WriteToServer(data);
-            connection.Close();
+            };
+
+            this.sqlContext.BulkInsert(data, columnMappings, this.sqlConfig.TicksTableName);
         }
     }
 }
