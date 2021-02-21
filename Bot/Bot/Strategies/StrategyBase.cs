@@ -20,7 +20,7 @@ namespace Bot.Strategies
 
             if (Hydrated)
             {
-                OnTick(tick);
+                OnTick();
             }
         }
 
@@ -38,7 +38,7 @@ namespace Bot.Strategies
         /// OnTick which must be overrided in the child class.
         /// </summary>
         /// <param name="tick"></param>
-        public abstract void OnTick(Tick tick);
+        public abstract void OnTick();
 
         /// <summary>
         /// Gets a list of indicators, makes hydration easier.

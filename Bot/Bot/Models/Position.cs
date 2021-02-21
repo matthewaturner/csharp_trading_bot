@@ -17,5 +17,10 @@ namespace Bot.Models
         public string Symbol { get; set; }
 
         public double Quantity { get; set; }
+
+        public PositionType GetPositionType()
+        {
+            return this.Quantity > 0 ? PositionType.Long : PositionType.Short;
+        }
     }
 }

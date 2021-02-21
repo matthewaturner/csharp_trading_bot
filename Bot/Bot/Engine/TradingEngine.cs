@@ -43,8 +43,8 @@ namespace Bot.Trading
             this.InitializeTickData(ticker, startDate, endDate, tickInterval);
             foreach (var tick in this.TickData)
             {
-                this.Strategy.OnTick(tick);
-                this.Broker.OnTick(tick);
+               // this.Strategy.OnTick(tick);
+                //this.Broker.OnTick(tick);
             }
         }
     }

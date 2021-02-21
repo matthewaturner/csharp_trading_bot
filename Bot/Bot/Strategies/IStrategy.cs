@@ -10,6 +10,6 @@ namespace Bot.Strategies
 
         bool Hydrated { get; }
 
-        void OnTick(Tick ticks);
+        void OnTick();
     }
 }
