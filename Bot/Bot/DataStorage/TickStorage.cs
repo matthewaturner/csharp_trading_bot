@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Bot.DataCollection;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
 using System.Data;
 using Bot.Models;
 
@@ -18,7 +17,6 @@ namespace Bot.DataStorage
         private SqlConfiguration sqlConfig;
         private TickContext context;
         private IDataSource dataSource;
-        private ISqlDataContext sqlContext;
 
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
@@ -29,8 +27,7 @@ namespace Bot.DataStorage
             this.sqlConfig = sqlConfig.Value;
 
             var connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
-            this.context = new TickContext(connectionString);
-            this.sqlContext = new SqlDataContext(connectionString);
+            this.context = new TickContext(connectionString, this.sqlConfig.TicksTableName);
             this.context.Database.CreateIfNotExists();
             this.context.Configuration.AutoDetectChangesEnabled = false;
         }
@@ -68,7 +65,7 @@ namespace Bot.DataStorage
             if (sqlTicks == null || !sqlTicks.Any())
             {
                 Console.WriteLine($"Data not found in database. Fetching from source.");
-                this.DeleteTicksForSymbol(symbol, interval);
+                this.context.DeleteTicksForSymbol(symbol, interval);
                 await this.SyncTickData(symbol, interval, start, end, tradeEndInclusive);
             }
             else
@@ -81,7 +78,7 @@ namespace Bot.DataStorage
                 || Helpers.Compare(ticksEnd, tradeEndInclusive, interval) != 0)
                 {
                     Console.WriteLine($"Data from sql was insufficient date span. Fetching from source.");
-                    this.DeleteTicksForSymbol(symbol, interval);
+                    this.context.DeleteTicksForSymbol(symbol, interval);
                     await this.SyncTickData(symbol, interval, start, end, tradeEndInclusive);
                 }
             }
@@ -134,70 +131,9 @@ namespace Bot.DataStorage
                 throw new Exception();
             }
 
-            BulkInsertTicks(sourceTicks);          
+            this.context.BulkInsert(sourceTicks);          
 
             return sourceTicks;
-        }
-
-        /// <summary>
-        /// Delete the rows in SqlDataContext that match the given symbol and tick interval
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="interval"></param>
-        private void DeleteTicksForSymbol(string symbol, TickInterval interval)
-        {
-            string  sqlCommand = "DELETE FROM " + this.sqlConfig.TicksTableName + " WHERE [Symbol] = '" + symbol + "' AND [TickInterval] = " + (int)interval;
-            int deletedRows = this.sqlContext.ExecuteCommand(sqlCommand);
-            Console.WriteLine("Deleted " + deletedRows + " rows from dbo.[Ticks] where symbol = " + symbol);                
-        }
-
-        /// <summary>
-        /// Insert all ticks to SqlDataContext
-        /// </summary>
-        /// <param name="ticks"></param>
-        private void BulkInsertTicks(IEnumerable<Tick> ticks)
-        {
-            DataTable data = new DataTable();
-            data.Columns.Add(new DataColumn("Symbol", typeof(string)));
-            data.Columns.Add(new DataColumn("DateTime", typeof(DateTime)));
-            data.Columns.Add(new DataColumn("TickInterval", typeof(int)));
-            data.Columns.Add(new DataColumn("Open", typeof(double)));
-            data.Columns.Add(new DataColumn("High", typeof(double)));
-            data.Columns.Add(new DataColumn("Low", typeof(double)));
-            data.Columns.Add(new DataColumn("Close", typeof(double)));
-            data.Columns.Add(new DataColumn("AdjClose", typeof(double)));
-            data.Columns.Add(new DataColumn("Volume", typeof(double)));
-
-            foreach(Tick t in ticks)
-            {
-                DataRow row = data.NewRow();
-                row["Symbol"] = t.Symbol;
-                row["DateTime"] = t.DateTime;
-                row["TickInterval"] = t.TickInterval;
-                row["Open"] = t.Open;
-                row["High"] = t.High;
-                row["Low"] = t.Low;
-                row["Close"] = t.Close;
-                row["AdjClose"] = t.AdjClose;
-                row["Volume"] = t.Volume;
-                data.Rows.Add(row);
-            }
-
-            List<SqlBulkCopyColumnMapping> columnMappings = new List<SqlBulkCopyColumnMapping>()
-            {
-               new SqlBulkCopyColumnMapping("Symbol", "Symbol"),
-               new SqlBulkCopyColumnMapping("DateTime", "DateTime"),
-               new SqlBulkCopyColumnMapping("TickInterval", "TickInterval"),
-               new SqlBulkCopyColumnMapping("Open", "Open"),
-               new SqlBulkCopyColumnMapping("High", "High"),
-               new SqlBulkCopyColumnMapping("Low", "Low"),
-               new SqlBulkCopyColumnMapping("Close", "Close"),
-               new SqlBulkCopyColumnMapping("AdjClose", "AdjClose"),
-               new SqlBulkCopyColumnMapping("Volume", "Volume")
-
-            };
-
-            this.sqlContext.BulkInsert(data, columnMappings, this.sqlConfig.TicksTableName);
         }
     }
 }
