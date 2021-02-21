@@ -1,11 +1,11 @@
-﻿using Bot.Models;
+﻿using Bot.Brokerages;
 using System;
 
 namespace Bot.Trading.Interfaces
 {
     public interface ITradingEngine
     {
-        public void Run(DateTime startDate, DateTime endDate, TickInterval tickInterval);
+        public void Run(string ticker, DateTime startDate, DateTime endDate, TickInterval tickInterval);
 
     }
 }
