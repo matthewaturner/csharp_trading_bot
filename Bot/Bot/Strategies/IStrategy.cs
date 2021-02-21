@@ -1,5 +1,5 @@
-﻿using Bot.Indicators;
-using Bot.Models;
+﻿
+using Bot.Indicators;
 using System.Collections.Generic;
 
 namespace Bot.Strategies
@@ -10,6 +10,11 @@ namespace Bot.Strategies
 
         bool Hydrated { get; }
 
-        void OnTick(Tick ticks);
+        IList<IIndicator> Indicators { get; }
+
+        void Initialize(string[] args);
+
+        void OnTick();
+
     }
 }

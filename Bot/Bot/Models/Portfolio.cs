@@ -1,22 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace Bot.Models
+namespace Bot.Engine
 {
     public class Portfolio
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public Portfolio()
         {
             CashBalance = 0;
             Positions = new Dictionary<string, Position>();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="initialCash"></param>
         public Portfolio(double initialCash)
         {
             CashBalance = initialCash;
             Positions = new Dictionary<string, Position>();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="positions"></param>
+        /// <param name="initialCash"></param>
         public Portfolio(IDictionary<string, Position> positions, double initialCash)
         {
             CashBalance = initialCash;
@@ -26,7 +39,7 @@ namespace Bot.Models
         /// <summary>
         /// Available cash balance.
         /// </summary>
-        public double CashBalance { get; set; }
+        public double CashBalance { get; private set; }
 
         /// <summary>
         /// symbol : position.
@@ -41,6 +54,16 @@ namespace Bot.Models
         public Position this[string symbol]
         {
             get => Positions[symbol];
+        }
+
+        /// <summary>
+        /// Adds cash to portfolio.
+        /// </summary>
+        /// <param name="cash"></param>
+        /// <returns></returns>
+        public void AddFunds(double cash)
+        {
+            CashBalance += cash;
         }
 
         /// <summary>
@@ -126,6 +149,17 @@ namespace Bot.Models
                 value += p.Quantity * transform(ticks[p.Symbol]);
             }
             return value + CashBalance;
+        }
+
+        /// <summary>
+        /// ToString.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string positionsStr = string.Join(", ", Positions.Values.Select(pos => pos.ToString()));
+
+            return $"CashBalance: {CashBalance}\nPositions: [{positionsStr}]";
         }
     }
 }

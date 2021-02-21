@@ -1,24 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Bot.Models
+namespace Bot.Engine
 {
     public interface IBroker
     {
         /// <summary>
-        /// Portfolio held by the broker.
+        /// Initializes the broker with custom arguments.
         /// </summary>
-        Portfolio Portfolio { get; }
-
-        /// <summary>
-        /// List of open orders.
-        /// </summary>
-        IList<Order> OpenOrders { get; }
-
-        /// <summary>
-        /// Order history.
-        /// </summary>
-        IList<Order> OrderHistory { get; }
+        /// <param name="args"></param>
+        public void Initialize(string[] args);
 
         /// <summary>
         /// Gets the history of orders.
@@ -50,5 +41,20 @@ namespace Bot.Models
         /// the portfolio with.
         /// </summary>
         public void OnTick();
+
+        /// <summary>
+        /// Portfolio held by the broker.
+        /// </summary>
+        Portfolio Portfolio { get; }
+
+        /// <summary>
+        /// List of open orders.
+        /// </summary>
+        IList<Order> OpenOrders { get; }
+
+        /// <summary>
+        /// Order history.
+        /// </summary>
+        IList<Order> OrderHistory { get; }
     }
 }

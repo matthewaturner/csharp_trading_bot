@@ -1,49 +1,38 @@
 ﻿
 using Bot.Indicators;
-using Bot.Models;
+using Bot.Engine;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot.Strategies
 {
-    public abstract class StrategyBase : IStrategy
+    public abstract class StrategyBase
     {
-        /// <summary>
-        /// Base on tick method, simply calls regular on tick if it is hydrated.
-        /// </summary>
-        /// <param name="ticks"></param>
-        public void OnTickBase(Tick tick)
-        {
-            for (int i=0; i<Indicators.Count; i++)
-            {
-                Indicators[i].OnTick(tick);
-            }
-
-            if (Hydrated)
-            {
-                OnTick(tick);
-            }
-        }
-
-        /// <summary>
-        /// Returns the max lookback for any of the indicators.
-        /// </summary>
-        public virtual int Lookback { get; }
-
-        /// <summary>
-        /// Returns whether all indicators are hydrated for the strategy.
-        /// </summary>
-        public virtual bool Hydrated { get; }
-
         /// <summary>
         /// OnTick which must be overrided in the child class.
         /// </summary>
         /// <param name="tick"></param>
-        public abstract void OnTick(Tick tick);
+        public abstract void OnTick();
 
         /// <summary>
         /// Gets a list of indicators, makes hydration easier.
         /// </summary>
         public abstract IList<IIndicator> Indicators { get; }
 
+        /// <summary>
+        /// Returns the max lookback for any of the indicators.
+        /// </summary>
+        public int Lookback
+        {
+            get { return Indicators.Max(ind => ind.Lookback); }
+        }
+
+        /// <summary>
+        /// Returns whether all indicators are hydrated for the strategy.
+        /// </summary>
+        public bool Hydrated
+        {
+            get { return Indicators.All(ind => ind.Hydrated); }
+        }
     }
 }

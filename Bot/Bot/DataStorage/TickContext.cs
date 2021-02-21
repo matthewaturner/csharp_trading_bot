@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Engine;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -33,7 +33,7 @@ namespace Bot.DataStorage.Models
             data.Columns.Add(new DataColumn("Low", typeof(double)));
             data.Columns.Add(new DataColumn("Close", typeof(double)));
             data.Columns.Add(new DataColumn("AdjClose", typeof(double)));
-            data.Columns.Add(new DataColumn("Volume", typeof(double)));
+            data.Columns.Add(new DataColumn("Volume", typeof(int)));
 
             foreach (Tick t in ticks)
             {

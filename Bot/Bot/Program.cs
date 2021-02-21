@@ -2,7 +2,9 @@
 using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
-using Bot.Models;
+using Bot.Engine;
+using Bot.Strategies;
+using Bot.Trading;
 using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -14,8 +16,14 @@ using System.Net.Http;
 
 namespace Bot
 {
-    class Program
+    public class Program
     {
+        public delegate IDataSource DataSourceResolver(string key);
+
+        public delegate IBroker BrokerResolver(string key);
+
+        public delegate IStrategy StrategyResolver(string key);
+
         public static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
@@ -38,21 +46,59 @@ namespace Bot
             // inject singletons
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
             services.AddSingleton<HttpClient>();
-            services.AddSingleton<IDataSource, YahooDataSource>();
             services.AddSingleton<ITickStorage, TickStorage>();
-            services.AddSingleton<ISqlDataContext, SqlDataContext>();
+            services.AddSingleton<ITicks, Ticks>();
 
-            IServiceProvider provider = services.BuildServiceProvider();
+            // ticks object is special
+            Ticks ticks = new Ticks();
+            services.AddSingleton<ITicks>(ticks);
+            services.AddSingleton(ticks);
 
-            //YahooDataSource yahoo = (YahooDataSource)provider.GetService(typeof(YahooDataSource));
-            ITickStorage tickStorage = (ITickStorage)provider.GetService(typeof(ITickStorage));
+            // inject named dependency resolvers
+            services.AddSingleton<YahooDataSource>();
+            services.AddSingleton<BackTestingBroker>();
+            services.AddSingleton<SMACrossoverStrategy>();
 
-            var ticks = tickStorage.GetTicksAsync("AMC", TickInterval.Day, new DateTime(1970, 1, 1), DateTime.Now).Result;
+            var serviceProvider = services.BuildServiceProvider();
 
-            foreach (Tick t in ticks)
+            services.AddSingleton<DataSourceResolver>(serviceProvider => key =>
             {
-                Console.WriteLine(t.ToString());
-            }
+                switch (key)
+                {
+                    case nameof(YahooDataSource):
+                        return serviceProvider.GetService<YahooDataSource>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<BrokerResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(BackTestingBroker):
+                        return serviceProvider.GetService<BackTestingBroker>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<StrategyResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(SMACrossoverStrategy):
+                        return serviceProvider.GetService<SMACrossoverStrategy>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<ITradingEngine, TradingEngine>();
+            serviceProvider = services.BuildServiceProvider();
+
+            ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
+            engine.RunAsync().Wait();
         }
     }
 }

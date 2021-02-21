@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Engine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,6 +7,12 @@ namespace Bot.DataCollection
 {
     public interface IDataSource
     {
+        /// <summary>
+        /// Initializes the data source with custom arguments.
+        /// </summary>
+        /// <param name="args"></param>
+        void Initialize(string[] args);
+
         /// <summary>
         /// Gets a list of ticks for a certain interval over a period of time.
         /// </summary>

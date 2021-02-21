@@ -1,11 +1,14 @@
-﻿using Bot.Models;
-using System;
+﻿using System.Threading.Tasks;
 
 namespace Bot.Trading
 {
     public interface ITradingEngine
     {
-        public void Run(string ticker, DateTime startDate, DateTime endDate, TickInterval tickInterval);
+        /// <summary>
+        /// Runs the trading engine.
+        /// </summary>
+        /// <returns></returns>
+        public Task RunAsync();
 
     }
 }
