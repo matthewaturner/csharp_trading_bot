@@ -2,15 +2,14 @@
 using Bot.Engine;
 using System;
 using System.Collections.Generic;
+using Bot.Models;
 
 namespace Bot.Strategies
 {
     public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
-        private ITicks ticks;
         private IList<IIndicator> indicators;
         private IIndicator mac;
-        private int longLookback;
         private bool longOnly;
         private IBroker broker;
         private Position currentPosition;
@@ -24,18 +23,21 @@ namespace Bot.Strategies
             this.ticks = ticks ?? throw new ArgumentNullException(nameof(ticks));
         }
 
+        public void Initialize(IBroker broker, string[] args)
+        {
+            this.broker = broker;
+            mac = new MovingAverageCrossover(
+                int.Parse(args[1]),
+                int.Parse(args[2]),
+                (Tick t) => t.AdjClose);
+            indicators = new List<IIndicator> { mac };
+            longOnly = bool.Parse(args[3]);            
+            symbol = args[0];
+        }
+
         public void Initialize(string symbol, int shortLookback, int longLookback, bool longOnly, IBroker broker)
         {
-            this.longLookback = longLookback;
-            this.mac = new MovingAverageCrossover(
-                shortLookback,
-                longLookback,
-                (Tick t) => t.AdjClose);
-            this.indicators = new List<IIndicator> { mac };
-            this.longOnly = true;
-            this.broker = broker;
-            this.symbol = symbol;
-            this.longOnly = longOnly;
+            
         }
 
         public override IList<IIndicator> Indicators => indicators;
@@ -46,7 +48,7 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="tick"></param>
-        public override void OnTick()
+        public void OnTick()
         {
             Tick tick = this.ticks[this.symbol];
             this.mac.OnTick(tick);
@@ -145,6 +147,6 @@ namespace Bot.Strategies
                 targetPrice
                 );
             this.orderId = broker.PlaceOrder(order);
-        }
+        }        
     }
 }

@@ -17,6 +17,8 @@ namespace Bot.Strategies
             get { return Indicators.Max(ind => ind.Lookback); }
         }
 
+        public abstract IList<IIndicator> Indicators { get; }
+
         /// <summary>
         /// Returns whether all indicators are hydrated for the strategy.
         /// </summary>

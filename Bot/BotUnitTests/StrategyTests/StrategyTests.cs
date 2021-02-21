@@ -1,4 +1,5 @@
-﻿using Bot.Indicators;
+﻿using Bot.Engine;
+using Bot.Indicators;
 using Bot.Models;
 using Bot.Strategies;
 using Microsoft.VisualBasic.FileIO;
@@ -27,10 +28,19 @@ namespace StrategyTests
         public void SMACrossoverStrategy_LongOnly()
         {
             var symbol = "AMC";
-            Ticks ticks = new Ticks(new string[1]{ symbol });
+            Ticks ticks = new Ticks();
             var strat = new SMACrossoverStrategy(ticks);
-            IBroker broker = new BackTestingBroker(ticks, 1000);
-            strat.Initialize(symbol, 5, 30, true, broker);
+            IBroker broker = new BackTestingBroker(ticks);
+            ticks.Initialize(new string[] { symbol });
+            broker.Initialize(new string[] { "1000" });
+            strat.Initialize(
+                broker,
+                new string[] { 
+                    symbol, 
+                    "5", 
+                    "30", 
+                    "true"
+                });
 
             this.amcData = amcData.Select(x => x).OrderBy(x => x.DateTime).ToList();
 

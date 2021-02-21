@@ -1,4 +1,6 @@
 ﻿
+using Bot.Models;
+
 namespace Bot.Engine
 {
     public class Position
