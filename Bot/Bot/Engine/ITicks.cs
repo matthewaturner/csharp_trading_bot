@@ -1,7 +1,7 @@
 ﻿
 namespace Bot.Models
 {
-    public interface ICurrentTicks
+    public interface ITicks
     {
         /// <summary>
         /// Gets the latest ticker for a symbol.

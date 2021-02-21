@@ -1,4 +1,5 @@
-﻿using Bot.Models;
+﻿using Bot;
+using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -8,128 +9,302 @@ namespace BrokerUnitTests
     [TestClass]
     public class BackTestingBrokerUnitTests
     {
-        /*
-        [TestMethod]
-        public void PlaceOrderSucceeds()
+        Ticks ticks;
+
+        [TestInitialize]
+        public void Setup()
         {
-            var broker = new BackTestingBroker(, 1000);
+            ticks = new Ticks(new string[] { "GME", "MSFT", "AMC" });
 
-            var order = new Order()
-            {
-                Symbol = "GME",
-                TargetPrice = 420.69,
-                Quantity = 10,
-                Type = OrderType.Buy
-            };
+            var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
+            var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
+            var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
 
-            Assert.ThrowsException<Exception>(() => broker.PlaceOrder(order));
+            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("MSFT", msftTick);
+            latestTicks.Add("GME", gmeTick);
+            latestTicks.Add("AMC", amcTick);
+            ticks.Update(latestTicks);
         }
 
         [TestMethod]
-        public void BulkExecuteTrade_Buy_ThrowException()
+        public void BuyOrderSucceeds()
         {
-            var portfolio = new Portfolio(1000);
-            var broker = new BackTestingBroker(portfolio);
+            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 3000);
 
-            var orders = new List<Order>()
-            {
-                new Order(){Ticker = "GME", Price = 90, Units = 10, Type = OrderType.Buy },
-                new Order(){Ticker = "AMC", Price = 10, Units = 20, Type = OrderType.Buy }
-            };
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
-            Assert.ThrowsException<Exception>(() => broker.BulkExecuteTrade(orders));
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(10.0, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(orderId).State);
         }
 
         [TestMethod]
-        public void ExecuteTrade_Buy()
+        public void SellOrderSucceeds()
         {
-            var startingCash = 10000;
-            var portfolio = new Portfolio(startingCash);
-            var broker = new BackTestingBroker(portfolio);
+            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 3000);
 
-            var order = new Order()
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                Type = OrderType.Buy
-            };
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
-            broker.PlaceOrder(order);
-            var expectedAvailableCash = startingCash - order.GetTradeValue();
-            var expectedPostion = new Position("GME", PositionType.StockLong, 10, 100);
-            var actualPosition = broker.Portfolio.CurrentPositions[expectedPostion.Name];
-
-            Assert.AreEqual(expectedPostion.EntryPrice, actualPosition.EntryPrice);
-            Assert.AreEqual(expectedPostion.Name, actualPosition.Name);
-            Assert.AreEqual(expectedPostion.Size, actualPosition.Size);
-            Assert.AreEqual(expectedPostion._Type, actualPosition._Type);
-            Assert.AreEqual(expectedAvailableCash, broker.Portfolio.AvailableCash);
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(-10.0, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(orderId).State);
         }
 
         [TestMethod]
-        public void BulkExecuteTrade_Buy()
+        public void BuyOrderInsufficientCashFails()
         {
-            var startingCash = 10000;
-            var portfolio = new Portfolio(startingCash);
-            var broker = new BackTestingBroker(portfolio);
+            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 1000);
 
-            var orders = new List<Order>()
-            {
-                new Order(){Ticker = "GME", Price = 100, Units = 10, Type = OrderType.Buy },
-                new Order(){Ticker = "AMC", Price = 10, Units = 20, Type = OrderType.Buy }
-            };
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
 
-            broker.BulkExecuteTrade(orders);
-            var expectedAvailableCash = startingCash - orders[0].GetTradeValue() - orders[1].GetTradeValue();
-
-            Assert.AreEqual(expectedAvailableCash, broker.Portfolio.AvailableCash);
-
-            var expectedPositions = new Dictionary<string, Position>();
-            expectedPositions.Add("GME",  new Position("GME", PositionType.StockLong, 10, 100));
-            expectedPositions.Add("AMC", new Position("AMC", PositionType.StockLong, 20, 10));
-
-            foreach (var expectedPosition in expectedPositions)
-            {
-                Assert.IsTrue(broker.Portfolio.CurrentPositions.ContainsKey(expectedPosition.Key));
-                var actualPosition = broker.Portfolio.CurrentPositions[expectedPosition.Key];
-                Assert.AreEqual(expectedPosition.Value.EntryPrice, actualPosition.EntryPrice);
-                Assert.AreEqual(expectedPosition.Value.Name, actualPosition.Name);
-                Assert.AreEqual(expectedPosition.Value.Size, actualPosition.Size);
-                Assert.AreEqual(expectedPosition.Value._Type, actualPosition._Type);
-            }          
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(!broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
         }
 
         [TestMethod]
-        public void ExecuteTrade_Sell()
+        public void ShortSaleInsufficientCashFails()
         {
-            var startingCash = 1000;
-            var portfolio = new Portfolio(startingCash);
-            var broker = new BackTestingBroker(portfolio);
+            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 1000);
 
-            var buy = new Order()
-            {
-                Ticker = "GME",
-                Price = 100,
-                Units = 10,
-                Type = OrderType.Buy
-            };
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
 
-            broker.PlaceOrder(buy);
-
-            var sell = new Order() 
-            {
-                Ticker = "GME",
-                Price = 1000,
-                Units = -10,
-                Type = OrderType.Sell
-            };
-
-            broker.PlaceOrder(sell);
-            var expectedAvailableCash = sell.GetTradeValue();
-
-            Assert.AreEqual(expectedAvailableCash, broker.Portfolio.AvailableCash);
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(!broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
         }
-        */
+
+
+        [TestMethod]
+        public void SellOrderInsufficientCashFails()
+        {
+            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 1000);
+
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+
+            // execution happens on ticks
+            broker.OnTick();
+            Assert.IsTrue(!broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(1000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
+        }
+
+        [TestMethod]
+        public void CancelOrderDoesNotExecute()
+        {
+            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            IBroker broker = new BackTestingBroker(ticks, 3000);
+
+            string orderId = broker.PlaceOrder(orderRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
+
+            broker.CancelOrder(orderId);
+
+            broker.OnTick();
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Cancelled, broker.GetOrder(orderId).State);
+        }
+
+        [TestMethod]
+        public void BuyThenSellAllSucceeds()
+        {
+            IBroker broker = new BackTestingBroker(ticks, 3000);
+
+            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 31.0);
+
+            string buyOrderId = broker.PlaceOrder(buyRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
+
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(10.0, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
+
+            string sellOrderId = broker.PlaceOrder(sellRequest);
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
+
+            broker.OnTick();
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
+            Assert.AreEqual(2, broker.OrderHistory.Count);
+        }
+
+        [TestMethod]
+        public void BuyThenShortSellSucceeds()
+        {
+            IBroker broker = new BackTestingBroker(ticks, 3000);
+
+            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 15.0, 31.0);
+
+            string buyOrderId = broker.PlaceOrder(buyRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
+
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(10.0, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
+
+            string sellOrderId = broker.PlaceOrder(sellRequest);
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
+
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("MSFT"));
+            Assert.AreEqual(-5, broker.Portfolio["MSFT"].Quantity);
+            Assert.AreEqual(3000, broker.Portfolio.CurrentValue(ticks, (t) => t.AdjOpen).Round());
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
+            Assert.AreEqual(2, broker.OrderHistory.Count);
+        }
+
+        [TestMethod]
+        public void BuySellProfitSucceeds()
+        {
+            Ticks t = new Ticks(new string[] { "TEST" });
+
+            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
+            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("TEST", testTick);
+            t.Update(latestTicks);
+
+            IBroker broker = new BackTestingBroker(t, 100);
+
+            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);
+
+            string buyOrderId = broker.PlaceOrder(buyRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(100, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
+
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(10.0, broker.Portfolio["TEST"].Quantity);
+            Assert.AreEqual(100, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
+
+            // update the prices
+            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 11, 11, 11, 11, 11, 100);
+            latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("TEST", testTick);
+            t.Update(latestTicks);
+
+            string sellOrderId = broker.PlaceOrder(sellRequest);
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
+
+            broker.OnTick();
+            Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(110, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen).Round());
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
+            Assert.AreEqual(2, broker.OrderHistory.Count);
+        }
+
+        [TestMethod]
+        public void SellBuyProfitSucceeds()
+        {
+            Ticks t = new Ticks(new string[] { "TEST" });
+
+            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
+            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("TEST", testTick);
+            t.Update(latestTicks);
+
+            IBroker broker = new BackTestingBroker(t, 100);
+
+            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);
+
+            string sellOrderId = broker.PlaceOrder(sellRequest);
+            Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(100, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen));
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
+
+            broker.OnTick();
+            Assert.IsTrue(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(-10.0, broker.Portfolio["TEST"].Quantity);
+            Assert.AreEqual(100, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen));
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
+
+            // update the prices
+            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 9, 9, 9, 9, 9, 100);
+            latestTicks = new Dictionary<string, Tick>();
+            latestTicks.Add("TEST", testTick);
+            t.Update(latestTicks);
+
+            string buyOrderId = broker.PlaceOrder(buyRequest);
+            Assert.AreEqual(1, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
+
+            broker.OnTick();
+            Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
+            Assert.AreEqual(110, broker.Portfolio.CurrentValue(t, (t) => t.AdjOpen).Round());
+            Assert.AreEqual(0, broker.OpenOrders.Count);
+            Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
+            Assert.AreEqual(2, broker.OrderHistory.Count);
+        }
     }
 }

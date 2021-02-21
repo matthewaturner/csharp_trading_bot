@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Bot.Models
 {
-    public class CurrentTicks : ICurrentTicks
+    public class Ticks : ITicks
     {
         private Dictionary<string, Tick> currentTicks;
 
-        public CurrentTicks(string[] symbols)
+        public Ticks(string[] symbols)
         {
             currentTicks = new Dictionary<string, Tick>();
             foreach (string s in symbols)
             {
-                currentTicks.Add(s, null);
+                currentTicks.Add(s.ToUpper(), null);
             }
         }
 
@@ -35,14 +35,15 @@ namespace Bot.Models
         {
             // iterate this way because we should never add ticks
             // in the middle of a run
-            foreach (KeyValuePair<string, Tick> kvp in currentTicks)
+            foreach (string symbol in currentTicks.Keys.ToList())
             {
-                if (!newTicks.ContainsKey(kvp.Key))
+                string upperSymbol = symbol.ToUpper();
+                if (!newTicks.ContainsKey(symbol.ToUpper()))
                 {
                     throw new ArgumentException("Ticks must contain data for all ticks in the universe.");
                 }
 
-                currentTicks[kvp.Key] = newTicks[kvp.Key];
+                currentTicks[symbol.ToUpper()] = newTicks[symbol.ToUpper()];
             }
         }
 
@@ -53,7 +54,7 @@ namespace Bot.Models
         /// <returns></returns>
         public bool HasSymbol(string symbol)
         {
-            return currentTicks.ContainsKey(symbol);
+            return currentTicks.ContainsKey(symbol.ToUpper());
         }
     }
 }

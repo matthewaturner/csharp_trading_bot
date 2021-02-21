@@ -1,7 +1,7 @@
 ﻿
 namespace Bot.Models
 {
-    public enum OrderStatus
+    public enum OrderState
     {
         Open,
         Cancelled,

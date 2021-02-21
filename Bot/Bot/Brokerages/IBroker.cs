@@ -32,7 +32,7 @@ namespace Bot.Models
         /// Places an order.
         /// </summary>
         /// <returns></returns>
-        public void PlaceOrder(Order order);
+        public string PlaceOrder(OrderRequest order);
 
         /// <summary>
         /// Gets the status of an order.
