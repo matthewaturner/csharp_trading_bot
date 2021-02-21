@@ -1,5 +1,5 @@
 ﻿using Bot.Configuration;
-using Bot.Models;
+using Bot.Engine;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,11 @@ namespace Bot.DataCollection
         YahooDataConfiguration config;
         HttpClient httpClient;
 
+        /// <summary>
+        /// Constructs data source.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="httpClient"></param>
         public YahooDataSource(
             IOptionsSnapshot<YahooDataConfiguration> config,
             HttpClient httpClient)
@@ -26,6 +31,19 @@ namespace Bot.DataCollection
             this.httpClient = httpClient;
         }
 
+        /// <summary>
+        /// Initializes the data source with custom arguments.
+        /// </summary>
+        public void Initialize(string[] args)
+        { }
+
+        /// <summary>
+        /// Create request url for yahoo.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         private string FormalRequestUrl(
             string symbol,
             DateTimeOffset start,
@@ -38,7 +56,19 @@ namespace Bot.DataCollection
                 end.ToUnixTimeSeconds());
         }
 
-        public async Task<Stream> GetDataStream(string symbol, TickInterval interval, DateTimeOffset start, DateTimeOffset end)
+        /// <summary>
+        /// Gets a stream of data.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public async Task<Stream> GetDataStream(
+            string symbol, 
+            TickInterval interval, 
+            DateTimeOffset start, 
+            DateTimeOffset end)
         {
             if (interval != TickInterval.Day)
             {
@@ -66,6 +96,14 @@ namespace Bot.DataCollection
             }
         }
 
+        /// <summary>
+        /// Gets a list of ticks.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         public async Task<IList<Tick>> GetTicksAsync(string symbol, TickInterval interval, DateTime start, DateTime end)
         {
             Stream dataStream = await GetDataStream(symbol, interval, start, end);

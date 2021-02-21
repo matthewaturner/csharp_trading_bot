@@ -1,5 +1,5 @@
 ﻿
-namespace Bot.Models
+namespace Bot.Engine
 {
     public enum OrderState
     {

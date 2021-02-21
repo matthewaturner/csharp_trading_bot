@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Bot.Models
+namespace Bot.Engine
 {
     public class Order
     {

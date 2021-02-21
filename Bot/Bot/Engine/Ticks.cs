@@ -2,13 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bot.Models
+namespace Bot.Engine
 {
     public class Ticks : ITicks
     {
         private Dictionary<string, Tick> currentTicks;
 
-        public Ticks(string[] symbols)
+        public Ticks()
+        { }
+
+        /// <summary>
+        /// Initializes the ticks object to have all symbols.
+        /// </summary>
+        /// <param name="symbols"></param>
+        public void Initialize(string[] symbols)
         {
             currentTicks = new Dictionary<string, Tick>();
             foreach (string s in symbols)
@@ -55,6 +62,15 @@ namespace Bot.Models
         public bool HasSymbol(string symbol)
         {
             return currentTicks.ContainsKey(symbol.ToUpper());
+        }
+
+        /// <summary>
+        /// Returns ticks as a list.
+        /// </summary>
+        /// <returns></returns>
+        public IList<Tick> ToList()
+        {
+            return currentTicks.Values.ToList();
         }
     }
 }

@@ -1,19 +1,26 @@
 ﻿using Bot.Indicators;
-using Bot.Models;
+using Bot.Engine;
 using System;
 using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public class SMACrossoverStrategy : StrategyBase
+    public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
+        private ITicks ticks;
         private IList<IIndicator> indicators;
         private IIndicator mac;
-        private readonly int longLookback;
 
-        public SMACrossoverStrategy(int shortLookback, int longLookback)
+        public SMACrossoverStrategy(ITicks ticks)
         {
-            this.longLookback = longLookback;
+            this.ticks = ticks;
+        }
+
+        public void Initialize(string[] args)
+        {
+            int shortLookback = int.Parse(args[0]);
+            int longLookback = int.Parse(args[1]);
+
             mac = new MovingAverageCrossover(
                 shortLookback, 
                 longLookback, 
@@ -21,17 +28,13 @@ namespace Bot.Strategies
             indicators = new List<IIndicator> { mac };
         }
 
-        public override int Lookback => longLookback;
-
-        public override bool Hydrated => mac.Hydrated;
-
         public override IList<IIndicator> Indicators => indicators;
 
         /// <summary>
         /// Logic here!
         /// </summary>
         /// <param name="tick"></param>
-        public override void OnTick(Tick tick)
+        public override void OnTick()
         {
             Console.WriteLine("Got a tick!");
         }
