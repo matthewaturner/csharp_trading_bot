@@ -1,7 +1,7 @@
-﻿using Bot.Brokerages;
+﻿using Bot.Models;
 using System;
 
-namespace Bot.Trading.Interfaces
+namespace Bot.Trading
 {
     public interface ITradingEngine
     {
