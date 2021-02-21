@@ -40,6 +40,7 @@ namespace Bot
             services.AddSingleton<HttpClient>();
             services.AddSingleton<IDataSource, YahooDataSource>();
             services.AddSingleton<ITickStorage, TickStorage>();
+            services.AddSingleton<ISqlDataContext, SqlDataContext>();
 
             IServiceProvider provider = services.BuildServiceProvider();
 

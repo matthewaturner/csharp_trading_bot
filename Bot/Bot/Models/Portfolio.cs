@@ -60,16 +60,27 @@ namespace Bot.Models
         /// <param name="quantity"></param>
         public void Buy(string symbol, double quantity, double price)
         {
+            if (quantity == 0)
+            {
+                return;
+            }
+
             if (Positions.ContainsKey(symbol))
             {
                 Positions[symbol].Quantity += quantity;
                 CashBalance -= price * quantity;
+
+                if (Positions[symbol].Quantity == 0)
+                {
+                    Positions.Remove(symbol);
+                }
             }
             else
             {
                 Positions[symbol] = new Position(symbol, quantity);
                 CashBalance -= price * quantity;
             }
+
         }
 
         /// <summary>
@@ -79,14 +90,24 @@ namespace Bot.Models
         /// <param name="quantity"></param>
         public void Sell(string symbol, double quantity, double price)
         {
+            if (quantity == 0)
+            {
+                return;
+            }
+
             if (Positions.ContainsKey(symbol))
             {
                 Positions[symbol].Quantity -= quantity;
                 CashBalance += price * quantity;
+
+                if (Positions[symbol].Quantity == 0)
+                {
+                    Positions.Remove(symbol);
+                }
             }
             else
             {
-                Positions[symbol] = new Position(symbol, quantity);
+                Positions[symbol] = new Position(symbol, -quantity);
                 CashBalance += price * quantity;
             }
         }

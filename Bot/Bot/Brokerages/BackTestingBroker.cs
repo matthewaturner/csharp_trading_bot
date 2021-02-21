@@ -27,7 +27,7 @@ namespace Bot.Models
         /// Placing an order just puts it into the open orders list.
         /// </summary>
         /// <param name="order"></param>
-        public void PlaceOrder(OrderRequest request)
+        public string PlaceOrder(OrderRequest request)
         {
             Order order = new Order(request);
 
@@ -39,6 +39,8 @@ namespace Bot.Models
             order.OrderId = Guid.NewGuid().ToString();
             OpenOrders.Add(order);
             OrderHistory.Add(order);
+
+            return order.OrderId;
         }
 
         /// <summary>
@@ -64,25 +66,27 @@ namespace Bot.Models
                 OrderState state = PreviewOrder(order);
                 if (state == OrderState.Rejected)
                 {
-                    throw new InvalidOrderException($"Order could not be validated.");
+                    order.State = OrderState.Rejected;
                 }
-
-                switch (order.Type)
+                else
                 {
-                    case OrderType.Buy:
-                        Portfolio.Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
-                        break;
+                    switch (order.Type)
+                    {
+                        case OrderType.Buy:
+                            Portfolio.Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            break;
 
-                    case OrderType.Sell:
-                        Portfolio.Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
-                        break;
+                        case OrderType.Sell:
+                            Portfolio.Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            break;
+                    }
+
+                    // mark order as filled and remove it from the open orders list,
+                    // it will remain in the order history list
+                    order.Fill(ticks[order.Symbol].AdjOpen, ticks[order.Symbol].DateTime);
                 }
 
-                // mark order as filled and remove it from the open orders list,
-                // it will remain in the order history list
-                order.Fill(ticks[order.Symbol].AdjOpen, ticks[order.Symbol].DateTime);
                 OpenOrders.RemoveAt(0);
-
                 order = OpenOrders.FirstOrDefault();
             }
         }
@@ -103,10 +107,11 @@ namespace Bot.Models
         /// <param name="orderId"></param>
         public void CancelOrder(string orderId)
         {
-            Order order = OpenOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) != 0);
+            Order order = OpenOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
 
             if (order != null)
             {
+                order.State = OrderState.Cancelled;
                 OpenOrders.Remove(order);
             }
         }
@@ -125,10 +130,23 @@ namespace Bot.Models
             {
                 // logic is the same for now
                 case OrderType.Buy:
-                case OrderType.Sell:
                     if (orderPrice > Portfolio.CashBalance)
                     {
                         return OrderState.Rejected;
+                    }
+                    break;
+
+                case OrderType.Sell:
+                    double netQuantity = Portfolio.HasPosition(order.Symbol) ?
+                        Portfolio[order.Symbol].Quantity - order.Quantity :
+                        -order.Quantity;
+
+                    if (netQuantity < 0)
+                    {
+                        if (currentPrice * -netQuantity > Portfolio.CurrentValue(ticks, (t) => t.AdjOpen))
+                        {
+                            return OrderState.Rejected;
+                        }
                     }
                     break;
 
