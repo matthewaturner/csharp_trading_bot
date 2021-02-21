@@ -3,24 +3,43 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bot.Models
+namespace Bot.Engine
 {
     public class BackTestingBroker : IBroker
     {
         private ITicks ticks;
 
-        public BackTestingBroker(ITicks ticks, double initialFunds)
+        public BackTestingBroker(ITicks ticks)
         {
             this.ticks = ticks;
-            Portfolio = new Portfolio(initialFunds);
+            Portfolio = new Portfolio();
             OpenOrders = new List<Order>();
             OrderHistory = new List<Order>();
         }
 
+        /// <summary>
+        /// Initialize with custom arguments.
+        /// </summary>
+        /// <param name="args"></param>
+        public void Initialize(string[] args)
+        {
+            double initialFunds = double.Parse(args[0]);
+            Portfolio.AddFunds(initialFunds);
+        }
+
+        /// <summary>
+        /// Get portfolio object.
+        /// </summary>
         public Portfolio Portfolio { get; private set; }
 
+        /// <summary>
+        /// Get open orders.
+        /// </summary>
         public IList<Order> OpenOrders { get; private set; }
 
+        /// <summary>
+        /// Get order history.
+        /// </summary>
         public IList<Order> OrderHistory { get; private set; }
 
         /// <summary>

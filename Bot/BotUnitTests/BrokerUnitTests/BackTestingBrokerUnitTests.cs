@@ -1,5 +1,5 @@
 ﻿using Bot;
-using Bot.Models;
+using Bot.Engine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,8 @@ namespace BrokerUnitTests
         [TestInitialize]
         public void Setup()
         {
-            ticks = new Ticks(new string[] { "GME", "MSFT", "AMC" });
+            ticks = new Ticks();
+            ticks.Initialize(new string[] { "GME", "MSFT", "AMC" });
 
             var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
             var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
@@ -31,7 +32,8 @@ namespace BrokerUnitTests
         public void BuyOrderSucceeds()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 3000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(3000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -52,7 +54,8 @@ namespace BrokerUnitTests
         public void SellOrderSucceeds()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 3000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(3000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -73,7 +76,8 @@ namespace BrokerUnitTests
         public void BuyOrderInsufficientCashFails()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 1000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(1000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -92,7 +96,8 @@ namespace BrokerUnitTests
         public void ShortSaleInsufficientCashFails()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 1000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(1000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -112,7 +117,8 @@ namespace BrokerUnitTests
         public void SellOrderInsufficientCashFails()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 1000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(1000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -131,7 +137,8 @@ namespace BrokerUnitTests
         public void CancelOrderDoesNotExecute()
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
-            IBroker broker = new BackTestingBroker(ticks, 3000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(3000);
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -151,7 +158,8 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuyThenSellAllSucceeds()
         {
-            IBroker broker = new BackTestingBroker(ticks, 3000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(3000);
 
             OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 31.0);
@@ -184,7 +192,8 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuyThenShortSellSucceeds()
         {
-            IBroker broker = new BackTestingBroker(ticks, 3000);
+            IBroker broker = new BackTestingBroker(ticks);
+            broker.Portfolio.AddFunds(3000);
 
             OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 15.0, 31.0);
@@ -218,14 +227,16 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuySellProfitSucceeds()
         {
-            Ticks t = new Ticks(new string[] { "TEST" });
+            Ticks t = new Ticks();
+            t.Initialize(new string[] { "TEST" });
 
             var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
             Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
             latestTicks.Add("TEST", testTick);
             t.Update(latestTicks);
 
-            IBroker broker = new BackTestingBroker(t, 100);
+            IBroker broker = new BackTestingBroker(t);
+            broker.Portfolio.AddFunds(100);
 
             OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);
@@ -264,14 +275,16 @@ namespace BrokerUnitTests
         [TestMethod]
         public void SellBuyProfitSucceeds()
         {
-            Ticks t = new Ticks(new string[] { "TEST" });
+            Ticks t = new Ticks();
+            t.Initialize(new string[] { "TEST" });
 
             var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
             Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
             latestTicks.Add("TEST", testTick);
             t.Update(latestTicks);
 
-            IBroker broker = new BackTestingBroker(t, 100);
+            IBroker broker = new BackTestingBroker(t);
+            broker.Portfolio.AddFunds(100);
 
             OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);

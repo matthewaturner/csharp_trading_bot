@@ -1,11 +1,10 @@
 ﻿
-using Bot.Models;
+using Bot.Engine;
 
 namespace Bot.Indicators
 {
     public interface IIndicator
     {
-
         /// <summary>
         /// Gets the number of windows until the indicator is hydrated.
         /// </summary>

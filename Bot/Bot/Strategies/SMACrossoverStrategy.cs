@@ -1,12 +1,13 @@
 ﻿using Bot.Indicators;
-using Bot.Models;
+using Bot.Engine;
 using System;
 using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public class SMACrossoverStrategy : StrategyBase
+    public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
+        private ITicks ticks;
         private IList<IIndicator> indicators;
         private IIndicator mac;
         private int longLookback;
@@ -36,10 +37,6 @@ namespace Bot.Strategies
             this.symbol = symbol;
             this.longOnly = longOnly;
         }
-
-        public override int Lookback => longLookback;
-
-        public override bool Hydrated => mac.Hydrated;
 
         public override IList<IIndicator> Indicators => indicators;
 
