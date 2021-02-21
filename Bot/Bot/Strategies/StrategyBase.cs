@@ -8,17 +8,7 @@ namespace Bot.Strategies
 {
     public abstract class StrategyBase
     {
-        /// <summary>
-        /// OnTick which must be overrided in the child class.
-        /// </summary>
-        /// <param name="tick"></param>
-        public abstract void OnTick();
-
-        /// <summary>
-        /// Gets a list of indicators, makes hydration easier.
-        /// </summary>
-        public abstract IList<IIndicator> Indicators { get; }
-
+        
         /// <summary>
         /// Returns the max lookback for any of the indicators.
         /// </summary>
@@ -26,6 +16,8 @@ namespace Bot.Strategies
         {
             get { return Indicators.Max(ind => ind.Lookback); }
         }
+
+        public abstract IList<IIndicator> Indicators { get; }
 
         /// <summary>
         /// Returns whether all indicators are hydrated for the strategy.

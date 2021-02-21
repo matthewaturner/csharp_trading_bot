@@ -1,4 +1,5 @@
 ﻿
+using Bot.Engine;
 using Bot.Indicators;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace Bot.Strategies
 
         IList<IIndicator> Indicators { get; }
 
-        void Initialize(string[] args);
+        void Initialize(IBroker broker, string[] args);
 
         void OnTick();
 

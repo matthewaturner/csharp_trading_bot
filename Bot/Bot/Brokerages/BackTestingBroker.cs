@@ -56,6 +56,7 @@ namespace Bot.Engine
             }
 
             order.OrderId = Guid.NewGuid().ToString();
+            order.PlacementTime = ticks[order.Symbol].DateTime;
             OpenOrders.Add(order);
             OrderHistory.Add(order);
 

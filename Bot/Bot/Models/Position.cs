@@ -1,4 +1,6 @@
 ﻿
+using Bot.Models;
+
 namespace Bot.Engine
 {
     public class Position
@@ -39,6 +41,11 @@ namespace Bot.Engine
         public override string ToString()
         {
             return $"(Symbol:{Symbol} Quantity:{Quantity})";
+        }
+
+        public PositionType GetPositionType()
+        {
+            return this.Quantity > 0 ? PositionType.Long : PositionType.Short;
         }
     }
 }

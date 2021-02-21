@@ -63,7 +63,7 @@ namespace Bot.Trading
             ticks.Initialize(new string[] { symbol });
             dataSource.Initialize(dataSourceArgs);
             broker.Initialize(brokerArgs);
-            strategy.Initialize(strategyArgs);
+            strategy.Initialize(broker, strategyArgs);
 
             IList<Tick> tickData = await tickStorage.GetTicksAsync(
                 dataSource,
