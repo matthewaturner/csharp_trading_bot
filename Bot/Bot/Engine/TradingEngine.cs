@@ -52,7 +52,7 @@ namespace Bot.Trading
             string[] brokerArgs = new string[] { "1000" };
 
             string strategyName = nameof(SMACrossoverStrategy);
-            string[] strategyArgs = new string[] { "16", "64" };
+            string[] strategyArgs = new string[] { symbol, "16", "64", "true" };
 
             // resolve objects
             IDataSource dataSource = dataSourceResolver(dataSourceName);
