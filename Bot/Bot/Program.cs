@@ -2,9 +2,9 @@
 using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
-using Bot.Engine;
+using Bot.Brokers;
 using Bot.Strategies;
-using Bot.Trading;
+using Bot.Engine;
 using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data.Common;
 using System.Net.Http;
+using Bot.Analyzers;
 
 namespace Bot
 {
@@ -23,6 +24,8 @@ namespace Bot
         public delegate IBroker BrokerResolver(string key);
 
         public delegate IStrategy StrategyResolver(string key);
+
+        public delegate IAnalyzer AnalyzerResolver(string key);
 
         public static void Main(string[] args)
         {
@@ -43,24 +46,26 @@ namespace Bot
             // entity framework stuff
             DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
 
-            // inject singletons
+            // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            services.AddSingleton<HttpClient>();
             services.AddSingleton<ITickStorage, TickStorage>();
-            services.AddSingleton<ITicks, Ticks>();
+            services.AddSingleton<HttpClient>();
 
-            // ticks object is special
-            Ticks ticks = new Ticks();
-            services.AddSingleton<ITicks>(ticks);
-            services.AddSingleton(ticks);
-
-            // inject named dependency resolvers
+            // inject data sources
             services.AddSingleton<YahooDataSource>();
+
+            // inject brokers
             services.AddSingleton<BackTestingBroker>();
+
+            // inject strategies
             services.AddSingleton<SMACrossoverStrategy>();
+
+            // inject analyzers
+            services.AddSingleton<ConsoleLogger>();
 
             var serviceProvider = services.BuildServiceProvider();
 
+            // resolvers do named lookup on singleton services
             services.AddSingleton<DataSourceResolver>(serviceProvider => key =>
             {
                 switch (key)
@@ -89,6 +94,17 @@ namespace Bot
                 {
                     case nameof(SMACrossoverStrategy):
                         return serviceProvider.GetService<SMACrossoverStrategy>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<AnalyzerResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(ConsoleLogger):
+                        return serviceProvider.GetService<ConsoleLogger>();
                     default:
                         return null;
                 }

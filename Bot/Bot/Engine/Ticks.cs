@@ -2,25 +2,41 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bot.Engine
+namespace Bot.Brokers
 {
     public class Ticks : ITicks
     {
-        private Dictionary<string, Tick> currentTicks;
-
-        public Ticks()
-        { }
+        private Tick[] ticks;
+        private IDictionary<string, int> symbolMap;
 
         /// <summary>
-        /// Initializes the ticks object to have all symbols.
+        /// Initializes ticks with no data.
         /// </summary>
         /// <param name="symbols"></param>
-        public void Initialize(string[] symbols)
+        public Ticks(string[] symbols)
         {
-            currentTicks = new Dictionary<string, Tick>();
-            foreach (string s in symbols)
+            ticks = new Tick[symbols.Length];
+
+            symbolMap = new Dictionary<string, int>(symbols.Length);
+            for (int i=0; i<symbols.Length; i++)
             {
-                currentTicks.Add(s.ToUpper(), null);
+                ticks[i] = new Tick();
+                ticks[i].Symbol = symbols[i];
+                symbolMap[symbols[i]] = i;
+            }
+        }
+
+        /// <summary>
+        /// Initialize the ticks object.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public Ticks(Tick[] ticks)
+        {
+            this.ticks = ticks;
+
+            for (int i=0; i<ticks.Length; i++)
+            {
+                symbolMap[ticks[i].Symbol] = i;
             }
         }
 
@@ -31,26 +47,30 @@ namespace Bot.Engine
         /// <returns></returns>
         public Tick this[string symbol]
         {
-            get => currentTicks[symbol];
+            get => ticks[symbolMap[symbol]];
         }
 
         /// <summary>
         /// Updates the current prices. Called by engine.
         /// </summary>
         /// <param name="newTicks"></param>
-        public void Update(Dictionary<string, Tick> newTicks)
+        public void Update(Tick[] newTicks)
         {
             // iterate this way because we should never add ticks
             // in the middle of a run
-            foreach (string symbol in currentTicks.Keys.ToList())
-            {
-                string upperSymbol = symbol.ToUpper();
-                if (!newTicks.ContainsKey(symbol.ToUpper()))
-                {
-                    throw new ArgumentException("Ticks must contain data for all ticks in the universe.");
-                }
 
-                currentTicks[symbol.ToUpper()] = newTicks[symbol.ToUpper()];
+            if (newTicks.Length != ticks.Length)
+            {
+                throw new ArgumentOutOfRangeException("new ticks contain more or less ticks than previously.");
+            }
+
+            for (int i=0; i<ticks.Length; i++)
+            {
+                if (string.Compare(ticks[i].Symbol, newTicks[i].Symbol, ignoreCase: true) != 0)
+                {
+                    throw new ArgumentException($"newTicks[{i}] was for symbol {newTicks[i].Symbol}. Expected {ticks[i].Symbol}");
+                }
+                ticks[i] = newTicks[i];
             }
         }
 
@@ -61,16 +81,30 @@ namespace Bot.Engine
         /// <returns></returns>
         public bool HasSymbol(string symbol)
         {
-            return currentTicks.ContainsKey(symbol.ToUpper());
+            return symbolMap.ContainsKey(symbol);
         }
 
         /// <summary>
         /// Returns ticks as a list.
         /// </summary>
         /// <returns></returns>
-        public IList<Tick> ToList()
+        public Tick[] ToArray()
         {
-            return currentTicks.Values.ToList();
+            return ticks;
+        }
+
+        /// <summary>
+        /// Print to the screen
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string output = string.Empty;
+            for (int i=0; i<ticks.Length; i++)
+            {
+                output += ticks[i].ToString() + "\n";
+            }
+            return output;
         }
     }
 }

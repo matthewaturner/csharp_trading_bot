@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Bot.Engine;
+using System;
 using System.Collections.Generic;
 
-namespace Bot.Engine
+namespace Bot.Brokers
 {
     public interface IBroker
     {
@@ -9,7 +10,7 @@ namespace Bot.Engine
         /// Initializes the broker with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        public void Initialize(string[] args);
+        public void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
         /// Gets the history of orders.
@@ -35,12 +36,6 @@ namespace Bot.Engine
         /// </summary>
         /// <param name="order"></param>
         public void CancelOrder(string orderId);
-
-        /// <summary>
-        /// Gets tick data from the order engine to update
-        /// the portfolio with.
-        /// </summary>
-        public void OnTick();
 
         /// <summary>
         /// Portfolio held by the broker.

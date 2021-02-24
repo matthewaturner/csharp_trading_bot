@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public interface IStrategy
+    public interface IStrategy : ITickReceiver
     {
         int Lookback { get; }
 
@@ -13,9 +13,6 @@ namespace Bot.Strategies
 
         IList<IIndicator> Indicators { get; }
 
-        void Initialize(IBroker broker, string[] args);
-
-        void OnTick();
-
+        void Initialize(ITradingEngine engine, string[] args);
     }
 }

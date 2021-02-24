@@ -1,4 +1,5 @@
-﻿using Bot.Engine;
+﻿using Bot.Brokers;
+using Bot.Engine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace Bot.DataCollection
         /// Initializes the data source with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        void Initialize(string[] args);
+        void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
         /// Gets a list of ticks for a certain interval over a period of time.

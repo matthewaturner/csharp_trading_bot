@@ -1,7 +1,7 @@
 ﻿
 using System.Collections.Generic;
 
-namespace Bot.Engine
+namespace Bot.Brokers
 {
     public interface ITicks
     {
@@ -20,9 +20,15 @@ namespace Bot.Engine
         bool HasSymbol(string symbol);
 
         /// <summary>
-        /// Returns all ticks as a list.
+        /// Returns all ticks as an array.
         /// </summary>
         /// <returns></returns>
-        IList<Tick> ToList();
+        Tick[] ToArray();
+
+        /// <summary>
+        /// ToString
+        /// </summary>
+        /// <returns></returns>
+        string ToString();
     }
 }

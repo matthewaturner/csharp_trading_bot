@@ -1,6 +1,4 @@
-﻿using Bot.Engine;
-using Bot.Indicators;
-using Bot.Models;
+﻿using Bot.Brokers;
 using Bot.Strategies;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,7 +7,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
+using Bot.Engine;
+using Moq;
 
 namespace StrategyTests
 {
@@ -28,13 +27,18 @@ namespace StrategyTests
         public void SMACrossoverStrategy_LongOnly()
         {
             var symbol = "AMC";
-            Ticks ticks = new Ticks();
-            var strat = new SMACrossoverStrategy(ticks);
-            IBroker broker = new BackTestingBroker(ticks);
-            ticks.Initialize(new string[] { symbol });
-            broker.Initialize(new string[] { "1000" });
+            Ticks ticks = new Ticks(new string[] { symbol });
+            var strat = new SMACrossoverStrategy();
+            BackTestingBroker broker = new BackTestingBroker();
+
+            Mock<ITradingEngine> engine = new Mock<ITradingEngine>();
+            engine.Setup(m => m.Ticks).Returns(ticks);
+            engine.Setup(m => m.Broker).Returns(broker);
+            engine.Setup(m => m.Strategy).Returns(strat);
+
+            broker.Initialize(engine.Object, new string[] { "1000" });
             strat.Initialize(
-                broker,
+                engine.Object,
                 new string[] { 
                     symbol, 
                     "5", 
@@ -42,15 +46,13 @@ namespace StrategyTests
                     "true"
                 });
 
-            this.amcData = amcData.Select(x => x).OrderBy(x => x.DateTime).ToList();
+            amcData = amcData.Select(x => x).OrderBy(x => x.DateTime).ToList();
 
-            foreach (var tick in this.amcData)
+            foreach (var tick in amcData)
             {
-                var tickDict = new Dictionary<string, Tick>();
-                tickDict.Add(symbol, tick);
-                ticks.Update(tickDict);
-                broker.OnTick();
-                strat.OnTick();
+                ticks.Update(new Tick[] { tick });
+                broker.OnTick(ticks);
+                strat.OnTick(ticks);
             }
 
             var expectedNumTrades = 10;

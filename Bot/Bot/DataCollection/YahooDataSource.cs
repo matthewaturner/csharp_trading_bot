@@ -1,5 +1,5 @@
 ﻿using Bot.Configuration;
-using Bot.Engine;
+using Bot.Brokers;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Bot.Engine;
 
 namespace Bot.DataCollection
 {
@@ -34,7 +35,7 @@ namespace Bot.DataCollection
         /// <summary>
         /// Initializes the data source with custom arguments.
         /// </summary>
-        public void Initialize(string[] args)
+        public void Initialize(ITradingEngine engine, string[] args)
         { }
 
         /// <summary>
@@ -141,5 +142,7 @@ namespace Bot.DataCollection
 
             return tickList;
         }
+
+
     }
 }

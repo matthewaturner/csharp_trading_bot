@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bot.Engine
+namespace Bot.Brokers
 {
     public class Portfolio
     {

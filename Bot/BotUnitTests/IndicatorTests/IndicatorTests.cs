@@ -1,6 +1,6 @@
 ﻿using Bot.DataStorage.Models;
 using Bot.Indicators;
-using Bot.Engine;
+using Bot.Brokers;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -10,13 +10,14 @@ using System.IO;
 using System.Linq;
 using Bot;
 using Bot.Exceptions;
+using Moq;
 
 namespace IndicatorTests
 {
     [TestClass]
     public class IndicatorTests
     {
-        private IList<Tick> msftData;
+        private IList<ITicks> msftData;
         private IDictionary<string, IList<object>> msftResults;
 
         [TestInitialize]
@@ -29,28 +30,28 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Hydration()
         {
-            IIndicator sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            IIndicator sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             Assert.IsFalse(sma.Hydrated);
 
-            sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(29).ToList());
             Assert.IsFalse(sma.Hydrated);
 
             Assert.ThrowsException<NotHydratedException>(() => sma.Value);
 
-            sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(30).ToList());
             Assert.IsTrue(sma.Hydrated);
 
-            sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(60).ToList());
             Assert.IsTrue(sma.Hydrated);
 
-            sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(61).ToList());
             Assert.IsTrue(sma.Hydrated);
 
-            sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(62).ToList());
             Assert.IsTrue(sma.Hydrated);
         }
@@ -58,19 +59,19 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Values()
         {
-            IIndicator sma = new SimpleMovingAverage(30, (Tick t) => t.AdjClose);
+            IIndicator sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             IList<double> smaResults = msftResults[nameof(SimpleMovingAverage)]
                 .Select(obj => (double)obj)
                 .ToList();
 
             ReplayData(sma, msftData.Take(29).ToList());
-            ReplayAndCompare(sma, msftData.Skip(29).ToList(), smaResults.Skip(29).ToList(), Helpers.CompareDoubles);
+            ReplayAndCompare(sma, msftData.Skip(29).ToList<ITicks>(), smaResults.Skip(29).ToList(), Helpers.CompareDoubles);
         }
 
         [TestMethod]
         public void MAC_Hydration()
         {
-            IIndicator mac = new MovingAverageCrossover(16, 64, (Tick t) => t.AdjClose);
+            IIndicator mac = new MovingAverageCrossover(16, 64, (ITicks t) => t["MSFT"].AdjClose);
             Assert.IsFalse(mac.Hydrated);
 
             ReplayData(mac, msftData.Take(15).ToList());
@@ -88,7 +89,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Values()
         {
-            IIndicator mac = new MovingAverageCrossover(10, 30, (Tick t) => t.AdjClose);
+            IIndicator mac = new MovingAverageCrossover(10, 30, (ITicks t) => t["MSFT"].AdjClose);
             IList<int> macResults = msftResults[nameof(MovingAverageCrossover)]
                 .Select(obj => (int)obj)
                 .ToList();
@@ -96,14 +97,14 @@ namespace IndicatorTests
             ReplayData(mac, msftData.Take(29).ToList());
             ReplayAndCompare(
                 mac, 
-                msftData.Skip(29).ToList(), 
+                msftData.Skip(29).ToList<ITicks>(), 
                 macResults.Skip(29).ToList(), 
                 (int a, int b) => { return a == b ? 0 : -1; });
         }
 
         public void ReplayAndCompare<T>(
             IIndicator indicator, 
-            IList<Tick> data, 
+            IList<ITicks> data, 
             IList<T> results, 
             Func<T, T, int> compareFunc)
         {
@@ -120,9 +121,9 @@ namespace IndicatorTests
             }
         }
 
-        public void ReplayData(IIndicator indicator, IList<Tick> data)
+        public void ReplayData(IIndicator indicator, IList<ITicks> data)
         {
-            foreach (Tick t in data)
+            foreach (ITicks t in data)
             {
                 indicator.OnTick(t);
             }
@@ -163,13 +164,13 @@ namespace IndicatorTests
             return results;
         }
 
-        public IList<Tick> LoadData(
+        public IList<ITicks> LoadData(
             string fileName, 
             string symbol, 
             TickInterval interval)
         {
             Path.GetFullPath(fileName);
-            List<Tick> tickList = new List<Tick>();
+            List<ITicks> tickList = new List<ITicks>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -195,7 +196,10 @@ namespace IndicatorTests
                     Tick tick = new Tick(
                         symbol, interval, dateTime, open, high, low, close, adjClose, volume);
 
-                    tickList.Add(tick);
+                    Mock<ITicks> mockTicks = new Mock<ITicks>();
+                    mockTicks.Setup(m => m[It.IsAny<string>()]).Returns(tick);
+
+                    tickList.Add(mockTicks.Object);
                 }
             }
 

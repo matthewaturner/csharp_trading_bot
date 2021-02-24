@@ -1,14 +1,14 @@
 ﻿using Bot.Indicators;
-using Bot.Engine;
+using Bot.Brokers;
 using System;
 using System.Collections.Generic;
-using Bot.Models;
+using Bot.Brokers;
+using Bot.Engine;
 
 namespace Bot.Strategies
 {
     public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
-        private ITicks ticks;
         private IBroker broker;
         private IList<IIndicator> indicators;
         private IIndicator mac;
@@ -18,23 +18,21 @@ namespace Bot.Strategies
         private string orderId;
         private string symbol;
 
-        public SMACrossoverStrategy(ITicks ticks)
-        {
-            this.ticks = ticks ?? throw new ArgumentNullException(nameof(ticks));
-        }
+        public SMACrossoverStrategy()
+        { }
 
-        public void Initialize(IBroker broker, string[] args)
+        public void Initialize(ITradingEngine engine, string[] args)
         {
             symbol = args[0];
             int shortMa = int.Parse(args[1]);
             int longMa = int.Parse(args[2]);
             longOnly = bool.Parse(args[3]);
 
-            this.broker = broker;
+            broker = engine.Broker;
             mac = new MovingAverageCrossover(
                 shortMa,
                 longMa,
-                (Tick t) => t.AdjClose);
+                (ITicks t) => t[symbol].AdjClose);
             indicators = new List<IIndicator> { mac };
         }
 
@@ -45,11 +43,11 @@ namespace Bot.Strategies
         /// Enter Short position if the Moving average crossover value is less than 0,
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
-        /// <param name="tick"></param>
-        public void OnTick()
+        /// <param name="_"></param>
+        public void OnTick(ITicks ticks)
         {
             Tick tick = ticks[symbol];
-            mac.OnTick(tick);
+            mac.OnTick(ticks);
 
             if (Hydrated)
             {

@@ -1,5 +1,5 @@
 ﻿using Bot;
-using Bot.Engine;
+using Bot.Brokers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,18 +14,14 @@ namespace PortfolioTests
         [TestInitialize]
         public void Setup()
         {
-            ticks = new Ticks();
-            ticks.Initialize(new string[] { "GME", "MSFT", "AMC" });
+            // order matters
+            ticks = new Ticks(new string[] { "MSFT", "GME", "AMC" });
 
             var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
             var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
             var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
 
-            Dictionary<string, Tick> latestTicks = new Dictionary<string, Tick>();
-            latestTicks.Add("MSFT", msftTick);
-            latestTicks.Add("GME", gmeTick);
-            latestTicks.Add("AMC", amcTick);
-            ticks.Update(latestTicks);
+            ticks.Update(new Tick[] { msftTick, gmeTick, amcTick });
         }
 
         [TestMethod]
