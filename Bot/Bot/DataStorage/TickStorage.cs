@@ -8,6 +8,7 @@ using System.Linq;
 using Bot.DataCollection;
 using System.Threading.Tasks;
 using System.Data;
+using Bot.Brokers;
 using Bot.Engine;
 
 namespace Bot.DataStorage
@@ -17,6 +18,11 @@ namespace Bot.DataStorage
         private SqlConfiguration sqlConfig;
         private TickContext context;
 
+        /// <summary>
+        /// Dependency injection.
+        /// </summary>
+        /// <param name="sqlConfig"></param>
+        /// <param name="kvManager"></param>
         public TickStorage(
             IOptions<SqlConfiguration> sqlConfig,
             IKeyVaultManager kvManager)
@@ -28,6 +34,13 @@ namespace Bot.DataStorage
             this.context.Database.CreateIfNotExists();
             this.context.Configuration.AutoDetectChangesEnabled = false;
         }
+
+        /// <summary>
+        /// Initializes the data source with custom arguments.
+        /// </summary>
+        /// <param name="args"></param>
+        public void Initialize(ITradingEngine engine, string[] args)
+        { }
 
         /// <summary>
         /// Get ticks for a symbol for some interval and over a range of time.
@@ -103,6 +116,60 @@ namespace Bot.DataStorage
             }
 
             return sqlTicks;
+        }
+
+        /// <summary>
+        /// For this function just call the actual data source streaming function.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="symbols"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="onTickCallback"></param>
+        public async void StreamTicks(
+            IDataSource source,
+            string[] symbols,
+            TickInterval interval,
+            DateTime start,
+            DateTime end,
+            Action<Tick[]> onTickCallback)
+        {
+            IList<Tick>[] allTicks = new List<Tick>[symbols.Length];
+            int tickCount = 0;
+
+            for (int i=0; i<symbols.Length; i++)
+            {
+                allTicks[i] = await GetTicksAsync(source, symbols[i], interval, start, end);
+
+                if (tickCount == 0)
+                {
+                    tickCount = allTicks[i].Count;
+                }
+                else if (allTicks[i].Count != tickCount)
+                {
+                    throw new DataException("Received varying number of ticks from each symbol.");
+                }
+            }
+
+            Tick[] tickArray = new Tick[symbols.Length];
+            Ticks currentTicks = new Ticks(symbols);
+            IList<IEnumerator<Tick>> enumerators = new List<IEnumerator<Tick>>();
+
+            for (int i=0; i<symbols.Length; i++)
+            {
+                enumerators.Add(allTicks[i].GetEnumerator());
+            }
+
+            while (enumerators.All(e => e.MoveNext()))
+            {
+                for (int i=0; i<enumerators.Count; i++)
+                {
+                    tickArray[i] = enumerators[i].Current;
+                }
+
+                onTickCallback(tickArray);
+            }
         }
 
         /// <summary>

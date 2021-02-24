@@ -1,35 +1,69 @@
 ﻿using Bot.DataCollection;
 using Bot.DataStorage;
-using Bot.Engine;
+using Bot.Brokers;
 using Bot.Strategies;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static Bot.Program;
+using Bot.Analyzers;
 
-namespace Bot.Trading
+namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
-        public readonly DataSourceResolver dataSourceResolver;
-        public readonly BrokerResolver brokerResolver;
-        public readonly StrategyResolver strategyResolver;
-        public readonly ITickStorage tickStorage;
-        public readonly Ticks ticks;
+        private readonly DataSourceResolver dataSourceResolver;
+        private readonly BrokerResolver brokerResolver;
+        private readonly StrategyResolver strategyResolver;
+        private readonly AnalyzerResolver analyzerResolver;
+
+        private Ticks ticks;
+        private ITickStorage tickStorage;
+
+        private IList<ITickReceiver> tickReceivers;
+        private IList<ITerminateReceiver> terminateReceivers;
+
+        private IBroker broker;
+        private IDataSource dataSource;
+        private IStrategy strategy;
+        private IList<IAnalyzer> analyzers;
 
         public TradingEngine(
             DataSourceResolver dataSourceResolver,
             BrokerResolver brokerResolver,
             StrategyResolver strategyResolver,
-            ITickStorage tickStorage,
-            Ticks ticks)
+            AnalyzerResolver analyzerResolver,
+            ITickStorage tickStorage)
         {
             this.dataSourceResolver = dataSourceResolver;
             this.brokerResolver = brokerResolver;
             this.strategyResolver = strategyResolver;
+            this.analyzerResolver = analyzerResolver;
             this.tickStorage = tickStorage;
-            this.ticks = ticks;
+
+            tickReceivers = new List<ITickReceiver>();
+            terminateReceivers = new List<ITerminateReceiver>();
         }
+
+        /// <summary>
+        /// Current ticks.
+        /// </summary>
+        public ITicks Ticks => ticks;
+
+        /// <summary>
+        /// Current broker.
+        /// </summary>
+        public IBroker Broker => broker;
+
+        /// <summary>
+        /// Current strategy.
+        /// </summary>
+        public IStrategy Strategy => strategy;
+
+        /// <summary>
+        /// Current analyzers.
+        /// </summary>
+        public IList<IAnalyzer> Analyzers => analyzers;
 
         /// <summary>
         /// Configure a strategy and run it.
@@ -54,39 +88,102 @@ namespace Bot.Trading
             string strategyName = nameof(SMACrossoverStrategy);
             string[] strategyArgs = new string[] { symbol, "16", "64", "true" };
 
-            // resolve objects
-            IDataSource dataSource = dataSourceResolver(dataSourceName);
-            IBroker broker = brokerResolver(brokerName);
-            IStrategy strategy = strategyResolver(strategyName);
+            IDictionary<string, string[]> analyzerConfig = new Dictionary<string, string[]>()
+            {
+                ["ConsoleLogger"] = new string[] { },
+                ["SharpeRatio"] = new string[] { "0.00005357" }
+            };
 
             // initialize stuff
-            ticks.Initialize(new string[] { symbol });
-            dataSource.Initialize(dataSourceArgs);
-            broker.Initialize(brokerArgs);
-            strategy.Initialize(broker, strategyArgs);
+            ticks = new Ticks(new string[] { symbol });
+
+            // data source
+            IDataSource dataSource = dataSourceResolver(dataSourceName);
+            dataSource.Initialize(this, dataSourceArgs);
+            AddToReceiverLists(dataSource);
+
+            // broker
+            broker = brokerResolver(brokerName);
+            broker.Initialize(this, brokerArgs);
+            AddToReceiverLists(broker);
+
+            // strategy
+            strategy = strategyResolver(strategyName);
+            strategy.Initialize(this, strategyArgs);
+            AddToReceiverLists(strategy);
+
+            // analyzers
+            analyzers = new List<IAnalyzer>();
+            foreach ((string name, string[] args) in analyzerConfig)
+            {
+                IAnalyzer analyzer = analyzerResolver(name);
+                analyzer.Initialize(this, args);
+                analyzers.Add(analyzerResolver(name));
+                AddToReceiverLists(analyzer);
+            }
 
             IList<Tick> tickData = await tickStorage.GetTicksAsync(
                 dataSource,
                 symbol,
-                TickInterval.Day,
+                interval,
                 start,
                 end);
 
             foreach (Tick tick in tickData)
             {
-                var tickDictionary = new Dictionary<string, Tick>();
-                tickDictionary.Add(symbol, tick);
-                ticks.Update(tickDictionary);
+                ticks.Update(new Tick[] { tick });
 
                 Console.WriteLine($"Tick: {tick}");
                 Console.WriteLine($"Indicators Hydrated: {strategy.Hydrated}");
 
-                broker.OnTick();
-                strategy.OnTick();
+                SendOnTickEvents(ticks.ToArray());
 
                 Console.WriteLine(broker.Portfolio);
                 Console.WriteLine($"Portfolio Value:{broker.Portfolio.CurrentValue(ticks, (t) => t.AdjClose)}");
                 Console.WriteLine("----------");
+            }
+
+            SendTerminateEvents();
+        }
+
+        /// <summary>
+        /// Adds the objects to the receiver lists for the different types of events.
+        /// </summary>
+        /// <param name="obj"></param>
+        private void AddToReceiverLists(object obj)
+        {
+            if (obj is ITickReceiver tickReceiver)
+            {
+                tickReceivers.Add(tickReceiver);
+            }
+
+            if (obj is ITerminateReceiver terminateReceiver)
+            {
+                terminateReceivers.Add(terminateReceiver);
+            }
+        }
+
+        /// <summary>
+        /// Sends on tick events to all interested parties.
+        /// </summary>
+        /// <param name="ticks"></param>
+        private void SendOnTickEvents(Tick[] newTicks)
+        {
+            ticks.Update(newTicks);
+            foreach (ITickReceiver receiver in tickReceivers)
+            {
+                receiver.OnTick(ticks);
+            }
+        }
+
+        /// <summary>
+        /// Sends finalize event to all interested parties.
+        /// </summary>
+        private void SendTerminateEvents()
+        {
+            foreach (ITerminateReceiver receiver in terminateReceivers)
+            {
+                receiver.OnTerminate();
             }
         }
     }

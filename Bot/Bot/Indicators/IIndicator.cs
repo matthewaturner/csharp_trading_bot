@@ -1,5 +1,5 @@
 ﻿
-using Bot.Engine;
+using Bot.Brokers;
 
 namespace Bot.Indicators
 {
@@ -26,6 +26,6 @@ namespace Bot.Indicators
         /// Updates the indicator with a new row of data.
         /// </summary>
         /// <param name="tick"></param>
-        public void OnTick(Tick tick);
+        public void OnTick(ITicks ticks);
     }
 }

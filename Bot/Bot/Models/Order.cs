@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Bot.Engine
+namespace Bot.Brokers
 {
     public class Order
     {
