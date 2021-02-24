@@ -62,6 +62,7 @@ namespace Bot
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
+            services.AddSingleton<SharpeRatio>();
 
             var serviceProvider = services.BuildServiceProvider();
 
@@ -105,6 +106,8 @@ namespace Bot
                 {
                     case nameof(ConsoleLogger):
                         return serviceProvider.GetService<ConsoleLogger>();
+                    case nameof(SharpeRatio):
+                        return serviceProvider.GetService<SharpeRatio>();
                     default:
                         return null;
                 }

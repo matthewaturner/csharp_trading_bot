@@ -12,14 +12,16 @@ namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
-        public readonly DataSourceResolver dataSourceResolver;
-        public readonly BrokerResolver brokerResolver;
-        public readonly StrategyResolver strategyResolver;
-        public readonly AnalyzerResolver analyzerResolver;
+        private readonly DataSourceResolver dataSourceResolver;
+        private readonly BrokerResolver brokerResolver;
+        private readonly StrategyResolver strategyResolver;
+        private readonly AnalyzerResolver analyzerResolver;
 
-        public Ticks ticks;
-        public ITickStorage tickStorage;
-        public IList<ITickReceiver> tickReceivers;
+        private Ticks ticks;
+        private ITickStorage tickStorage;
+
+        private IList<ITickReceiver> tickReceivers;
+        private IList<ITerminateReceiver> terminateReceivers;
 
         private IBroker broker;
         private IDataSource dataSource;
@@ -38,7 +40,9 @@ namespace Bot.Engine
             this.strategyResolver = strategyResolver;
             this.analyzerResolver = analyzerResolver;
             this.tickStorage = tickStorage;
+
             tickReceivers = new List<ITickReceiver>();
+            terminateReceivers = new List<ITerminateReceiver>();
         }
 
         /// <summary>
@@ -55,6 +59,11 @@ namespace Bot.Engine
         /// Current strategy.
         /// </summary>
         public IStrategy Strategy => strategy;
+
+        /// <summary>
+        /// Current analyzers.
+        /// </summary>
+        public IList<IAnalyzer> Analyzers => analyzers;
 
         /// <summary>
         /// Configure a strategy and run it.
@@ -79,7 +88,11 @@ namespace Bot.Engine
             string strategyName = nameof(SMACrossoverStrategy);
             string[] strategyArgs = new string[] { symbol, "16", "64", "true" };
 
-            string[] analyzerList = new string[] { "ConsoleLogger" };
+            IDictionary<string, string[]> analyzerConfig = new Dictionary<string, string[]>()
+            {
+                ["ConsoleLogger"] = new string[] { },
+                ["SharpeRatio"] = new string[] { "0.00005357" }
+            };
 
             // initialize stuff
             ticks = new Ticks(new string[] { symbol });
@@ -100,10 +113,11 @@ namespace Bot.Engine
             AddToReceiverLists(strategy);
 
             // analyzers
-            IList<IAnalyzer> analyzers = new List<IAnalyzer>();
-            foreach (string name in analyzerList)
+            analyzers = new List<IAnalyzer>();
+            foreach ((string name, string[] args) in analyzerConfig)
             {
                 IAnalyzer analyzer = analyzerResolver(name);
+                analyzer.Initialize(this, args);
                 analyzers.Add(analyzerResolver(name));
                 AddToReceiverLists(analyzer);
             }
@@ -128,6 +142,8 @@ namespace Bot.Engine
                 Console.WriteLine($"Portfolio Value:{broker.Portfolio.CurrentValue(ticks, (t) => t.AdjClose)}");
                 Console.WriteLine("----------");
             }
+
+            SendTerminateEvents();
         }
 
         /// <summary>
@@ -136,9 +152,14 @@ namespace Bot.Engine
         /// <param name="obj"></param>
         private void AddToReceiverLists(object obj)
         {
-            if (obj is ITickReceiver receiver)
+            if (obj is ITickReceiver tickReceiver)
             {
-                tickReceivers.Add(receiver);
+                tickReceivers.Add(tickReceiver);
+            }
+
+            if (obj is ITerminateReceiver terminateReceiver)
+            {
+                terminateReceivers.Add(terminateReceiver);
             }
         }
 
@@ -152,6 +173,17 @@ namespace Bot.Engine
             foreach (ITickReceiver receiver in tickReceivers)
             {
                 receiver.OnTick(ticks);
+            }
+        }
+
+        /// <summary>
+        /// Sends finalize event to all interested parties.
+        /// </summary>
+        private void SendTerminateEvents()
+        {
+            foreach (ITerminateReceiver receiver in terminateReceivers)
+            {
+                receiver.OnTerminate();
             }
         }
     }

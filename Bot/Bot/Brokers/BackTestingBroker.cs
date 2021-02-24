@@ -179,5 +179,14 @@ namespace Bot.Brokers
 
             return OrderState.Open;
         }
+
+        /// <summary>
+        /// Gets the current portfolio value.
+        /// </summary>
+        /// <returns></returns>
+        public double PortfolioValue()
+        {
+            return Portfolio.CurrentValue(ticks, (tick) => tick.AdjClose);
+        }
     }
 }

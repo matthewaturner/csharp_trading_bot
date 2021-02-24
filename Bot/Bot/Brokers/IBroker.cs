@@ -13,6 +13,12 @@ namespace Bot.Brokers
         public void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
+        /// Gets the current portfolio value.
+        /// </summary>
+        /// <returns></returns>
+        public double PortfolioValue();
+
+        /// <summary>
         /// Gets the history of orders.
         /// </summary>
         /// <param name="start"></param>

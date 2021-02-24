@@ -1,5 +1,7 @@
-﻿using Bot.Brokers;
+﻿using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.Strategies;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bot.Engine
@@ -20,6 +22,11 @@ namespace Bot.Engine
         /// Gets current strategy.
         /// </summary>
         public IStrategy Strategy { get; }
+
+        /// <summary>
+        /// Gets all analyzers.
+        /// </summary>
+        public IList<IAnalyzer> Analyzers { get; }
 
         /// <summary>
         /// Runs the trading engine.
