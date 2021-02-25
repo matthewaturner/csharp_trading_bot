@@ -8,6 +8,7 @@ using Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using RDotNet;
 using System;
 using System.Data.Common;
 using System.Net.Http;
@@ -43,14 +44,32 @@ namespace Bot
 
             IServiceProvider provider = services.BuildServiceProvider();
 
-            //YahooDataSource yahoo = (YahooDataSource)provider.GetService(typeof(YahooDataSource));
-            ITickStorage tickStorage = (ITickStorage)provider.GetService(typeof(ITickStorage));
+            TestStuff(provider);
+        }
 
-            var ticks = tickStorage.GetTicksAsync("AMC", TickInterval.Day, new DateTime(1970, 1, 1), DateTime.Now).Result;
-
-            foreach (Tick t in ticks)
+        public static void TestStuff(IServiceProvider provider)
+        {
+            try
             {
-                Console.WriteLine(t.ToString());
+                StartupParameter rinit = new StartupParameter();
+                rinit.Quiet = true;
+                rinit.RHome = "C:/Program Files/R/R-3.4.3";
+                rinit.Interactive = true;
+                REngine rEngine = REngine.GetInstance(null, true, rinit);
+
+                // A somewhat contrived but customary Hello World:
+                CharacterVector charVec = rEngine.CreateCharacterVector(new[] { "Hello, R world!, .NET speaking" });
+                rEngine.SetSymbol("greetings", charVec);
+                rEngine.Evaluate("str(greetings)"); // print out in the console
+                string[] a = rEngine.Evaluate("'Hi there .NET, from the R engine'").AsCharacter().ToArray();
+                Console.WriteLine("R answered: '{0}'", a[0]);
+                Console.WriteLine("Press any key to exit the program");
+                Console.ReadKey();
+                rEngine.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
     }
