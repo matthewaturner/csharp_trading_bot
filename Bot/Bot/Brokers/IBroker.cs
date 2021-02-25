@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Bot.Brokers
+namespace Bot.Models
 {
     public interface IBroker
     {

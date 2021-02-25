@@ -1,6 +1,6 @@
 ﻿
 using Bot.Indicators;
-using Bot.Brokers;
+using Bot.Models;
 using System.Collections.Generic;
 using System.Linq;
 

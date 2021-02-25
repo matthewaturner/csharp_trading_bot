@@ -1,5 +1,5 @@
 ﻿using Bot;
-using Bot.Brokers;
+using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

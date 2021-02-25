@@ -8,7 +8,7 @@ using System.Linq;
 using Bot.DataCollection;
 using System.Threading.Tasks;
 using System.Data;
-using Bot.Brokers;
+using Bot.Models;
 using Bot.Engine;
 
 namespace Bot.DataStorage
@@ -52,11 +52,12 @@ namespace Bot.DataStorage
         /// <returns></returns>
         public async Task<IList<Tick>> GetTicksAsync(
             IDataSource source,
-            string symbol,
+            string symbols,
             TickInterval interval,
             DateTime start,
             DateTime end)
         {
+            string symbol = symbols;
             start = start.GetNextTradingDayInclusive();
             end = end.GetNextTradingDayInclusive();
             DateTime tradeEndInclusive = end.GetPreviousTradingDay();

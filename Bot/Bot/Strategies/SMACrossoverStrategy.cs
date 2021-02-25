@@ -1,8 +1,8 @@
 ﻿using Bot.Indicators;
-using Bot.Brokers;
+using Bot.Models;
 using System;
 using System.Collections.Generic;
-using Bot.Brokers;
+using Bot.Models;
 using Bot.Engine;
 
 namespace Bot.Strategies

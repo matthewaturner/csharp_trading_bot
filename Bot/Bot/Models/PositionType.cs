@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bot.Brokers
+namespace Bot.Models
 {
     public enum PositionType
     {
