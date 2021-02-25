@@ -1,12 +1,17 @@
 ﻿using Bot.DataCollection;
 using Bot.DataStorage;
-using Bot.Brokers;
+using Bot.Models;
 using Bot.Strategies;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static Bot.Program;
 using Bot.Analyzers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Bot.Configuration;
+using System.IO;
+using System.Linq;
 
 namespace Bot.Engine
 {
@@ -71,63 +76,46 @@ namespace Bot.Engine
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="tickInterval"></param>
-        public async Task RunAsync()
+        public async Task RunAsync(string configFileName)
         {
-            // config
-            string symbol = "MSFT";
-            TickInterval interval = TickInterval.Day;
-            DateTime start = new DateTime(2010, 1, 1);
-            DateTime end = new DateTime(2020, 1, 1);
-
-            string dataSourceName = nameof(YahooDataSource);
-            string[] dataSourceArgs = new string[] { };
-
-            string brokerName = nameof(BackTestingBroker);
-            string[] brokerArgs = new string[] { "1000" };
-
-            string strategyName = nameof(SMACrossoverStrategy);
-            string[] strategyArgs = new string[] { symbol, "16", "64", "true" };
-
-            IDictionary<string, string[]> analyzerConfig = new Dictionary<string, string[]>()
-            {
-                ["ConsoleLogger"] = new string[] { },
-                ["SharpeRatio"] = new string[] { "0.00005357" }
-            };
+            string configString = File.ReadAllText(configFileName);
+            EngineConfig config = JsonConvert.DeserializeObject<EngineConfig>(configString);
 
             // initialize stuff
-            ticks = new Ticks(new string[] { symbol });
+            ticks = new Ticks(config.Symbols.ToArray());
 
             // data source
-            IDataSource dataSource = dataSourceResolver(dataSourceName);
-            dataSource.Initialize(this, dataSourceArgs);
+            IDataSource dataSource = dataSourceResolver(config.DataSource.Name);
+            dataSource.Initialize(this, config.DataSource.Args);
             AddToReceiverLists(dataSource);
 
             // broker
-            broker = brokerResolver(brokerName);
-            broker.Initialize(this, brokerArgs);
+            broker = brokerResolver(config.Broker.Name);
+            broker.Initialize(this, config.Broker.Args);
             AddToReceiverLists(broker);
 
             // strategy
-            strategy = strategyResolver(strategyName);
-            strategy.Initialize(this, strategyArgs);
+            strategy = strategyResolver(config.Strategy.Name);
+            strategy.Initialize(this, config.Strategy.Args);
             AddToReceiverLists(strategy);
 
             // analyzers
             analyzers = new List<IAnalyzer>();
-            foreach ((string name, string[] args) in analyzerConfig)
+            foreach (DependencyConfig analyzerConfig in config.Analyzers)
             {
-                IAnalyzer analyzer = analyzerResolver(name);
-                analyzer.Initialize(this, args);
-                analyzers.Add(analyzerResolver(name));
+                IAnalyzer analyzer = analyzerResolver(analyzerConfig.Name);
+                analyzer.Initialize(this, analyzerConfig.Args);
+
+                analyzers.Add(analyzer);
                 AddToReceiverLists(analyzer);
             }
 
             IList<Tick> tickData = await tickStorage.GetTicksAsync(
                 dataSource,
-                symbol,
-                interval,
-                start,
-                end);
+                config.Symbols[0],
+                config.Interval,
+                config.Start,
+                config.End);
 
             foreach (Tick tick in tickData)
             {

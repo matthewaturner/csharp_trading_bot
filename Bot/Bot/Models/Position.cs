@@ -1,7 +1,7 @@
 ﻿
-using Bot.Brokers;
+using Bot.Models;
 
-namespace Bot.Brokers
+namespace Bot.Models
 {
     public class Position
     {

@@ -1,5 +1,5 @@
 ﻿using Bot.DataCollection;
-using Bot.Brokers;
+using Bot.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

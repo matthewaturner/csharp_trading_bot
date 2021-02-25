@@ -1,0 +1,28 @@
+{
+  "symbols": [ "MSFT" ],
+  "interval": "day",
+  "start": "2010-01-01",
+  "end": "2020-01-01",
+  "dataSource": {
+    "name": "YahooDataSource",
+    "args": []
+  },
+  "broker": {
+    "name": "BackTestingBroker",
+    "args": [ "1000" ]
+  },
+  "strategy": {
+    "name": "SMACrossoverStrategy",
+    "args": [ "MSFT", "16", "64", "true" ]
+  },
+  "analyzers": [
+    {
+      "name": "ConsoleLogger",
+      "args": []
+    },
+    {
+      "name": "SharpeRatio",
+      "args": [ "0.00005357" ]
+    }
+  ]
+}

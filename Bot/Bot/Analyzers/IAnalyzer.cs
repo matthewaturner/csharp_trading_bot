@@ -1,4 +1,4 @@
-﻿using Bot.Brokers;
+﻿using Bot.Models;
 using Bot.Engine;
 
 namespace Bot.Analyzers

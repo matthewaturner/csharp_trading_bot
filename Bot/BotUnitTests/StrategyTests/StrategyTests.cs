@@ -1,4 +1,4 @@
-﻿using Bot.Brokers;
+﻿using Bot.Models;
 using Bot.Strategies;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

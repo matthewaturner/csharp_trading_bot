@@ -2,7 +2,7 @@
 using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
-using Bot.Brokers;
+using Bot.Models;
 using Bot.Strategies;
 using Bot.Engine;
 using Core;
@@ -117,7 +117,8 @@ namespace Bot
             serviceProvider = services.BuildServiceProvider();
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
-            engine.RunAsync().Wait();
+
+            engine.RunAsync("engineConfig.json").Wait();
         }
     }
 }

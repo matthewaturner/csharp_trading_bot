@@ -1,6 +1,6 @@
 ﻿using Bot.DataStorage.Models;
 using Bot.Indicators;
-using Bot.Brokers;
+using Bot.Models;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
