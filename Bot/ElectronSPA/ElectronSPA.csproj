@@ -7,8 +7,11 @@
     <SpaRoot>ClientApp\</SpaRoot>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
     <!-- Set this to true if you enable server-side prerendering -->
-    <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <BuildServerSideRenderer>false</BuildServerSideRenderer>	  
   </PropertyGroup>
+	<PropertyGroup>
+		<TypeScriptExperimentalDecorators>true</TypeScriptExperimentalDecorators>
+	</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ElectronNET.API" Version="11.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.3" />
@@ -44,6 +47,12 @@
       </ResolvedFileToPublish>
     </ItemGroup>
   </Target>
+  <ItemGroup>
+    <None Remove="ClientApp\src\app\BackTest\BackTest.component.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\BackTest\BackTest.component.ts" />
+  </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
