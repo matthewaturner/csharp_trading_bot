@@ -24,7 +24,6 @@ namespace ElectronSPA.Controllers
             this.tradingEngine = tradingEngine;
         }
 
-        [HttpGet]
         public IEnumerable<int> GetRandomListOfNumbers(int lengthOfArray)
         {
             var arr = new int[lengthOfArray];
@@ -58,14 +57,14 @@ namespace ElectronSPA.Controllers
                 },
                 Strategy = new DependencyConfig()
                 {
-                    Name = "SMACrossOverStrategy",
+                    Name = "SMACrossoverStrategy",
                     Args = new string[] { "MSFT", "16", "64", "true" }
                 },
                 Analyzers = new List<DependencyConfig>()
                 {
                     new DependencyConfig()
                     {
-                        Name = "SharpRatio",
+                        Name = "SharpeRatio",
                         Args = new string[] { "0.00005357"}
                     }, 
                 }

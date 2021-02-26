@@ -14,6 +14,7 @@ using System;
 using System.Data.Common;
 using System.Net.Http;
 using Bot.Analyzers;
+using System.Collections.Generic;
 
 namespace Bot
 {
@@ -118,7 +119,38 @@ namespace Bot
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
 
-           // engine.RunAsync("engineConfig.json").Wait();
+            var engineConfig = new EngineConfig()
+            {
+                Symbols = new List<string>() { "MSFT" },
+                Interval = TickInterval.Day,
+                Start = new DateTime(2010, 1, 1),
+                End = new DateTime(2021, 1, 1),
+                DataSource = new DependencyConfig()
+                {
+                    Name = "YahooDataSource"
+                },
+                Broker = new DependencyConfig()
+                {
+                    Name = "BackTestingBroker",
+                    Args = new string[] { "1000" }
+                },
+                Strategy = new DependencyConfig()
+                {
+                    Name = "SMACrossoverStrategy",
+                    Args = new string[] { "MSFT", "16", "64", "true" }
+                },
+                Analyzers = new List<DependencyConfig>()
+                {
+                    new DependencyConfig()
+                    {
+                        Name = "SharpeRatio",
+                        Args = new string[] { "0.00005357"}
+                    },
+                }
+
+            };
+            engine.RunAsync(engineConfig).Wait();
+            //engine.RunAsync("engineConfig.json").Wait();
         }
     }
 }
