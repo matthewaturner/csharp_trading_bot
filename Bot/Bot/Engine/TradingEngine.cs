@@ -76,10 +76,10 @@ namespace Bot.Engine
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="tickInterval"></param>
-        public async Task RunAsync(string configFileName)
+        public async Task RunAsync(EngineConfig config)
         {
-            string configString = File.ReadAllText(configFileName);
-            EngineConfig config = JsonConvert.DeserializeObject<EngineConfig>(configString);
+            //string configString = File.ReadAllText(configFileName);
+            //EngineConfig config = JsonConvert.DeserializeObject<EngineConfig>(configString);
 
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Bot.Configuration;
+using Bot.Engine;
+using Bot.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,9 +16,12 @@ namespace ElectronSPA.Controllers
     {
         private readonly ILogger<BackTestController> logger;
 
-        public BackTestController(ILogger<BackTestController> logger)
+        private ITradingEngine tradingEngine;
+
+        public BackTestController(ILogger<BackTestController> logger, ITradingEngine tradingEngine)
         {
             this.logger = logger;
+            this.tradingEngine = tradingEngine;
         }
 
         [HttpGet]
@@ -30,6 +36,44 @@ namespace ElectronSPA.Controllers
             }
 
             return arr;
+        }
+
+        [HttpGet]
+        public IEnumerable<Order> RunBackTest()
+        {
+            var engineConfig = new EngineConfig()
+            {
+                Symbols = new List<string>() { "MSFT" },
+                Interval = TickInterval.Day,
+                Start = new DateTime(2010, 1, 1),
+                End = new DateTime(2021, 1, 1),
+                DataSource = new DependencyConfig()
+                {
+                    Name = "YahooDataSource"
+                },
+                Broker = new DependencyConfig()
+                {
+                    Name = "BackTestingBroker",
+                    Args = new string[] { "1000" }
+                },
+                Strategy = new DependencyConfig()
+                {
+                    Name = "SMACrossOverStrategy",
+                    Args = new string[] { "MSFT", "16", "64", "true" }
+                },
+                Analyzers = new List<DependencyConfig>()
+                {
+                    new DependencyConfig()
+                    {
+                        Name = "SharpRatio",
+                        Args = new string[] { "0.00005357"}
+                    }, 
+                }
+
+            };
+            tradingEngine.RunAsync(engineConfig);
+
+            return tradingEngine.Broker.OrderHistory;
         }
     }
 }

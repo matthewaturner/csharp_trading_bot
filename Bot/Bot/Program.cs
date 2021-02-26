@@ -118,7 +118,7 @@ namespace Bot
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
 
-            engine.RunAsync("engineConfig.json").Wait();
+           // engine.RunAsync("engineConfig.json").Wait();
         }
     }
 }

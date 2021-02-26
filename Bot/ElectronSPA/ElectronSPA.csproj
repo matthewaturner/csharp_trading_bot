@@ -51,6 +51,9 @@
     <None Remove="ClientApp\src\app\BackTest\BackTest.component.ts" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Bot\Bot.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\BackTest\BackTest.component.ts" />
   </ItemGroup>
   <ItemGroup>

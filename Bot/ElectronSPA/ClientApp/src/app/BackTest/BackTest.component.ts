@@ -10,20 +10,27 @@ import { inject } from '@angular/core/testing';
 export class BackTestComponent {
   public currentCount = 0;
   public portfolioValueDates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  public portfolioValues = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
+  public numberOfShares = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
 
   public chart = [];
+  public orders = [];
 
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) { }
+  private httpClient: HttpClient;
+  private baseUrl: string;
 
-  public buildChart() {
+  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+    this.httpClient = http;
+    this.baseUrl = baseUrl;
+  }
+
+  public buildChart(_labels, _data) {
     this.chart.push(new Chart('canvas', {
       type: 'line',
       data: {
-        labels: this.portfolioValueDates,
+        labels: _labels,
         datasets: [
           {
-            data: this.portfolioValues,
+            data: _data,
             borderColor: '#3cba9f',
             fill: false
           }
@@ -49,18 +56,32 @@ export class BackTestComponent {
     this.currentCount++;
   }
 
-  public getPortfolioValues() {
-    return this.portfolioValues;
+  public getOrders() {
+    return this.orders;
   }
 
   public runBackTest() {
-    for (var i = 0; i < this.portfolioValues.length; i++) {
-      this.portfolioValues[i] = Math.random() * 100;
-    }
-    this.buildChart()
+    this.httpClient.get<Order[]>(this.baseUrl + 'backtest').subscribe(result => {
+      this.orders = result;
+    }, error => console.error(error));
+
+
+    //this.buildChart()
   }
 
   public getChart() {
     return this.chart;
   }
+}
+
+interface Order {
+  orderId: string;
+  placementTime: Date;
+  executionTime: Date;
+  symbol: string;
+  executionPrice: number;
+  targetprice: number;
+  quantity: number;
+  type: number;
+  state: number;
 }
