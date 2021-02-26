@@ -18,13 +18,12 @@ var BackTestComponent = /** @class */ (function () {
         this.portfolioValueDates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.numberOfShares = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
         this.chart = [];
-        this.orders = [];
         this.httpClient = http;
         this.baseUrl = baseUrl;
     }
-    BackTestComponent.prototype.buildChart = function (_labels, _data) {
+    BackTestComponent.prototype.buildChart = function (_labels, _data, _chartType) {
         this.chart.push(new chart_js_1.Chart('canvas', {
-            type: 'line',
+            type: _chartType,
             data: {
                 labels: _labels,
                 datasets: [
@@ -53,15 +52,22 @@ var BackTestComponent = /** @class */ (function () {
     BackTestComponent.prototype.incrementCounter = function () {
         this.currentCount++;
     };
-    BackTestComponent.prototype.getOrders = function () {
-        return this.orders;
+    BackTestComponent.prototype.getOrderDates = function () {
+        return this.orderHistory.dates;
+    };
+    BackTestComponent.prototype.getOrderValues = function () {
+        return this.orderHistory.values;
+    };
+    BackTestComponent.prototype.getOrderQuantities = function () {
+        return this.orderHistory.quantity;
     };
     BackTestComponent.prototype.runBackTest = function () {
         var _this = this;
         this.httpClient.get(this.baseUrl + 'backtest').subscribe(function (result) {
-            _this.orders = result;
+            _this.orderHistory = result;
         }, function (error) { return console.error(error); });
-        //this.buildChart()
+        this.buildChart(this.orderHistory.dates, this.orderHistory.values, "line");
+        //this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
     };
     BackTestComponent.prototype.getChart = function () {
         return this.chart;

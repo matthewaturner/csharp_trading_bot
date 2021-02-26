@@ -6,25 +6,15 @@ using System.Threading.Tasks;
 
 namespace ElectronSPA
 {
-    public class OrderAngular
+    public class OrderHistory
     {
-        public string orderId { get; set; }
-        
-        public DateTime placementTime { get; set; }
-        
-        public DateTime executionTime { get; set; }
-        
         public string symbol { get; set; }
-        
-        public double executionPrice { get; set; }
 
-        public double targetPrice { get; set; }
+        public DateTime[] dates { get; set; }
 
-        public double quantity { get; set; }
+        public double[] portfolioValue { get; set; }
 
-        public int type { get; set; }
-
-        public int state { get; set; }
+        public double[] quantity { get; set; }
 
     }
 }

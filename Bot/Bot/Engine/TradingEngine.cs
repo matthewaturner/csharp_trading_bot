@@ -23,7 +23,6 @@ namespace Bot.Engine
         private readonly AnalyzerResolver analyzerResolver;
 
         private Ticks ticks;
-        private ITickStorage tickStorage;
 
         private IList<ITickReceiver> tickReceivers;
         private IList<ITerminateReceiver> terminateReceivers;
@@ -37,14 +36,13 @@ namespace Bot.Engine
             DataSourceResolver dataSourceResolver,
             BrokerResolver brokerResolver,
             StrategyResolver strategyResolver,
-            AnalyzerResolver analyzerResolver,
-            ITickStorage tickStorage)
+            AnalyzerResolver analyzerResolver)
         {
             this.dataSourceResolver = dataSourceResolver;
             this.brokerResolver = brokerResolver;
             this.strategyResolver = strategyResolver;
             this.analyzerResolver = analyzerResolver;
-            this.tickStorage = tickStorage;
+            
 
             tickReceivers = new List<ITickReceiver>();
             terminateReceivers = new List<ITerminateReceiver>();
@@ -110,8 +108,7 @@ namespace Bot.Engine
                 AddToReceiverLists(analyzer);
             }
 
-            IList<Tick> tickData = await tickStorage.GetTicksAsync(
-                dataSource,
+            IList<Tick> tickData = await dataSource.GetTicksAsync(
                 config.Symbols[0],
                 config.Interval,
                 config.Start,

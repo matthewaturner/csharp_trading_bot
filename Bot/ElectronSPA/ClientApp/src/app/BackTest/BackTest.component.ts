@@ -13,7 +13,7 @@ export class BackTestComponent {
   public numberOfShares = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
 
   public chart = [];
-  public orders = [];
+  public orderHistory: OrderHistory;
 
   private httpClient: HttpClient;
   private baseUrl: string;
@@ -23,9 +23,9 @@ export class BackTestComponent {
     this.baseUrl = baseUrl;
   }
 
-  public buildChart(_labels, _data) {
+  public buildChart(_labels, _data, _chartType) {
     this.chart.push(new Chart('canvas', {
-      type: 'line',
+      type: _chartType,
       data: {
         labels: _labels,
         datasets: [
@@ -56,17 +56,25 @@ export class BackTestComponent {
     this.currentCount++;
   }
 
-  public getOrders() {
-    return this.orders;
+  public getOrderDates() {
+    return this.orderHistory.dates;
+  }
+
+  public getOrderValues() {
+    return this.orderHistory.values;
+  }
+
+  public getOrderQuantities() {
+    return this.orderHistory.quantity;
   }
 
   public runBackTest() {
-    this.httpClient.get<Order[]>(this.baseUrl + 'backtest').subscribe(result => {
-      this.orders = result;
+    this.httpClient.get<OrderHistory>(this.baseUrl + 'backtest').subscribe(result => {
+      this.orderHistory = result;
     }, error => console.error(error));
 
-
-    //this.buildChart()
+    this.buildChart(this.orderHistory.dates, this.orderHistory.values, "line");
+    //this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
   }
 
   public getChart() {
@@ -74,14 +82,9 @@ export class BackTestComponent {
   }
 }
 
-interface Order {
-  orderId: string;
-  placementTime: Date;
-  executionTime: Date;
+interface OrderHistory {
   symbol: string;
-  executionPrice: number;
-  targetprice: number;
-  quantity: number;
-  type: number;
-  state: number;
+  dates: Date[];
+  values: number[];
+  quantity: number[];
 }

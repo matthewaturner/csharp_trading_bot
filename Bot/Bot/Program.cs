@@ -49,7 +49,7 @@ namespace Bot
 
             // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            services.AddSingleton<ITickStorage, TickStorage>();
+            //services.AddSingleton<ITickStorage, TickStorage>();
             services.AddSingleton<HttpClient>();
 
             // inject data sources
