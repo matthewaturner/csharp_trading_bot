@@ -61,7 +61,7 @@ export class BackTestComponent {
   }
 
   public getOrderValues() {
-    return this.orderHistory.values;
+    return this.orderHistory.portfolioValue;
   }
 
   public getOrderQuantities() {
@@ -73,8 +73,9 @@ export class BackTestComponent {
       this.orderHistory = result;
     }, error => console.error(error));
 
-    this.buildChart(this.orderHistory.dates, this.orderHistory.values, "line");
-    //this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
+
+    this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
+    this.buildChart(this.orderHistory.dates, this.orderHistory.portfolioValue, "line");
   }
 
   public getChart() {
@@ -85,6 +86,6 @@ export class BackTestComponent {
 interface OrderHistory {
   symbol: string;
   dates: Date[];
-  values: number[];
+  portfolioValue: number[];
   quantity: number[];
 }

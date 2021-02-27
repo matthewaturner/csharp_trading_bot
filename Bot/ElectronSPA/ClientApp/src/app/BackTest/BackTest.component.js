@@ -56,7 +56,7 @@ var BackTestComponent = /** @class */ (function () {
         return this.orderHistory.dates;
     };
     BackTestComponent.prototype.getOrderValues = function () {
-        return this.orderHistory.values;
+        return this.orderHistory.portfolioValue;
     };
     BackTestComponent.prototype.getOrderQuantities = function () {
         return this.orderHistory.quantity;
@@ -66,8 +66,8 @@ var BackTestComponent = /** @class */ (function () {
         this.httpClient.get(this.baseUrl + 'backtest').subscribe(function (result) {
             _this.orderHistory = result;
         }, function (error) { return console.error(error); });
-        this.buildChart(this.orderHistory.dates, this.orderHistory.values, "line");
-        //this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
+        this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
+        this.buildChart(this.orderHistory.dates, this.orderHistory.portfolioValue, "line");
     };
     BackTestComponent.prototype.getChart = function () {
         return this.chart;
