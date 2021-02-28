@@ -10,6 +10,12 @@ namespace Bot.Engine
     public interface ITradingEngine
     {
         /// <summary>
+        /// Sets up the trading engine.
+        /// </summary>
+        /// <param name="configFileName"></param>
+        public void Initialize(string configFileName);
+
+        /// <summary>
         /// Get current ticks.
         /// </summary>
         public ITicks Ticks { get; }
@@ -29,10 +35,12 @@ namespace Bot.Engine
         /// </summary>
         public IList<IAnalyzer> Analyzers { get; }
 
-        /// <summary>
-        /// Runs the trading engine.
-        /// </summary>
-        /// <returns></returns>
         public Task RunAsync(EngineConfig engineConfig);
+
+        /// <summary>
+        /// Sends log events to listeners.
+        /// </summary>
+        /// <param name="log"></param>
+        public void Log(string log);
     }
 }

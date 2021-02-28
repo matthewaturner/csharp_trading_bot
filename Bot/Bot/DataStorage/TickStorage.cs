@@ -30,9 +30,9 @@ namespace Bot.DataStorage
             this.sqlConfig = sqlConfig.Value;
 
             var connectionString = kvManager.GetSecretAsync(this.sqlConfig.ConnectionStringSecretName).Result;
-            this.context = new TickContext(connectionString, this.sqlConfig.TicksTableName);
-            this.context.Database.CreateIfNotExists();
-            this.context.Configuration.AutoDetectChangesEnabled = false;
+            context = new TickContext(connectionString, this.sqlConfig.TicksTableName);
+            context.Database.CreateIfNotExists();
+            context.Configuration.AutoDetectChangesEnabled = false;
         }
 
         /// <summary>

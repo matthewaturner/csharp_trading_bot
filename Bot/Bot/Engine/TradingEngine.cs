@@ -1,17 +1,19 @@
-﻿using Bot.DataCollection;
+﻿using Bot.Analyzers;
+using Bot.Configuration;
+using Bot.DataCollection;
 using Bot.DataStorage;
+using Bot.Engine.Events;
+using Bot.Exceptions;
 using Bot.Models;
 using Bot.Strategies;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using static Bot.Program;
-using Bot.Analyzers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Bot.Configuration;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System;
+
+using static Bot.Program;
 
 namespace Bot.Engine
 {
@@ -22,10 +24,12 @@ namespace Bot.Engine
         private readonly StrategyResolver strategyResolver;
         private readonly AnalyzerResolver analyzerResolver;
 
+        private EngineConfig config;
         private Ticks ticks;
 
         private IList<ITickReceiver> tickReceivers;
         private IList<ITerminateReceiver> terminateReceivers;
+        private IList<ILogReceiver> logReceivers;
 
         private IBroker broker;
         private IDataSource dataSource;
@@ -46,6 +50,7 @@ namespace Bot.Engine
 
             tickReceivers = new List<ITickReceiver>();
             terminateReceivers = new List<ITerminateReceiver>();
+            logReceivers = new List<ILogReceiver>();
         }
 
         /// <summary>
@@ -69,15 +74,13 @@ namespace Bot.Engine
         public IList<IAnalyzer> Analyzers => analyzers;
 
         /// <summary>
-        /// Configure a strategy and run it.
+        /// Sets up the trading engine.
         /// </summary>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="tickInterval"></param>
         public async Task RunAsync(EngineConfig config)
         {
-            //string configString = File.ReadAllText(configFileName);
-            //EngineConfig config = JsonConvert.DeserializeObject<EngineConfig>(configString);
 
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());
@@ -107,12 +110,14 @@ namespace Bot.Engine
                 analyzers.Add(analyzer);
                 AddToReceiverLists(analyzer);
             }
+        }
 
             IList<Tick> tickData = await dataSource.GetTicksAsync(
                 config.Symbols[0],
                 config.Interval,
                 config.Start,
-                config.End);
+                config.End,
+                SendOnTickEvents);
 
             foreach (Tick tick in tickData)
             {
@@ -146,6 +151,11 @@ namespace Bot.Engine
             {
                 terminateReceivers.Add(terminateReceiver);
             }
+
+            if (obj is ILogReceiver logReceiver)
+            {
+                logReceivers.Add(logReceiver);
+            }
         }
 
         /// <summary>
@@ -169,6 +179,18 @@ namespace Bot.Engine
             foreach (ITerminateReceiver receiver in terminateReceivers)
             {
                 receiver.OnTerminate();
+            }
+        }
+
+        /// <summary>
+        /// Sends logging events.
+        /// </summary>
+        /// <param name="log"></param>
+        public void Log(string log)
+        {
+            foreach (ILogReceiver receiver in logReceivers)
+            {
+                receiver.OnLog(log);
             }
         }
     }

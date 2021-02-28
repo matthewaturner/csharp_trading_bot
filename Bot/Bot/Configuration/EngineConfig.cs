@@ -1,8 +1,7 @@
 ﻿using Bot.Models;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace Bot.Configuration
 {

@@ -1,7 +1,6 @@
-﻿
-using Bot.Models;
+﻿using Bot.Models;
 
-namespace Bot.Engine
+namespace Bot.Engine.Events
 {
     public interface ITickReceiver
     {
