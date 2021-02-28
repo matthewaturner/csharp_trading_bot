@@ -3,11 +3,8 @@
 
 <p>Run a simple backtest and display a chart of the portfolio value.</p>
 
-<p aria-live="polite">OrderDates: <strong>{{ getOrderDates() }}</strong></p>
-<p aria-live="polite">OrderValue: <strong>{{ getOrderValues() }}</strong></p>
-<p aria-live="polite">OrderQuantity: <strong>{{ getOrderQuantities() }}</strong></p>
-
 <button class="btn btn-primary" (click)="runBackTest()">Run Back Test</button>
+
 <div id="chart">
   <canvas id="canvas">{{ getChart() }} </canvas>
 </div>

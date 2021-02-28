@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { BackTestComponent } from './BackTest/BackTest.component';
+import { ExampleChartsComponent } from './ExampleCharts/ExampleCharts.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { BackTestComponent } from './BackTest/BackTest.component';
     CounterComponent,
     FetchDataComponent,
     BackTestComponent,
+    ExampleChartsComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -28,7 +30,8 @@ import { BackTestComponent } from './BackTest/BackTest.component';
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
-      { path: 'BackTest', component: BackTestComponent }
+      { path: 'BackTest', component: BackTestComponent },
+      { path: 'ExampleCharts', component: ExampleChartsComponent }
     ])
   ],
   providers: [],

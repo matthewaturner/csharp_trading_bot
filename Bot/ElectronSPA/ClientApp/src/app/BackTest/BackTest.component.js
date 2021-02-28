@@ -15,28 +15,34 @@ var chart_js_1 = require("chart.js");
 var BackTestComponent = /** @class */ (function () {
     function BackTestComponent(http, baseUrl) {
         this.currentCount = 0;
-        this.portfolioValueDates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        this.numberOfShares = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
         this.chart = [];
         this.httpClient = http;
         this.baseUrl = baseUrl;
     }
-    BackTestComponent.prototype.buildChart = function (_labels, _data, _chartType) {
+    BackTestComponent.prototype.buildChart = function (_labels, _dataSet1, _dataSet1Name, _dataSet1ChartType, _dataSet2, _dataSet2Name, _dataSet2ChartType) {
         this.chart.push(new chart_js_1.Chart('canvas', {
-            type: _chartType,
             data: {
                 labels: _labels,
                 datasets: [
                     {
-                        data: _data,
+                        label: _dataSet1Name,
+                        data: _dataSet1,
                         borderColor: '#3cba9f',
-                        fill: false
+                        fill: false,
+                        type: _dataSet1ChartType
+                    },
+                    {
+                        label: _dataSet2Name,
+                        data: _dataSet2,
+                        borderColor: '#3cba9f',
+                        fill: false,
+                        type: _dataSet2ChartType
                     }
                 ]
             },
             options: {
                 legend: {
-                    display: false
+                    display: true
                 },
                 scales: {
                     xAxes: [{
@@ -66,8 +72,8 @@ var BackTestComponent = /** @class */ (function () {
         this.httpClient.get(this.baseUrl + 'backtest').subscribe(function (result) {
             _this.orderHistory = result;
         }, function (error) { return console.error(error); });
-        this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
-        this.buildChart(this.orderHistory.dates, this.orderHistory.portfolioValue, "line");
+        this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, 'Order Quantity', 'bar', this.orderHistory.portfolioValue, 'Portfolio Value', 'line');
+        return;
     };
     BackTestComponent.prototype.getChart = function () {
         return this.chart;

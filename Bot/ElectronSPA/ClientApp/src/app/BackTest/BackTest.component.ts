@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { Chart } from 'chart.js';
-import { HttpClient } from '@angular/common/http'
+import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core/testing';
 
 @Component({
@@ -9,8 +9,6 @@ import { inject } from '@angular/core/testing';
 })
 export class BackTestComponent {
   public currentCount = 0;
-  public portfolioValueDates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  public numberOfShares = [100, 120, 170, 90, 80, 100, 120, 200, 420.69, 694.20];
 
   public chart = [];
   public orderHistory: OrderHistory;
@@ -23,22 +21,30 @@ export class BackTestComponent {
     this.baseUrl = baseUrl;
   }
 
-  public buildChart(_labels, _data, _chartType) {
-    this.chart.push(new Chart('canvas', {
-      type: _chartType,
+  public buildChart(_labels, _dataSet1, _dataSet1Name, _dataSet1ChartType, _dataSet2, _dataSet2Name, _dataSet2ChartType) {
+    this.chart.push(new Chart('canvas', {      
       data: {
         labels: _labels,
         datasets: [
           {
-            data: _data,
+            label: _dataSet1Name,
+            data: _dataSet1,
             borderColor: '#3cba9f',
-            fill: false
+            fill: false,
+            type: _dataSet1ChartType
+          },
+          {
+            label: _dataSet2Name,
+            data: _dataSet2,
+            borderColor: '#3cba9f',
+            fill: false,
+            type: _dataSet2ChartType
           }
         ]
       },
       options: {
         legend: {
-          display: false
+          display: true
         },
         scales: {
           xAxes: [{
@@ -73,9 +79,8 @@ export class BackTestComponent {
       this.orderHistory = result;
     }, error => console.error(error));
 
-
-    this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, "bar");
-    this.buildChart(this.orderHistory.dates, this.orderHistory.portfolioValue, "line");
+    this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, 'Order Quantity', 'bar', this.orderHistory.portfolioValue, 'Portfolio Value', 'line', );
+    return;
   }
 
   public getChart() {

@@ -49,12 +49,14 @@
   </Target>
   <ItemGroup>
     <None Remove="ClientApp\src\app\BackTest\BackTest.component.ts" />
+    <None Remove="ClientApp\src\app\ExampleCharts\ExampleCharts.component.ts" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bot\Bot.csproj" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\BackTest\BackTest.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\ExampleCharts\ExampleCharts.component.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="electron.manifest.json">
