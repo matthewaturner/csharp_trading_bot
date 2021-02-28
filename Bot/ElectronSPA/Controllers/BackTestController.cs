@@ -70,7 +70,8 @@ namespace ElectronSPA.Controllers
                 }
             };
 
-            await tradingEngine.RunAsync(engineConfig);
+            tradingEngine.Initialize(engineConfig);
+            await tradingEngine.RunAsync();
 
             Console.WriteLine("Completed running the engine");
             var orders = tradingEngine.Broker.OrderHistory.OrderBy(x => x.ExecutionTime).ToArray();

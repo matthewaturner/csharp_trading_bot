@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Bot.Engine;
 
-namespace Bot.DataCollection
+namespace Bot.Data
 {
     public class YahooDataSource : IDataSource
     {
@@ -51,9 +51,9 @@ namespace Bot.DataCollection
             DateTimeOffset end)
         {
             return config.BaseUrl + string.Format(
-                urlFormat, 
-                symbol, 
-                start.ToUnixTimeSeconds(), 
+                urlFormat,
+                symbol,
+                start.ToUnixTimeSeconds(),
                 end.ToUnixTimeSeconds());
         }
 
@@ -66,9 +66,9 @@ namespace Bot.DataCollection
         /// <param name="end"></param>
         /// <returns></returns>
         public async Task<Stream> GetDataStream(
-            string symbol, 
-            TickInterval interval, 
-            DateTimeOffset start, 
+            string symbol,
+            TickInterval interval,
+            DateTimeOffset start,
             DateTimeOffset end)
         {
             if (interval != TickInterval.Day)
@@ -80,7 +80,7 @@ namespace Bot.DataCollection
             {
                 //httpClient.BaseAddress = new Uri(config.BaseUrl);
                 //httpClient.Timeout = TimeSpan.FromMinutes(5);
-                string requestUrl = this.FormalRequestUrl(symbol, start, end);
+                string requestUrl = FormalRequestUrl(symbol, start, end);
 
                 Console.WriteLine($"Downloading from {requestUrl}");
 
@@ -122,12 +122,12 @@ namespace Bot.DataCollection
                 try
                 {
                     DateTime dateTime = DateTime.ParseExact(tickStrings[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                    double open     = Math.Round(double.Parse(tickStrings[1]), 4);
-                    double high     = Math.Round(double.Parse(tickStrings[2]), 4);
-                    double low      = Math.Round(double.Parse(tickStrings[3]), 4);
-                    double close    = Math.Round(double.Parse(tickStrings[4]), 4);
+                    double open = Math.Round(double.Parse(tickStrings[1]), 4);
+                    double high = Math.Round(double.Parse(tickStrings[2]), 4);
+                    double low = Math.Round(double.Parse(tickStrings[3]), 4);
+                    double close = Math.Round(double.Parse(tickStrings[4]), 4);
                     double adjClose = Math.Round(double.Parse(tickStrings[5]), 4);
-                    int volume      = int.Parse(tickStrings[6]);
+                    int volume = int.Parse(tickStrings[6]);
 
                     tick = new Tick(symbol, interval, dateTime, open, high, low, close, adjClose, volume);
                     tickList.Add(tick);

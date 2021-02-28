@@ -1,5 +1,6 @@
 ﻿
 using Bot.Engine;
+using Bot.Engine.Events;
 using Bot.Indicators;
 using System.Collections.Generic;
 

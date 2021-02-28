@@ -2,6 +2,7 @@
 using Bot.Engine;
 using System.Collections.Generic;
 using System.Linq;
+using Bot.Engine.Events;
 
 namespace Bot.Analyzers
 {
@@ -9,8 +10,8 @@ namespace Bot.Analyzers
     {
         public ITradingEngine engine;
         public double riskFreeRate;
-        public double previousValue = double.NaN;
-        public IList<double> returns = new List<double>();
+        public double previousValue;
+        public IList<double> returns;
 
         /// <summary>
         /// Initialize
@@ -22,6 +23,7 @@ namespace Bot.Analyzers
             riskFreeRate = double.Parse(args[0]);
 
             this.engine = engine;
+            previousValue = double.NaN;
             returns = new List<double>();
         }
 
