@@ -1,13 +1,10 @@
 ﻿using Bot.Analyzers;
 using Bot.Configuration;
-using Bot.DataStorage;
 using Bot.Engine.Events;
 using Bot.Exceptions;
 using Bot.Models;
 using Bot.Strategies;
-using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
@@ -31,7 +28,6 @@ namespace Bot.Engine
         private IList<ITerminateReceiver> terminateReceivers;
         private IList<ILogReceiver> logReceivers;
 
-        private IDataProcessor dataProcessor;
         private IBroker broker;
         private IDataSource dataSource;
         private IStrategy strategy;
@@ -41,15 +37,12 @@ namespace Bot.Engine
             DataSourceResolver dataSourceResolver,
             BrokerResolver brokerResolver,
             StrategyResolver strategyResolver,
-            AnalyzerResolver analyzerResolver,
-            IDataProcessor dataProcessor)
+            AnalyzerResolver analyzerResolver)
         {
             this.dataSourceResolver = dataSourceResolver;
             this.brokerResolver = brokerResolver;
             this.strategyResolver = strategyResolver;
             this.analyzerResolver = analyzerResolver;
-
-            this.dataProcessor = dataProcessor;
 
             tickReceivers = new List<ITickReceiver>();
             terminateReceivers = new List<ITerminateReceiver>();
@@ -67,6 +60,11 @@ namespace Bot.Engine
         public IBroker Broker => broker;
 
         /// <summary>
+        /// Current datasource.
+        /// </summary>
+        public IDataSource DataSource => dataSource;
+
+        /// <summary>
         /// Current strategy.
         /// </summary>
         public IStrategy Strategy => strategy;
@@ -82,16 +80,16 @@ namespace Bot.Engine
         /// <param name="configFileName"></param>
         public void Initialize(EngineConfig config)
         {
+            this.config = config;
+            ClearReceiverLists();
+
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());
 
             // data source
-            IDataSource dataSource = dataSourceResolver(config.DataSource.Name);
+            dataSource = dataSourceResolver(config.DataSource.Name);
             dataSource.Initialize(this, config.DataSource.Args);
             AddToReceiverLists(dataSource);
-
-            // data processor
-            dataProcessor.Initialize(this, null);
 
             // broker
             broker = brokerResolver(config.Broker.Name);
@@ -123,27 +121,12 @@ namespace Bot.Engine
         /// <param name="tickInterval"></param>
         public async Task RunAsync()
         {
-
-            IList<Tick> tickData = await dataSource.StreamTicks(
-                config.Symbols[0],
+            await StreamTicks(
+                config.Symbols.ToArray(),
                 config.Interval,
                 config.Start,
                 config.End,
                 SendOnTickEvents);
-
-            foreach (Tick tick in tickData)
-            {
-                ticks.Update(new Tick[] { tick });
-
-                Console.WriteLine($"Tick: {tick}");
-                Console.WriteLine($"Indicators Hydrated: {strategy.Hydrated}");
-
-                SendOnTickEvents(ticks.ToArray());
-
-                Console.WriteLine(broker.Portfolio);
-                Console.WriteLine($"Portfolio Value:{broker.Portfolio.CurrentValue(ticks, (t) => t.AdjClose)}");
-                Console.WriteLine("----------");
-            }
 
             SendTerminateEvents();
         }
@@ -168,6 +151,16 @@ namespace Bot.Engine
             {
                 logReceivers.Add(logReceiver);
             }
+        }
+
+        /// <summary>
+        /// Clears the receiver lists.
+        /// </summary>
+        private void ClearReceiverLists()
+        {
+            tickReceivers = new List<ITickReceiver>();
+            terminateReceivers = new List<ITerminateReceiver>();
+            logReceivers = new List<ILogReceiver>();
         }
 
         /// <summary>
@@ -203,6 +196,59 @@ namespace Bot.Engine
             foreach (ILogReceiver receiver in logReceivers)
             {
                 receiver.OnLog(log);
+            }
+        }
+
+        /// <summary>
+        /// Call get ticks for each symbol and unify into one multi-tick stream of events.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="symbols"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="onTickCallback"></param>
+        private async Task StreamTicks(
+            string[] symbols,
+            TickInterval interval,
+            DateTime start,
+            DateTime end,
+            Action<Tick[]> onTickCallback)
+        {
+            IList<Tick>[] allTicks = new List<Tick>[symbols.Length];
+            int tickCount = 0;
+
+            for (int i = 0; i < symbols.Length; i++)
+            {
+                allTicks[i] = await dataSource.GetTicksAsync(symbols[i], interval, start, end);
+
+                if (tickCount == 0)
+                {
+                    tickCount = allTicks[i].Count;
+                }
+                else if (allTicks[i].Count != tickCount)
+                {
+                    throw new BadDataException("Received varying number of ticks from each symbol.");
+                }
+            }
+
+            Tick[] tickArray = new Tick[symbols.Length];
+            Ticks currentTicks = new Ticks(symbols);
+            IList<IEnumerator<Tick>> enumerators = new List<IEnumerator<Tick>>();
+
+            for (int i = 0; i < symbols.Length; i++)
+            {
+                enumerators.Add(allTicks[i].GetEnumerator());
+            }
+
+            while (enumerators.All(e => e.MoveNext()))
+            {
+                for (int i = 0; i < enumerators.Count; i++)
+                {
+                    tickArray[i] = enumerators[i].Current;
+                }
+
+                onTickCallback(tickArray);
             }
         }
     }

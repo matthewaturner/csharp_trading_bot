@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Bot.Exceptions
 {
     public class NotInitializedException : Exception
     {
-        public NotHydratedException()
+        public NotInitializedException()
             : base()
         { }
 
-        public NotHydratedException(string message)
+        public NotInitializedException(string message)
             : base(message)
         { }
     }

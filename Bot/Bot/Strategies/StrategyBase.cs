@@ -1,6 +1,5 @@
 ﻿
 using Bot.Indicators;
-using Bot.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,8 +16,6 @@ namespace Bot.Strategies
             get { return Indicators.Max(ind => ind.Lookback); }
         }
 
-        public abstract IList<IIndicator> Indicators { get; }
-
         /// <summary>
         /// Returns whether all indicators are hydrated for the strategy.
         /// </summary>
@@ -26,5 +23,10 @@ namespace Bot.Strategies
         {
             get { return Indicators.All(ind => ind.Hydrated); }
         }
+
+        /// <summary>
+        /// List of indicators used to calculate lookback and hydrated values.
+        /// </summary>
+        public abstract IList<IIndicator> Indicators { get; }
     }
 }

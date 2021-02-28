@@ -14,7 +14,7 @@ namespace Bot.Engine
         /// Sets up the trading engine.
         /// </summary>
         /// <param name="configFileName"></param>
-        public void Initialize(string configFileName);
+        public void Initialize(EngineConfig config);
 
         /// <summary>
         /// Get current ticks.

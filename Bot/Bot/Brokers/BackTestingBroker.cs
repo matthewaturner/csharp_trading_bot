@@ -13,11 +13,7 @@ namespace Bot.Models
         private ITradingEngine engine;
 
         public BackTestingBroker()
-        {
-            Portfolio = new Portfolio();
-            OpenOrders = new List<Order>();
-            OrderHistory = new List<Order>();
-        }
+        { }
 
         /// <summary>
         /// Initialize with custom arguments.
@@ -25,10 +21,15 @@ namespace Bot.Models
         /// <param name="args"></param>
         public void Initialize(ITradingEngine engine, string[] args)
         {
-            this.ticks = engine.Ticks;
-            this.engine = engine;
             double initialFunds = double.Parse(args[0]);
+
+            this.engine = engine;
+            ticks = engine.Ticks;
+
+            Portfolio = new Portfolio();
             Portfolio.AddFunds(initialFunds);
+            OpenOrders = new List<Order>();
+            OrderHistory = new List<Order>();
         }
 
         /// <summary>

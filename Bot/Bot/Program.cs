@@ -1,5 +1,4 @@
 ﻿using Bot.Configuration;
-using Bot.DataStorage;
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Engine;
@@ -142,15 +141,21 @@ namespace Bot
                 {
                     new DependencyConfig()
                     {
+                        Name = "ConsoleLogger"
+                    },
+                    new DependencyConfig()
+                    {
                         Name = "SharpeRatio",
                         Args = new string[] { "0.00005357"}
                     },
                 }
-
             };
-            engine.RunAsync(engineConfig).Wait();
 
-            engine.RunAsync(engineConfig).Wait();
+            engine.Initialize(engineConfig);
+            engine.RunAsync().Wait();
+
+            engine.Initialize(engineConfig);
+            engine.RunAsync().Wait();
             //engine.RunAsync("engineConfig.json").Wait();
         }
     }
