@@ -1,36 +1,46 @@
-﻿using Bot.Configuration;
+using Bot.Analyzers;
+using Bot.Configuration;
 using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.DataStorage.Models;
+using Bot.Engine;
 using Bot.Models;
 using Bot.Strategies;
-using Bot.Engine;
 using Core;
 using Core.Configuration;
+using ElectronNET.API;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using Microsoft.Extensions.Hosting;
 using System.Data.Common;
 using System.Net.Http;
-using Bot.Analyzers;
-using System.Collections.Generic;
+using static Bot.Program;
 
-namespace Bot
+namespace ElectronSPA
 {
-    public class Program
+    public class Startup
     {
-        public delegate IDataSource DataSourceResolver(string key);
-
-        public delegate IBroker BrokerResolver(string key);
-
-        public delegate IStrategy StrategyResolver(string key);
-
-        public delegate IAnalyzer AnalyzerResolver(string key);
-
-        public static void Main(string[] args)
+        public Startup(IConfiguration configuration)
         {
-            IServiceCollection services = new ServiceCollection();
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllersWithViews();
+            // In production, the Angular files will be served from this directory
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/dist";
+            });
 
             // setup configurations
             IConfiguration configuration = new ConfigurationBuilder()
@@ -39,6 +49,7 @@ namespace Bot
                     Path = "./appsettings.dev.json"
                 })
                 .Build();
+
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
             services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
@@ -49,7 +60,7 @@ namespace Bot
 
             // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            //services.AddSingleton<ITickStorage, TickStorage>();
+            services.AddSingleton<ITickStorage, TickStorage>();
             services.AddSingleton<HttpClient>();
 
             // inject data sources
@@ -65,7 +76,6 @@ namespace Bot
             services.AddSingleton<ConsoleLogger>();
             services.AddSingleton<SharpeRatio>();
 
-            var serviceProvider = services.BuildServiceProvider();
 
             // resolvers do named lookup on singleton services
             services.AddSingleton<DataSourceResolver>(serviceProvider => key =>
@@ -115,44 +125,57 @@ namespace Bot
             });
 
             services.AddSingleton<ITradingEngine, TradingEngine>();
-            serviceProvider = services.BuildServiceProvider();
+        }
 
-            ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
-
-            var engineConfig = new EngineConfig()
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
             {
-                Symbols = new List<string>() { "MSFT" },
-                Interval = TickInterval.Day,
-                Start = new DateTime(2010, 1, 1),
-                End = new DateTime(2021, 1, 1),
-                DataSource = new DependencyConfig()
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            if (!env.IsDevelopment())
+            {
+                app.UseSpaStaticFiles();
+            }
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action=Index}/{id?}");
+            });
+
+            app.UseSpa(spa =>
+            {
+                // To learn more about options for serving an Angular SPA from ASP.NET Core,
+                // see https://go.microsoft.com/fwlink/?linkid=864501
+
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
                 {
-                    Name = "YahooDataSource"
-                },
-                Broker = new DependencyConfig()
-                {
-                    Name = "BackTestingBroker",
-                    Args = new string[] { "1000" }
-                },
-                Strategy = new DependencyConfig()
-                {
-                    Name = "SMACrossoverStrategy",
-                    Args = new string[] { "MSFT", "16", "64", "true" }
-                },
-                Analyzers = new List<DependencyConfig>()
-                {
-                    new DependencyConfig()
-                    {
-                        Name = "SharpeRatio",
-                        Args = new string[] { "0.00005357"}
-                    },
+                    spa.UseAngularCliServer(npmScript: "start");
                 }
+            });
 
-            };
-            engine.RunAsync(engineConfig).Wait();
+            Bootstrap();
+        }
 
-            engine.RunAsync(engineConfig).Wait();
-            //engine.RunAsync("engineConfig.json").Wait();
+        public async void Bootstrap()
+        {
+            await Electron.WindowManager.CreateWindowAsync();
         }
     }
 }

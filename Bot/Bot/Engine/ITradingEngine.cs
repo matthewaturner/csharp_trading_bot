@@ -1,4 +1,5 @@
 ﻿using Bot.Analyzers;
+using Bot.Configuration;
 using Bot.Models;
 using Bot.Strategies;
 using System.Collections.Generic;
@@ -32,6 +33,6 @@ namespace Bot.Engine
         /// Runs the trading engine.
         /// </summary>
         /// <returns></returns>
-        public Task RunAsync(string configFile);
+        public Task RunAsync(EngineConfig engineConfig);
     }
 }
