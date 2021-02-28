@@ -1,12 +1,10 @@
 ﻿using Bot.Models;
-using Bot.Engine;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Bot.Engine;
 
-namespace Bot.DataCollection
+namespace Bot.Data
 {
-    public interface IDataSource
+    public interface IDataProcessor
     {
         /// <summary>
         /// Initializes the data source with custom arguments.
@@ -15,17 +13,20 @@ namespace Bot.DataCollection
         void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
-        /// Gets a list of ticks for a certain interval over a period of time.
+        /// Streams ticks 
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="source"></param>
+        /// <param name="symbols"></param>
         /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        Task<IList<Tick>> GetTicksAsync(
-            string symbol,
+        void StreamTicks(
+            IDataSource source,
+            string[] symbols,
             TickInterval interval,
             DateTime start,
-            DateTime end);
+            DateTime end,
+            Action<Tick[]> onTickCallback);
     }
 }

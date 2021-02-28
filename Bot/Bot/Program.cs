@@ -1,7 +1,5 @@
 ﻿using Bot.Configuration;
-using Bot.DataCollection;
 using Bot.DataStorage;
-using Bot.DataStorage.Models;
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Engine;
@@ -15,6 +13,7 @@ using System.Data.Common;
 using System.Net.Http;
 using Bot.Analyzers;
 using System.Collections.Generic;
+using Bot.Data;
 
 namespace Bot
 {

@@ -1,6 +1,5 @@
 ﻿using Bot.Analyzers;
 using Bot.Configuration;
-using Bot.DataCollection;
 using Bot.DataStorage;
 using Bot.Engine.Events;
 using Bot.Exceptions;
@@ -14,6 +13,7 @@ using System.Threading.Tasks;
 using System;
 
 using static Bot.Program;
+using Bot.Data;
 
 namespace Bot.Engine
 {
@@ -31,6 +31,7 @@ namespace Bot.Engine
         private IList<ITerminateReceiver> terminateReceivers;
         private IList<ILogReceiver> logReceivers;
 
+        private IDataProcessor dataProcessor;
         private IBroker broker;
         private IDataSource dataSource;
         private IStrategy strategy;
@@ -40,13 +41,15 @@ namespace Bot.Engine
             DataSourceResolver dataSourceResolver,
             BrokerResolver brokerResolver,
             StrategyResolver strategyResolver,
-            AnalyzerResolver analyzerResolver)
+            AnalyzerResolver analyzerResolver,
+            IDataProcessor dataProcessor)
         {
             this.dataSourceResolver = dataSourceResolver;
             this.brokerResolver = brokerResolver;
             this.strategyResolver = strategyResolver;
             this.analyzerResolver = analyzerResolver;
-            
+
+            this.dataProcessor = dataProcessor;
 
             tickReceivers = new List<ITickReceiver>();
             terminateReceivers = new List<ITerminateReceiver>();
@@ -74,14 +77,11 @@ namespace Bot.Engine
         public IList<IAnalyzer> Analyzers => analyzers;
 
         /// <summary>
-        /// Sets up the trading engine.
+        /// Setup everything.
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="tickInterval"></param>
-        public async Task RunAsync(EngineConfig config)
+        /// <param name="configFileName"></param>
+        public void Initialize(EngineConfig config)
         {
-
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());
 
@@ -89,6 +89,9 @@ namespace Bot.Engine
             IDataSource dataSource = dataSourceResolver(config.DataSource.Name);
             dataSource.Initialize(this, config.DataSource.Args);
             AddToReceiverLists(dataSource);
+
+            // data processor
+            dataProcessor.Initialize(this, null);
 
             // broker
             broker = brokerResolver(config.Broker.Name);
@@ -112,7 +115,16 @@ namespace Bot.Engine
             }
         }
 
-            IList<Tick> tickData = await dataSource.GetTicksAsync(
+        /// <summary>
+        /// Sets up the trading engine.
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="tickInterval"></param>
+        public async Task RunAsync()
+        {
+
+            IList<Tick> tickData = await dataSource.StreamTicks(
                 config.Symbols[0],
                 config.Interval,
                 config.Start,

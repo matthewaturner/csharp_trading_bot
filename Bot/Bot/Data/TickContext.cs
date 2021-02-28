@@ -5,7 +5,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 
-namespace Bot.DataStorage.Models
+namespace Bot.Data
 {
     public class TickContext : DbContext
     {
@@ -16,8 +16,8 @@ namespace Bot.DataStorage.Models
         public TickContext(string connectionString, string tableName)
             : base(connectionString)
         {
-            this.ConnectionString = !String.IsNullOrEmpty(connectionString) ? connectionString : throw new ArgumentNullException(nameof(connectionString));
-            this.TableName = !String.IsNullOrEmpty(tableName) ? tableName : throw new ArgumentNullException(nameof(tableName));
+            ConnectionString = !string.IsNullOrEmpty(connectionString) ? connectionString : throw new ArgumentNullException(nameof(connectionString));
+            TableName = !string.IsNullOrEmpty(tableName) ? tableName : throw new ArgumentNullException(nameof(tableName));
         }
 
         public DbSet<Tick> Ticks { get; set; }
@@ -63,14 +63,14 @@ namespace Bot.DataStorage.Models
                new SqlBulkCopyColumnMapping("Volume", "Volume")
             };
 
-            using (SqlConnection conn = new SqlConnection(this.ConnectionString))
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
                     columnMappings.ForEach(t => bulkCopy.ColumnMappings.Add(t));
 
-                    bulkCopy.DestinationTableName = this.TableName;
+                    bulkCopy.DestinationTableName = TableName;
                     bulkCopy.WriteToServer(data);
                 }
                 conn.Close();
@@ -79,18 +79,18 @@ namespace Bot.DataStorage.Models
 
         public void DeleteTicksForSymbol(string symbol, TickInterval tickInterval)
         {
-            string sqlCommand = "DELETE FROM " + this.TableName + " WHERE [Symbol] = '" + symbol + "' AND [TickInterval] = " + (int)tickInterval;
-            using (SqlConnection conn = new SqlConnection(this.ConnectionString))
+            string sqlCommand = "DELETE FROM " + TableName + " WHERE [Symbol] = '" + symbol + "' AND [TickInterval] = " + (int)tickInterval;
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlCommand comm = new SqlCommand(sqlCommand, conn))
                 {
                     int rowsAffected = comm.ExecuteNonQuery();
-                    Console.WriteLine("Deleted " + rowsAffected + " rows from dbo.[" + this.TableName + "] where [Symbol] = " + symbol + " AND [TickInterval] = " + tickInterval);
+                    Console.WriteLine("Deleted " + rowsAffected + " rows from dbo.[" + TableName + "] where [Symbol] = " + symbol + " AND [TickInterval] = " + tickInterval);
                 }
                 conn.Close();
-            }            
+            }
         }
-                
+
     }
 }

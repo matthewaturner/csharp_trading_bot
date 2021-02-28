@@ -1,5 +1,6 @@
 ﻿using Bot.Analyzers;
 using Bot.Configuration;
+using Bot.Data;
 using Bot.Models;
 using Bot.Strategies;
 using System.Collections.Generic;
@@ -21,6 +22,11 @@ namespace Bot.Engine
         public ITicks Ticks { get; }
 
         /// <summary>
+        /// Gets current data source.
+        /// </summary>
+        public IDataSource DataSource { get; }
+
+        /// <summary>
         /// Get current broker.
         /// </summary>
         public IBroker Broker { get; }
@@ -35,7 +41,12 @@ namespace Bot.Engine
         /// </summary>
         public IList<IAnalyzer> Analyzers { get; }
 
-        public Task RunAsync(EngineConfig engineConfig);
+        /// <summary>
+        /// Runs the engine.
+        /// </summary>
+        /// <param name="engineConfig"></param>
+        /// <returns></returns>
+        public Task RunAsync();
 
         /// <summary>
         /// Sends log events to listeners.

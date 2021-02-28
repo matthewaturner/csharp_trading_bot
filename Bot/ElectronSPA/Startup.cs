@@ -1,8 +1,6 @@
 using Bot.Analyzers;
 using Bot.Configuration;
-using Bot.DataCollection;
-using Bot.DataStorage;
-using Bot.DataStorage.Models;
+using Bot.Data;
 using Bot.Engine;
 using Bot.Models;
 using Bot.Strategies;
@@ -60,7 +58,7 @@ namespace ElectronSPA
 
             // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            services.AddSingleton<ITickStorage, TickStorage>();
+            services.AddSingleton<IDataProcessor, BackTestDataProcessor>();
             services.AddSingleton<HttpClient>();
 
             // inject data sources
