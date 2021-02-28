@@ -58,7 +58,6 @@ namespace ElectronSPA
 
             // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            services.AddSingleton<IDataProcessor, BackTestDataProcessor>();
             services.AddSingleton<HttpClient>();
 
             // inject data sources
