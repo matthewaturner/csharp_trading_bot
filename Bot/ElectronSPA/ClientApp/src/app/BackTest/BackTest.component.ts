@@ -16,7 +16,7 @@ export class BackTestComponent {
   private httpClient: HttpClient;
   private baseUrl: string;
 
-  constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+  constructor(private http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
     this.httpClient = http;
     this.baseUrl = baseUrl;
   }
@@ -74,13 +74,11 @@ export class BackTestComponent {
     return this.orderHistory.quantity;
   }
 
-  public runBackTest() {
-    this.httpClient.get<OrderHistory>(this.baseUrl + 'backtest').subscribe(result => {
-      this.orderHistory = result;
-    }, error => console.error(error));
-
-    this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, 'Order Quantity', 'bar', this.orderHistory.portfolioValue, 'Portfolio Value', 'line', );
-    return;
+  public runBackTest(): void {
+     this.http.get<OrderHistory>(this.baseUrl + 'backtest').subscribe(result => {
+       this.orderHistory = result;
+       this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, 'Order Quantity', 'bar', this.orderHistory.portfolioValue, 'Portfolio Value', 'line',);
+     }, error => console.error(error));    
   }
 
   public getChart() {

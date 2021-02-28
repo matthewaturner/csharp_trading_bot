@@ -150,6 +150,8 @@ namespace Bot
 
             };
             engine.RunAsync(engineConfig).Wait();
+
+            engine.RunAsync(engineConfig).Wait();
             //engine.RunAsync("engineConfig.json").Wait();
         }
     }

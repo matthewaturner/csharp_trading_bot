@@ -38,7 +38,7 @@ namespace ElectronSPA.Controllers
         }
 
         [HttpGet]
-        public OrderHistory RunBackTest()
+        public async Task<OrderHistory> RunBackTest()
         {
             var engineConfig = new EngineConfig()
             {
@@ -68,36 +68,16 @@ namespace ElectronSPA.Controllers
                         Args = new string[] { "0.00005357"}
                     }, 
                 }
-
             };
-            tradingEngine.RunAsync(engineConfig);
-            /*
-            var dates = tradingEngine.Broker.OrderHistory.Select(x => x.ExecutionTime).OrderBy(x => x.Date);
 
-            var minDate = dates.Min();
-            var maxDate = dates.Max();
-            var dateArray = Enumerable.Range(0, 1 + maxDate.Subtract(minDate).Days)
-                .Select(offset => minDate.AddDays(offset)).OrderBy(x => x.Date).ToArray();
-            */
+            await tradingEngine.RunAsync(engineConfig);
+
+            Console.WriteLine("Completed running the engine");
             var orders = tradingEngine.Broker.OrderHistory.OrderBy(x => x.ExecutionTime).ToArray();
             var dateArray = orders.Select(x => x.ExecutionTime).ToArray();
             var portfolioValueArray = orders.Select(x => x.ExecutionPrice * x.Quantity).ToArray();
             var quantityArray = orders.Select(x => x.Quantity).ToArray();
-            /*
-            for (int i = 0; i < dateArray.Length; i++)
-            {
-                if (orders[i].ExecutionTime == dateArray[i])
-                {
-                    portfolioValueArray[i] = orders[i].Quantity * orders[i].ExecutionPrice;
-                    quantityArray[i] = orders[i].Quantity;
-                }
-                else
-                {
-                    portfolioValueArray[i] = portfolioValueArray[i - 1];
-                    quantityArray[i] = 0;
-                }                
-            }
-            */
+
             var orderHistory = new OrderHistory()
             {
                 symbol = orders[0].Symbol,
@@ -106,6 +86,7 @@ namespace ElectronSPA.Controllers
                 quantity = quantityArray
             };
 
+            Console.WriteLine("Returning to front end...");
             return orderHistory;
         }
     }

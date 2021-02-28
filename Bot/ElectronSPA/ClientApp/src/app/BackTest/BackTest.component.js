@@ -14,6 +14,7 @@ var core_1 = require("@angular/core");
 var chart_js_1 = require("chart.js");
 var BackTestComponent = /** @class */ (function () {
     function BackTestComponent(http, baseUrl) {
+        this.http = http;
         this.currentCount = 0;
         this.chart = [];
         this.httpClient = http;
@@ -69,11 +70,10 @@ var BackTestComponent = /** @class */ (function () {
     };
     BackTestComponent.prototype.runBackTest = function () {
         var _this = this;
-        this.httpClient.get(this.baseUrl + 'backtest').subscribe(function (result) {
+        this.http.get(this.baseUrl + 'backtest').subscribe(function (result) {
             _this.orderHistory = result;
+            _this.buildChart(_this.orderHistory.dates, _this.orderHistory.quantity, 'Order Quantity', 'bar', _this.orderHistory.portfolioValue, 'Portfolio Value', 'line');
         }, function (error) { return console.error(error); });
-        this.buildChart(this.orderHistory.dates, this.orderHistory.quantity, 'Order Quantity', 'bar', this.orderHistory.portfolioValue, 'Portfolio Value', 'line');
-        return;
     };
     BackTestComponent.prototype.getChart = function () {
         return this.chart;

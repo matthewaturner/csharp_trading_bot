@@ -50,7 +50,7 @@ namespace Bot.DataCollection
             DateTimeOffset start,
             DateTimeOffset end)
         {
-            return string.Format(
+            return config.BaseUrl + string.Format(
                 urlFormat, 
                 symbol, 
                 start.ToUnixTimeSeconds(), 
@@ -78,8 +78,8 @@ namespace Bot.DataCollection
 
             try
             {
-                httpClient.BaseAddress = new Uri(config.BaseUrl);
-                httpClient.Timeout = TimeSpan.FromMinutes(5);
+                //httpClient.BaseAddress = new Uri(config.BaseUrl);
+                //httpClient.Timeout = TimeSpan.FromMinutes(5);
                 string requestUrl = this.FormalRequestUrl(symbol, start, end);
 
                 Console.WriteLine($"Downloading from {requestUrl}");
