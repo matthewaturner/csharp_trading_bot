@@ -6,7 +6,7 @@ namespace Bot.Models
 {
     public enum OrderType
     {
-        Buy,
-        Sell
+        MarketBuy,
+        MarketSell
     }
 }

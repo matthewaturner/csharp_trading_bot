@@ -97,11 +97,11 @@ namespace Bot.Models
                 {
                     switch (order.Type)
                     {
-                        case OrderType.Buy:
+                        case OrderType.MarketBuy:
                             Portfolio.Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
                             break;
 
-                        case OrderType.Sell:
+                        case OrderType.MarketSell:
                             Portfolio.Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
                             break;
                     }
@@ -154,14 +154,14 @@ namespace Bot.Models
             switch (order.Type)
             {
                 // logic is the same for now
-                case OrderType.Buy:
+                case OrderType.MarketBuy:
                     if (orderPrice > Portfolio.CashBalance)
                     {
                         return OrderState.Rejected;
                     }
                     break;
 
-                case OrderType.Sell:
+                case OrderType.MarketSell:
                     double netQuantity = Portfolio.HasPosition(order.Symbol) ?
                         Portfolio[order.Symbol].Quantity - order.Quantity :
                         -order.Quantity;

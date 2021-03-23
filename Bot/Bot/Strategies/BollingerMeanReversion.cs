@@ -99,7 +99,7 @@ namespace Bot.Strategies
                 if (difference > 0)
                 {
                     OrderRequest order = new OrderRequest(
-                        OrderType.Buy,
+                        OrderType.MarketBuy,
                         symbol,
                         Math.Abs(difference),
                         currentPrice);
@@ -108,7 +108,7 @@ namespace Bot.Strategies
                 else if (difference < 0)
                 {
                     OrderRequest order = new OrderRequest(
-                        OrderType.Sell,
+                        OrderType.MarketSell,
                         symbol,
                         Math.Abs(difference),
                         currentPrice);
@@ -133,7 +133,7 @@ namespace Bot.Strategies
                 if (currentUnits > 0)
                 {
                     OrderRequest order = new OrderRequest(
-                        OrderType.Sell,
+                        OrderType.MarketSell,
                         symbol,
                         Math.Abs(currentUnits),
                         currentPrice);
@@ -142,7 +142,7 @@ namespace Bot.Strategies
                 else if (currentUnits < 0)
                 {
                     OrderRequest order = new OrderRequest(
-                        OrderType.Buy,
+                        OrderType.MarketBuy,
                         symbol,
                         Math.Abs(currentUnits),
                         currentPrice);

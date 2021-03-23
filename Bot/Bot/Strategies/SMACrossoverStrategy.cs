@@ -91,7 +91,7 @@ namespace Bot.Strategies
 
         public void ExitPosition(Tick tick)
         {
-            var orderType = currentPosition.GetPositionType() == PositionType.Long ? OrderType.Sell : OrderType.Buy;
+            var orderType = currentPosition.GetPositionType() == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
             var quantity = currentPosition.Quantity;
             var targetPrice = tick.AdjClose;
             var order = new OrderRequest(
@@ -124,7 +124,7 @@ namespace Bot.Strategies
 
             var targetPrice = tick.AdjClose;
             var order = new OrderRequest(
-                OrderType.Buy,
+                OrderType.MarketBuy,
                 tick.Symbol,
                 quantity,
                 targetPrice
@@ -137,7 +137,7 @@ namespace Bot.Strategies
             var quantity = currentPosition != null ? 2 * currentPosition.Quantity * -1 : maxUnits;
             var targetPrice = tick.AdjClose;
             var order = new OrderRequest(
-                OrderType.Sell,
+                OrderType.MarketSell,
                 tick.Symbol,
                 quantity,
                 targetPrice
