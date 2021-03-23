@@ -159,7 +159,7 @@ namespace Bot.Models
         {
             string positionsStr = string.Join(", ", Positions.Values.Select(pos => pos.ToString()));
 
-            return $"CashBalance: {CashBalance}\nPositions: [{positionsStr}]";
+            return $"{{CashBalance: {CashBalance}\nPositions: [{positionsStr}]}}";
         }
     }
 }

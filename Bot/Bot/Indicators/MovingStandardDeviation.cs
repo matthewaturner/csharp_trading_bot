@@ -1,32 +1,33 @@
-﻿
+﻿using Bot.Exceptions;
 using Bot.Models;
-using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
 {
-    public class SimpleMovingAverage : IIndicator
+    public class MovingStandardDeviation : IIndicator
     {
         private readonly Func<ITicks, double> transform;
         private double[] data;
-        private double average;
         private int index;
+        private double stdDev;
 
-        public SimpleMovingAverage(int lookback, Func<ITicks, double> transform)
+        public MovingStandardDeviation(int lookback, Func<ITicks, double> transform)
         {
             if (lookback < 1)
             {
-                throw new ArgumentException("Lookback must be >= 1.");
+                throw new ArgumentException("Lookback must be >= 1");
             }
 
             this.transform = transform;
             data = new double[lookback];
-            index = 0;
-            average = 0;
 
-            Hydrated = false;
             Lookback = lookback;
+            Hydrated = false;
         }
+
+        public int Lookback { get; private set; }
+
+        public bool Hydrated { get; private set; }
 
         public object Value
         {
@@ -36,21 +37,16 @@ namespace Bot.Indicators
                 {
                     throw new NotHydratedException();
                 }
-                return average;
+                return stdDev;
             }
         }
 
-        public bool Hydrated { get; private set; }
-
-        public int Lookback { get; private set; }
-
         public void OnTick(ITicks ticks)
         {
-            average = average - (data[index] / Lookback);
             data[index] = transform(ticks);
-            average = average + (data[index] / Lookback);
-
             index = (index + 1) % Lookback;
+
+            stdDev = Helpers.StandardDeviation(data);
 
             if (!Hydrated && index == 0)
             {

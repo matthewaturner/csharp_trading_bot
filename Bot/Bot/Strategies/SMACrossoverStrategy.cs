@@ -1,8 +1,6 @@
 ﻿using Bot.Indicators;
 using Bot.Models;
-using System;
 using System.Collections.Generic;
-using Bot.Models;
 using Bot.Engine;
 
 namespace Bot.Strategies
@@ -19,7 +17,9 @@ namespace Bot.Strategies
         private string symbol;
 
         public SMACrossoverStrategy()
-        { }
+        {
+            indicators = new List<IIndicator>();
+        }
 
         public void Initialize(ITradingEngine engine, string[] args)
         {
@@ -33,7 +33,7 @@ namespace Bot.Strategies
                 shortMa,
                 longMa,
                 (ITicks t) => t[symbol].AdjClose);
-            indicators = new List<IIndicator> { mac };
+            indicators.Add(mac);
         }
 
         public override IList<IIndicator> Indicators => indicators;

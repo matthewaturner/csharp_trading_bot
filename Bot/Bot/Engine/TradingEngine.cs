@@ -23,6 +23,7 @@ namespace Bot.Engine
 
         private EngineConfig config;
         private Ticks ticks;
+        private IList<string> symbols;
 
         private IList<ITickReceiver> tickReceivers;
         private IList<ITerminateReceiver> terminateReceivers;
@@ -33,6 +34,13 @@ namespace Bot.Engine
         private IStrategy strategy;
         private IList<IAnalyzer> analyzers;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="dataSourceResolver"></param>
+        /// <param name="brokerResolver"></param>
+        /// <param name="strategyResolver"></param>
+        /// <param name="analyzerResolver"></param>
         public TradingEngine(
             DataSourceResolver dataSourceResolver,
             BrokerResolver brokerResolver,
@@ -48,6 +56,11 @@ namespace Bot.Engine
             terminateReceivers = new List<ITerminateReceiver>();
             logReceivers = new List<ILogReceiver>();
         }
+
+        /// <summary>
+        /// Current symbols.
+        /// </summary>
+        public IList<string> Symbols => symbols;
 
         /// <summary>
         /// Current ticks.
@@ -85,6 +98,7 @@ namespace Bot.Engine
 
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());
+            symbols = config.Symbols;
 
             // data source
             dataSource = dataSourceResolver(config.DataSource.Name);

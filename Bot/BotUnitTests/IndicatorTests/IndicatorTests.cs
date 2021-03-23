@@ -101,6 +101,76 @@ namespace IndicatorTests
                 (int a, int b) => { return a == b ? 0 : -1; });
         }
 
+        [TestMethod]
+        public void MovStdDev_Hydration()
+        {
+            IIndicator stdDev = new MovingStandardDeviation(30, (ITicks t) => t["MSFT"].AdjClose);
+            Assert.IsFalse(stdDev.Hydrated);
+
+            ReplayData(stdDev, msftData.Take(15).ToList());
+            Assert.IsFalse(stdDev.Hydrated);
+
+            ReplayData(stdDev, msftData.Skip(15).Take(14).ToList());
+            Assert.IsFalse(stdDev.Hydrated);
+
+            Assert.ThrowsException<NotHydratedException>(() => stdDev.Value);
+
+            ReplayData(stdDev, msftData.Skip(29).Take(1).ToList());
+            Assert.IsTrue(stdDev.Hydrated);
+        }
+
+        [TestMethod]
+        public void MovStdDev_Values()
+        {
+            IIndicator stdDev = new MovingStandardDeviation(10, (ITicks t) => t["MSFT"].AdjClose);
+            IList<double> stdDevResults = msftResults[nameof(MovingStandardDeviation)]
+                .Select(obj => (double)obj)
+                .ToList();
+
+            ReplayData(stdDev, msftData.Take(9).ToList());
+            ReplayAndCompare(
+                stdDev, 
+                msftData.Skip(9).ToList(), 
+                stdDevResults.Skip(9).ToList(), 
+                Helpers.CompareDoubles);
+        }
+
+        [TestMethod]
+        public void Bollinger_Hydration()
+        {
+            IIndicator boll = new BollingerBand(10, 1, .05, (ITicks t) => t["MSFT"].AdjClose);
+            IList<int> bollResults = msftResults[nameof(BollingerBand)]
+                .Select(obj => (int)obj)
+                .ToList();
+
+            ReplayData(boll, msftData.Take(4).ToList());
+            Assert.IsFalse(boll.Hydrated);
+
+            ReplayData(boll, msftData.Skip(4).Take(5).ToList());
+            Assert.IsFalse(boll.Hydrated);
+
+            Assert.ThrowsException<NotHydratedException>(() => boll.Value);
+
+            ReplayData(boll, msftData.Skip(9).Take(1).ToList());
+            Assert.IsTrue(boll.Hydrated);
+        }
+
+        [TestMethod]
+        public void Bollinger_Values()
+        {
+            IIndicator boll = new BollingerBand(10, 1, .05, (ITicks t) => t["MSFT"].AdjClose);
+            IList<int> bollResults = msftResults[nameof(BollingerBand)]
+                .Select(obj => (int)obj)
+                .ToList();
+
+            ReplayData(boll, msftData.Take(9).ToList());
+            ReplayAndCompare(
+                boll,
+                msftData.Skip(9).ToList(),
+                bollResults.Skip(9).ToList(),
+                (int a, int b) => { return a == b ? 0 : -1; });
+        }
+
         public void ReplayAndCompare<T>(
             IIndicator indicator, 
             IList<ITicks> data, 
@@ -135,6 +205,8 @@ namespace IndicatorTests
             Dictionary<string, IList<object>> results = new Dictionary<string, IList<object>>();
             List<object> sma30Results = new List<object>();
             List<object> mac10_30Results = new List<object>();
+            List<object> stdDevResults = new List<object>();
+            List<object> bollResults = new List<object>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -152,14 +224,22 @@ namespace IndicatorTests
                         double.NaN : double.Parse(fields[7]);
                     int mac10_30 = string.IsNullOrWhiteSpace(fields[9]) ?
                         -2 : int.Parse(fields[9]);
+                    double stdDev = string.IsNullOrWhiteSpace(fields[10]) ?
+                        double.NaN : double.Parse(fields[10]);
+                    int boll = string.IsNullOrWhiteSpace(fields[15]) ?
+                        -2 : int.Parse(fields[15]);
 
                     sma30Results.Add(sma30);
                     mac10_30Results.Add(mac10_30);
+                    stdDevResults.Add(stdDev);
+                    bollResults.Add(boll);
                 }
             }
 
             results.Add(nameof(SimpleMovingAverage), sma30Results);
             results.Add(nameof(MovingAverageCrossover), mac10_30Results);
+            results.Add(nameof(MovingStandardDeviation), stdDevResults);
+            results.Add(nameof(BollingerBand), bollResults);
             return results;
         }
 

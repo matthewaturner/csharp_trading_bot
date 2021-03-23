@@ -55,17 +55,40 @@ namespace Bot.Models
 
         public double TargetPrice { get; set; }
 
+        /// <summary>
+        /// Units to buy or sell.
+        /// </summary>
         public double Quantity { get; set; }
 
+        /// <summary>
+        /// Type of the order. Market buy, etc.
+        /// </summary>
         public OrderType Type { get; set; }
 
+        /// <summary>
+        /// State of the order. Open, filled, etc.
+        /// </summary>
         public OrderState State { get; set; }
 
+        /// <summary>
+        /// Updates the order with fill information.
+        /// </summary>
+        /// <param name="price"></param>
+        /// <param name="executionTime"></param>
         public void Fill(double price, DateTime executionTime)
         {
             ExecutionPrice = price;
             State = OrderState.Filled;
             ExecutionTime = executionTime;
+        }
+
+        /// <summary>
+        /// Prints order to the string.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{{Symbol:{Symbol}, Quantity:{Quantity} Type:{Type}, State:{State}, Price:{ExecutionPrice}}}";
         }
     }
 }

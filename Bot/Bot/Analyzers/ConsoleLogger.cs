@@ -3,6 +3,7 @@ using Bot.Models;
 using Bot.Engine;
 using System;
 using Bot.Engine.Events;
+using System.Linq;
 
 namespace Bot.Analyzers
 {
@@ -26,7 +27,13 @@ namespace Bot.Analyzers
         /// <param name="ticks"></param>
         public void OnTick(ITicks ticks)
         {
+            string openOrders = string.Join(',', engine.Broker.OpenOrders.Select(o => o.ToString()));
+            string orderHistory = string.Join(',', engine.Broker.OrderHistory.Select(o => o.ToString()));
+
             Console.WriteLine($"Tick: {ticks}");
+            Console.WriteLine($"Portfolio: {engine.Broker.Portfolio}");
+            Console.WriteLine($"Portfolio Value: {engine.Broker.PortfolioValue()}");
+            Console.WriteLine($"Open Orders: {openOrders}");
         }
 
         /// <summary>
@@ -42,6 +49,10 @@ namespace Bot.Analyzers
                     output += "\t" + analyzer.ToString() + "\n";
                 }
             }
+
+            string orderHistory = string.Join(',', engine.Broker.OrderHistory.Select(o => o.ToString() + "\n"));
+            Console.WriteLine($"Order History: {orderHistory}");
+
             Console.WriteLine(output);
         }
     }
