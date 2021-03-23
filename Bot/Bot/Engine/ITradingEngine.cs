@@ -17,6 +17,11 @@ namespace Bot.Engine
         public void Initialize(EngineConfig config);
 
         /// <summary>
+        /// Gets the symbols we are running for.
+        /// </summary>
+        public IList<string> Symbols { get; }
+
+        /// <summary>
         /// Get current ticks.
         /// </summary>
         public ITicks Ticks { get; }

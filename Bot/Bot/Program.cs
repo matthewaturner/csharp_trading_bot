@@ -58,6 +58,7 @@ namespace Bot
 
             // inject strategies
             services.AddSingleton<SMACrossoverStrategy>();
+            services.AddSingleton<BollingerMeanReversion>();
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
@@ -94,6 +95,8 @@ namespace Bot
                 {
                     case nameof(SMACrossoverStrategy):
                         return serviceProvider.GetService<SMACrossoverStrategy>();
+                    case nameof(BollingerMeanReversion):
+                        return serviceProvider.GetService<BollingerMeanReversion>();
                     default:
                         return null;
                 }
@@ -119,10 +122,10 @@ namespace Bot
 
             var engineConfig = new EngineConfig()
             {
-                Symbols = new List<string>() { "MSFT" },
+                Symbols = new List<string>() { "EWA", "EWC", "IGE" },
                 Interval = TickInterval.Day,
-                Start = new DateTime(2010, 1, 1),
-                End = new DateTime(2021, 1, 1),
+                Start = new DateTime(2006, 4, 26),
+                End = new DateTime(2012, 4, 9),
                 DataSource = new DependencyConfig()
                 {
                     Name = "YahooDataSource"
@@ -134,8 +137,8 @@ namespace Bot
                 },
                 Strategy = new DependencyConfig()
                 {
-                    Name = "SMACrossoverStrategy",
-                    Args = new string[] { "MSFT", "16", "64", "true" }
+                    Name = "BollingerMeanReversion",
+                    Args = new string[] { "23", "1", ".05", "1.3682;-.2327;.1074" }
                 },
                 Analyzers = new List<DependencyConfig>()
                 {
@@ -153,10 +156,6 @@ namespace Bot
 
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
-
-            engine.Initialize(engineConfig);
-            engine.RunAsync().Wait();
-            //engine.RunAsync("engineConfig.json").Wait();
         }
     }
 }

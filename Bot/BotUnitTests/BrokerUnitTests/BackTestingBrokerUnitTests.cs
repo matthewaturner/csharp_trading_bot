@@ -34,7 +34,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuyOrderSucceeds()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "3000" });
 
@@ -56,7 +56,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void SellOrderSucceeds()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "3000" });
 
@@ -78,7 +78,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuyOrderInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "1000" });
 
@@ -98,7 +98,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void ShortSaleInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "1000" });
 
@@ -119,7 +119,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void SellOrderInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "1000" });
 
@@ -139,7 +139,7 @@ namespace BrokerUnitTests
         [TestMethod]
         public void CancelOrderDoesNotExecute()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "3000" });
 
@@ -164,8 +164,8 @@ namespace BrokerUnitTests
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "3000" });
 
-            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
-            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 10.0, 31.0);
+            OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 31.0);
 
             string buyOrderId = broker.PlaceOrder(buyRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -198,8 +198,8 @@ namespace BrokerUnitTests
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "3000" });
 
-            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "MSFT", 10.0, 25.0);
-            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "MSFT", 15.0, 31.0);
+            OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 15.0, 31.0);
 
             string buyOrderId = broker.PlaceOrder(buyRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("MSFT"));
@@ -240,8 +240,8 @@ namespace BrokerUnitTests
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "100" });
 
-            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
-            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);
+            OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "TEST", 10.0, 10.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "TEST", 10.0, 10.0);
 
             string buyOrderId = broker.PlaceOrder(buyRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
@@ -284,8 +284,8 @@ namespace BrokerUnitTests
             BackTestingBroker broker = new BackTestingBroker();
             broker.Initialize(mockEngine.Object, new string[] { "100" });
 
-            OrderRequest buyRequest = new OrderRequest(OrderType.Buy, "TEST", 10.0, 10.0);
-            OrderRequest sellRequest = new OrderRequest(OrderType.Sell, "TEST", 10.0, 10.0);
+            OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "TEST", 10.0, 10.0);
+            OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "TEST", 10.0, 10.0);
 
             string sellOrderId = broker.PlaceOrder(sellRequest);
             Assert.IsFalse(broker.Portfolio.HasPosition("TEST"));
