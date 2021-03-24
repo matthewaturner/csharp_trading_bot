@@ -190,5 +190,14 @@ namespace Bot.Models
         {
             return Portfolio.CurrentValue(ticks, (tick) => tick.AdjClose);
         }
+
+        /// <summary>
+        /// Gets the current cash balance.
+        /// </summary>
+        /// <returns></returns>
+        public double CashValue()
+        {
+            return Portfolio.CashBalance;
+        }
     }
 }

@@ -19,6 +19,12 @@ namespace Bot.Models
         public double PortfolioValue();
 
         /// <summary>
+        /// Gets the current portfolio cash value.
+        /// </summary>
+        /// <returns></returns>
+        public double CashValue();
+
+        /// <summary>
         /// Gets the history of orders.
         /// </summary>
         /// <param name="start"></param>

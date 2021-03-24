@@ -1,5 +1,4 @@
 ﻿
-using Bot.Exceptions;
 using Bot.Models;
 using System;
 
@@ -36,7 +35,7 @@ namespace Bot.Indicators
             }
             if (exitZScore < 0)
             {
-                throw new ArgumentException("ExitZScore must be > 0.");
+                throw new ArgumentException("ExitZScore must be >= 0.");
             }
 
             sma = new SimpleMovingAverage(lookback, transform);
@@ -60,7 +59,7 @@ namespace Bot.Indicators
             {
                 if (!Hydrated)
                 {
-                    throw new NotHydratedException();
+                    return double.NaN;
                 }
                 return position;
             }

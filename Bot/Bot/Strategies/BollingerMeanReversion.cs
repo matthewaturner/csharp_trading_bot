@@ -23,14 +23,20 @@ namespace Bot.Strategies
         private double[] hedgeRatios;
         private Position position;
 
+        /// <summary>
+        /// Base constructor.
+        /// </summary>
         public BollingerMeanReversion()
-        {
-            indicators = new List<IIndicator>();
-        }
+        { }
 
         public override IList<IIndicator> Indicators => indicators;
 
-        public void Initialize(ITradingEngine engine, string[] args)
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="args"></param>
+        public override void Initialize(ITradingEngine engine, string[] args)
         {
             this.engine = engine;
 
@@ -46,11 +52,39 @@ namespace Bot.Strategies
                 throw new ArgumentException("Hedge ratios array length != symbols array length");
             }
 
+            indicators = new List<IIndicator>();
             bollingerBand = new BollingerBand(lookback, entryZScore, exitZScore, HedgedPortfolioValue);
             indicators.Add(bollingerBand);
             position = Position.Neutral;
         }
 
+        /// <summary>
+        /// Fields included in csv output.
+        /// </summary>
+        /// <returns></returns>
+        public override string[] GetCsvHeaders()
+        {
+            return new string[] { "Unit Portfolio Value", "Position Type" };
+        }
+
+        /// <summary>
+        /// Fields included in csv output.
+        /// </summary>
+        /// <returns></returns>
+        public override string[] GetCsvValues()
+        {
+            return new string[] { 
+                HedgedPortfolioValue(this.engine.Ticks).ToString(), 
+                position.ToString()
+            };
+        }
+
+        /// <summary>
+        /// Calculates the value of the unit portfolio, which is the value of each asset
+        /// multiplied by their hedge ratios.
+        /// </summary>
+        /// <param name="ticks"></param>
+        /// <returns></returns>
         public double HedgedPortfolioValue(ITicks ticks)
         {
             double value = 0;
@@ -64,6 +98,12 @@ namespace Bot.Strategies
             return value;
         }
 
+        /// <summary>
+        /// Gets the absolute value of the unit portfolio. Used to decide how many portfolios
+        /// to buy. Hedged value is often close to 0 and will result in over-leverage.
+        /// </summary>
+        /// <param name="ticks"></param>
+        /// <returns></returns>
         public double HedgedTradeValue(ITicks ticks)
         {
             double value = 0;
@@ -77,6 +117,10 @@ namespace Bot.Strategies
             return value;
         }
 
+        /// <summary>
+        /// Go long or short.
+        /// </summary>
+        /// <param name="longOrShort"></param>
         public void EnterPositions(int longOrShort)
         {
             double tradeableValue = engine.Broker.PortfolioValue() * .95;
@@ -117,6 +161,9 @@ namespace Bot.Strategies
             }
         }
 
+        /// <summary>
+        /// Close out all positions.
+        /// </summary>
         public void ExitPositions()
         {
             for (int i=0; i<symbols.Length; i++)
@@ -151,29 +198,28 @@ namespace Bot.Strategies
             }
         }
 
-        public void OnTick(ITicks ticks)
+        /// <summary>
+        /// What to do when a new tick of data comes in.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public override void StrategyOnTick(ITicks ticks)
         {
-            bollingerBand.OnTick(ticks);
+            int bollValue = (int)bollingerBand.Value;
 
-            if (Hydrated)
+            if (bollValue == 0 && position != Position.Neutral)
             {
-                int bollValue = (int)bollingerBand.Value;
-
-                if (bollValue == 0 && position != Position.Neutral)
-                {
-                    ExitPositions();
-                    position = Position.Neutral;
-                }
-                else if (bollValue > 0 && position != Position.Long)
-                {
-                    EnterPositions((int)Position.Long);
-                    position = Position.Long;
-                }
-                else if (bollValue < 0 && position != Position.Short)
-                {
-                    EnterPositions((int)Position.Short);
-                    position = Position.Short;
-                }
+                ExitPositions();
+                position = Position.Neutral;
+            }
+            else if (bollValue > 0 && position != Position.Long)
+            {
+                EnterPositions((int)Position.Long);
+                position = Position.Long;
+            }
+            else if (bollValue < 0 && position != Position.Short)
+            {
+                EnterPositions((int)Position.Short);
+                position = Position.Short;
             }
         }
     }

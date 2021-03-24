@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -48,6 +49,16 @@ namespace Bot.Models
         public Tick this[string symbol]
         {
             get => ticks[symbolMap[symbol]];
+        }
+
+        /// <summary>
+        /// Gets the latest tick for symbol at index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Tick this[int index]
+        {
+            get => ticks[index];
         }
 
         /// <summary>
