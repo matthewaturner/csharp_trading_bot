@@ -13,6 +13,13 @@ namespace Bot.Models
         Tick this[string symbol] { get; }
 
         /// <summary>
+        /// Gets the latest ticker for symbol at index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        Tick this[int index] { get; }
+
+        /// <summary>
         /// Returns whether we have a tick for this symbol.
         /// </summary>
         /// <param name="symbol"></param>

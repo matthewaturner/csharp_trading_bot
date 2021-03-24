@@ -5,9 +5,24 @@ namespace Bot.Models
 {
     public class Order
     {
+        /// <summary>
+        /// Null constructor.
+        /// </summary>
         public Order()
         { }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="placementTime"></param>
+        /// <param name="executionTime"></param>
+        /// <param name="symbol"></param>
+        /// <param name="executionPrice"></param>
+        /// <param name="targetPrice"></param>
+        /// <param name="quantity"></param>
+        /// <param name="type"></param>
+        /// <param name="state"></param>
         public Order(
             string orderId,
             DateTime placementTime,
@@ -23,36 +38,59 @@ namespace Bot.Models
             PlacementTime = placementTime;
             ExecutionTime = executionTime;
             Symbol = symbol.ToUpper();
-            ExecutionPrice = executionPrice;
+            FillPrice = executionPrice;
             TargetPrice = targetPrice;
             Quantity = quantity;
             Type = type;
             State = state;
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="request"></param>
         public Order(OrderRequest request)
         {
             OrderId = Guid.NewGuid().ToString();
             PlacementTime = DateTime.Now;
             ExecutionTime = new DateTime();
             Symbol = request.Symbol.ToUpper();
-            ExecutionPrice = double.NaN;
+            FillPrice = double.NaN;
             TargetPrice = request.TargetPrice;
             Quantity = request.Quantity;
             Type = request.Type;
             State = OrderState.Open;
         }
 
+        /// <summary>
+        /// Unique id of the order.
+        /// </summary>
         public string OrderId { get; set; }
 
+        /// <summary>
+        /// Time the order was placed.
+        /// </summary>
         public DateTime PlacementTime { get; set; }
 
+        /// <summary>
+        /// Time the order was executed.
+        /// </summary>
         public DateTime ExecutionTime { get; set; }
 
+        /// <summary>
+        /// Symbol the order is for.
+        /// </summary>
         public string Symbol { get; set; }
 
-        public double ExecutionPrice { get; set; }
+        /// <summary>
+        /// Price the order actually executed at.
+        /// </summary>
+        public double FillPrice { get; set; }
 
+        /// <summary>
+        /// Price the order is for at placement time.
+        /// Best bid/ask for market orders, limit price for limit orders.
+        /// </summary>
         public double TargetPrice { get; set; }
 
         /// <summary>
@@ -77,7 +115,7 @@ namespace Bot.Models
         /// <param name="executionTime"></param>
         public void Fill(double price, DateTime executionTime)
         {
-            ExecutionPrice = price;
+            FillPrice = price;
             State = OrderState.Filled;
             ExecutionTime = executionTime;
         }
@@ -88,7 +126,7 @@ namespace Bot.Models
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{{Symbol:{Symbol}, Quantity:{Quantity} Type:{Type}, State:{State}, Price:{ExecutionPrice}}}";
+            return $"{{Symbol:{Symbol}, Quantity:{Quantity} Type:{Type}, State:{State}, Price:{FillPrice}}}";
         }
     }
 }

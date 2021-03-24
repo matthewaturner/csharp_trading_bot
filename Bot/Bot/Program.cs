@@ -13,6 +13,7 @@ using System.Net.Http;
 using Bot.Analyzers;
 using System.Collections.Generic;
 using Bot.Data;
+using System.IO;
 
 namespace Bot
 {
@@ -29,6 +30,7 @@ namespace Bot
         public static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
+            string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/CSharpTradeBot";
 
             // setup configurations
             IConfiguration configuration = new ConfigurationBuilder()
@@ -47,7 +49,6 @@ namespace Bot
 
             // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
-            //services.AddSingleton<ITickStorage, TickStorage>();
             services.AddSingleton<HttpClient>();
 
             // inject data sources
@@ -62,6 +63,7 @@ namespace Bot
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
+            services.AddSingleton<TickCsvLogger>();
             services.AddSingleton<SharpeRatio>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -110,6 +112,8 @@ namespace Bot
                         return serviceProvider.GetService<ConsoleLogger>();
                     case nameof(SharpeRatio):
                         return serviceProvider.GetService<SharpeRatio>();
+                    case nameof(TickCsvLogger):
+                        return serviceProvider.GetService<TickCsvLogger>();
                     default:
                         return null;
                 }
@@ -122,10 +126,10 @@ namespace Bot
 
             var engineConfig = new EngineConfig()
             {
-                Symbols = new List<string>() { "EWA", "EWC", "IGE" },
+                Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
                 Interval = TickInterval.Day,
-                Start = new DateTime(2006, 4, 26),
-                End = new DateTime(2012, 4, 9),
+                Start = new DateTime(2020, 1, 1),
+                End = new DateTime(2021, 3, 21),
                 DataSource = new DependencyConfig()
                 {
                     Name = "YahooDataSource"
@@ -138,13 +142,14 @@ namespace Bot
                 Strategy = new DependencyConfig()
                 {
                     Name = "BollingerMeanReversion",
-                    Args = new string[] { "23", "1", ".05", "1.3682;-.2327;.1074" }
+                    Args = new string[] { "10", "1", ".05", "2.90852161;-2.22481014;-.00132392013" }
                 },
                 Analyzers = new List<DependencyConfig>()
                 {
                     new DependencyConfig()
                     {
-                        Name = "ConsoleLogger"
+                        Name = "CsvLogger",
+                        Args = new string[] { outputPath }
                     },
                     new DependencyConfig()
                     {

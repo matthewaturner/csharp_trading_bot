@@ -21,7 +21,12 @@ namespace Bot.Strategies
             indicators = new List<IIndicator>();
         }
 
-        public void Initialize(ITradingEngine engine, string[] args)
+        /// <summary>
+        /// Initialize.
+        /// </summary>
+        /// <param name="engine"></param>
+        /// <param name="args"></param>
+        public override void Initialize(ITradingEngine engine, string[] args)
         {
             symbol = args[0];
             int shortMa = int.Parse(args[1]);
@@ -44,7 +49,7 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public void OnTick(ITicks ticks)
+        public override void StrategyOnTick(ITicks ticks)
         {
             Tick tick = ticks[symbol];
             mac.OnTick(ticks);

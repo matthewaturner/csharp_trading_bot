@@ -82,7 +82,7 @@ namespace StrategyTests
                     if (!orderFound)
                     {
                         if (
-                            actualOrder.ExecutionPrice == expectedOrder.ExecutionPrice &&
+                            actualOrder.FillPrice == expectedOrder.FillPrice &&
                             actualOrder.ExecutionTime == expectedOrder.ExecutionTime &&
                             actualOrder.TargetPrice == expectedOrder.TargetPrice &&
                             actualOrder.Type == expectedOrder.Type &&

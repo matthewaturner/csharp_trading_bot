@@ -105,7 +105,7 @@ namespace Bot.Engine
             dataSource.Initialize(this, config.DataSource.Args);
             AddToReceiverLists(dataSource);
 
-            // broker
+            // broker - needs to come before strategy
             broker = brokerResolver(config.Broker.Name);
             broker.Initialize(this, config.Broker.Args);
             AddToReceiverLists(broker);
