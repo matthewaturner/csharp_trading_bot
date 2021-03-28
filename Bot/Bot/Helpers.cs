@@ -1,6 +1,8 @@
 ﻿
 using Bot.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot
 {
@@ -16,12 +18,9 @@ namespace Bot
         /// <returns></returns>
         public static int Compare(DateTime t1, DateTime t2, TickInterval interval)
         {
-            if (interval != TickInterval.Day)
-            {
-                throw new NotImplementedException();
-            }
-
-            return DateTime.Compare(t1.Date, t2.Date);
+            return DateTime.Compare(
+                t1.NormalizeToTickInterval(interval),
+                t2.NormalizeToTickInterval(interval));
         }
 
         /// <summary>
@@ -32,6 +31,22 @@ namespace Bot
         public static string StandardToString(this DateTime dt)
         {
             return dt.ToString("yyyy-MM-dd HH:mm");
+        }
+
+        /// <summary>
+        /// Returns a datetime with anything more specific than the tick interval stripped.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static DateTime NormalizeToTickInterval(this DateTime dt, TickInterval interval)
+        {
+            if (interval != TickInterval.Day)
+            {
+                throw new NotImplementedException();
+            }
+
+            return dt.Date;
         }
 
         /// <summary>
@@ -163,6 +178,16 @@ namespace Bot
         }
 
         /// <summary>
+        /// Rounds a double.
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
+        public static double Round(this double d)
+        {
+            return Math.Round(d, 6);
+        }
+
+        /// <summary>
         /// Compares doubles to six decimal places.
         /// </summary>
         /// <param name="a"></param>
@@ -170,20 +195,37 @@ namespace Bot
         /// <returns></returns>
         public static int CompareDoubles(double a, double b)
         {
-            double diff = a- b;
-            if (diff < -.000001)
-            {
-                return -1;
-            }
-            else if (diff < .000001)
+            double diff = a - b;
+
+            if (Math.Abs(diff) < .000001)
             {
                 return 0;
             }
-            else
-            {
-                return 1;
-            }
+            return a < b ? -1 : 1;
         }
 
+        /// <summary>
+        /// Standard deviation calculation.
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static double StandardDeviation(IEnumerable<double> values)
+        {
+            double standardDeviation = 0;
+
+            if (values.Any())
+            {
+                // Compute the average.     
+                double avg = values.Average();
+
+                // Perform the Sum of (value-avg)_2_2.      
+                double sum = values.Sum(d => Math.Pow(d - avg, 2));
+
+                // Put it all together.      
+                standardDeviation = Math.Sqrt((sum) / (values.Count() - 1));
+            }
+
+            return standardDeviation;
+        }
     }
 }

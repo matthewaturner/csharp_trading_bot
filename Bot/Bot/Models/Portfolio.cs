@@ -1,5 +1,4 @@
-﻿using Bot.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,100 +6,160 @@ namespace Bot.Models
 {
     public class Portfolio
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public Portfolio()
         {
-            Positions = new Dictionary<string, Position>();
             CashBalance = 0;
+            Positions = new Dictionary<string, Position>();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="initialCash"></param>
         public Portfolio(double initialCash)
         {
-            Positions = new Dictionary<string, Position>();
             CashBalance = initialCash;
+            Positions = new Dictionary<string, Position>();
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="positions"></param>
+        /// <param name="initialCash"></param>
         public Portfolio(IDictionary<string, Position> positions, double initialCash)
         {
-            Positions = positions;
             CashBalance = initialCash;
+            Positions = positions;
         }
 
-        public double CashBalance { get; set; }
+        /// <summary>
+        /// Available cash balance.
+        /// </summary>
+        public double CashBalance { get; private set; }
 
+        /// <summary>
+        /// symbol : position.
+        /// </summary>
         public IDictionary<string, Position> Positions { get; set; }
 
-        public double GetTotalValue(IDictionary<string, double> currentPrices)
+        /// <summary>
+        /// Gets the latest tick data for a symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public Position this[string symbol]
         {
-            double totalValue = 0;
-
-            foreach(KeyValuePair<string, Position> kvp in Positions)
-            {
-                if (!currentPrices.ContainsKey(kvp.Key))
-                {
-                    throw new ArgumentNullException("currentPrices must contain prices for all held symbols.");
-                }
-
-                totalValue += kvp.Value.Quantity * currentPrices[kvp.Key];
-            }
-
-            return totalValue;
+            get => Positions[symbol];
         }
 
-        public void BuySymbol(string symbol, int quantity, double currentPrice)
+        /// <summary>
+        /// Adds cash to portfolio.
+        /// </summary>
+        /// <param name="cash"></param>
+        /// <returns></returns>
+        public void AddFunds(double cash)
         {
-            if (quantity < 1)
+            CashBalance += cash;
+        }
+
+        /// <summary>
+        /// Returns whether the symbol is in the positions list.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public bool HasPosition(string symbol)
+        {
+            return Positions.ContainsKey(symbol);
+        }
+
+        /// <summary>
+        /// Buys a symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="quantity"></param>
+        public void Buy(string symbol, double quantity, double price)
+        {
+            if (quantity == 0)
             {
-                throw new InvalidOrderException("Quantity cannot be less than 1.");
+                return;
             }
 
-            if (CashBalance < quantity*currentPrice)
-            {
-                throw new InvalidOrderException("Order exceeds cash value of portfolio.");
-            }
-
-            // buy
             if (Positions.ContainsKey(symbol))
             {
-                Positions[symbol].Buy(quantity);
+                Positions[symbol].Quantity += quantity;
+                CashBalance -= price * quantity;
+
+                if (Positions[symbol].Quantity == 0)
+                {
+                    Positions.Remove(symbol);
+                }
             }
             else
             {
                 Positions[symbol] = new Position(symbol, quantity);
+                CashBalance -= price * quantity;
             }
 
-            // remove zero positions
-            if (Positions[symbol].Quantity == 0)
-            {
-                Positions.Remove(symbol);
-            }
-
-            CashBalance -= quantity*currentPrice;
         }
 
-        public void SellSymbol(string symbol, int quantity, double currentPrice)
+        /// <summary>
+        /// Sells a symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="quantity"></param>
+        public void Sell(string symbol, double quantity, double price)
         {
-            if (quantity < 1)
+            if (quantity == 0)
             {
-                throw new InvalidOrderException("Quantity cannot be less than 1.");
+                return;
             }
 
             if (Positions.ContainsKey(symbol))
             {
-                Positions[symbol].Sell(quantity);
+                Positions[symbol].Quantity -= quantity;
+                CashBalance += price * quantity;
+
+                if (Positions[symbol].Quantity == 0)
+                {
+                    Positions.Remove(symbol);
+                }
             }
             else
             {
                 Positions[symbol] = new Position(symbol, -quantity);
+                CashBalance += price * quantity;
             }
+        }
 
-            // remove zero positions
-            if (Positions[symbol].Quantity == 0)
+        /// <summary>
+        /// Gets the current value of a portfolio based on current tick values;
+        /// </summary>
+        /// <param name="ticks"></param>
+        /// <param name="transform"></param>
+        /// <returns></returns>
+        public double CurrentValue(ITicks ticks, Func<Tick, double> transform)
+        {
+            double value = 0;
+            foreach(Position p in Positions.Values)
             {
-                Positions.Remove(symbol);
+                value += p.Quantity * transform(ticks[p.Symbol]);
             }
+            return value + CashBalance;
+        }
 
+        /// <summary>
+        /// ToString.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string positionsStr = string.Join(", ", Positions.Values.Select(pos => pos.ToString()));
 
-            CashBalance += quantity*currentPrice;
+            return $"{{CashBalance: {CashBalance}\nPositions: [{positionsStr}]}}";
         }
     }
 }

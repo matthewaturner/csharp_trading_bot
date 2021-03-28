@@ -7,13 +7,18 @@ namespace Bot.Indicators
 {
     public class SimpleMovingAverage : IIndicator
     {
-        private readonly Func<Tick, double> transform;
+        private readonly Func<ITicks, double> transform;
         private double[] data;
         private double average;
         private int index;
 
-        public SimpleMovingAverage(int lookback, Func<Tick, double> transform)
+        public SimpleMovingAverage(int lookback, Func<ITicks, double> transform)
         {
+            if (lookback < 1)
+            {
+                throw new ArgumentException("Lookback must be >= 1.");
+            }
+
             this.transform = transform;
             data = new double[lookback];
             index = 0;
@@ -39,10 +44,10 @@ namespace Bot.Indicators
 
         public int Lookback { get; private set; }
 
-        public void OnTick(Tick tick)
+        public void OnTick(ITicks ticks)
         {
             average = average - (data[index] / Lookback);
-            data[index] = transform(tick);
+            data[index] = transform(ticks);
             average = average + (data[index] / Lookback);
 
             index = (index + 1) % Lookback;

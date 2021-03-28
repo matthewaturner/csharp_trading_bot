@@ -5,7 +5,6 @@ namespace Bot.Indicators
 {
     public interface IIndicator
     {
-
         /// <summary>
         /// Gets the number of windows until the indicator is hydrated.
         /// </summary>
@@ -27,6 +26,6 @@ namespace Bot.Indicators
         /// Updates the indicator with a new row of data.
         /// </summary>
         /// <param name="tick"></param>
-        public void OnTick(Tick tick);
+        public void OnTick(ITicks ticks);
     }
 }

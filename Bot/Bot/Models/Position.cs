@@ -1,31 +1,51 @@
 ﻿
+using Bot.Models;
+
 namespace Bot.Models
 {
     public class Position
     {
-        public Position(string symbol, int quantity)
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Position()
+        { }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="quantity"></param>
+        public Position(
+            string symbol,
+            double quantity)
         {
-            Symbol = symbol;
+            Symbol = symbol.ToUpper();
             Quantity = quantity;
         }
 
+        /// <summary>
+        /// Symbol referred to.
+        /// </summary>
         public string Symbol { get; set; }
 
-        public int Quantity { get; set; }
+        /// <summary>
+        /// Number of units. Can be fractional.
+        /// </summary>
+        public double Quantity { get; set; }
 
-        public void Sell(int quantity)
+        /// <summary>
+        /// ToString.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
         {
-            Quantity -= quantity;
+            return $"(Symbol:{Symbol} Quantity:{Quantity})";
         }
 
-        public void Buy(int quantity)
+        public PositionType GetPositionType()
         {
-            Quantity += quantity;
-        }
-
-        public double Value(double currentPrice)
-        {
-            return Quantity*currentPrice;
+            return this.Quantity > 0 ? PositionType.Long : PositionType.Short;
         }
     }
 }

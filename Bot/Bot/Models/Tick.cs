@@ -19,10 +19,10 @@ namespace Bot.Models
             double low,
             double close,
             double adjClose,
-            double volume)
+            int volume)
         {
             Symbol = symbol;
-            DateTime = dateTime.Date;
+            DateTime = dateTime.NormalizeToTickInterval(interval);
             TickInterval = interval;
             Open = open;
             High = high;
@@ -50,11 +50,17 @@ namespace Bot.Models
         [Required]
         public double Open { get; set; }
 
+        public double AdjOpen { get { return AdjValue(Open); } }
+
         [Required]
         public double High { get; set; }
 
+        public double AdjHigh { get { return AdjValue(High); } }
+
         [Required]
         public double Low { get; set; }
+
+        public double AdjLow { get { return AdjValue(Low); } }
 
         [Required]
         public double Close { get; set; }
@@ -63,7 +69,7 @@ namespace Bot.Models
         public double AdjClose { get; set; }
 
         [Required]
-        public double Volume { get; set; }
+        public int Volume { get; set; }
 
         public override string ToString()
         {
@@ -72,9 +78,13 @@ namespace Bot.Models
                 $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
         }
 
-        public string PrimaryKey()
+        private double AdjValue(double value)
         {
-            return Symbol + DateTime.ToString("O") + TickInterval.ToString();
+            if (AdjClose == 0.0)
+            {
+                return value;
+            }
+            return (AdjClose / Close) * value;
         }
     }
 }

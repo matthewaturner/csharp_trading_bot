@@ -1,4 +1,7 @@
-﻿using Bot.Indicators;
+﻿
+using Bot.Engine;
+using Bot.Engine.Events;
+using Bot.Indicators;
 using Bot.Models;
 using System.Collections.Generic;
 
@@ -10,6 +13,14 @@ namespace Bot.Strategies
 
         bool Hydrated { get; }
 
-        void OnTick(Tick ticks);
+        IList<IIndicator> Indicators { get; }
+
+        void Initialize(ITradingEngine engine, string[] args);
+
+        void StrategyOnTick(ITicks ticks);
+
+        string[] GetCsvHeaders();
+
+        string[] GetCsvValues();
     }
 }

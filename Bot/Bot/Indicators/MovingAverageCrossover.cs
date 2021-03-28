@@ -12,7 +12,7 @@ namespace Bot.Indicators
         public MovingAverageCrossover(
             int shortLookback, 
             int longLookback, 
-            Func<Tick, double> transform)
+            Func<ITicks, double> transform)
         {
             if (shortLookback >= longLookback)
             {
@@ -43,10 +43,10 @@ namespace Bot.Indicators
 
         public int Lookback { get; private set; }
 
-        public void OnTick(Tick tick)
+        public void OnTick(ITicks ticks)
         {
-            shortMA.OnTick(tick);
-            longMA.OnTick(tick);
+            shortMA.OnTick(ticks);
+            longMA.OnTick(ticks);
         }
     }
 }

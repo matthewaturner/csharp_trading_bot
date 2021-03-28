@@ -1,6 +1,7 @@
-﻿using Bot.Models;
-using Bot.Exceptions;
+﻿using Bot;
+using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 
 namespace PortfolioTests
@@ -8,26 +9,35 @@ namespace PortfolioTests
     [TestClass]
     public class PortfolioTests
     {
-        [TestMethod]
-        public void EnterPositionSucceeds()
+        Ticks ticks;
+
+        [TestInitialize]
+        public void Setup()
         {
-            var currentPrices = new Dictionary<string, double>()
-            { { "GME", 110 }, };
+            // order matters
+            ticks = new Ticks(new string[] { "MSFT", "GME", "AMC" });
 
-            var portfolio = new Portfolio(1000);
-            portfolio.BuySymbol("GME", 10, 100.0);
+            var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
+            var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
+            var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.03, 6.05, 5.49, 5.65, 5.65, 60690200);
 
-            Assert.AreEqual(0, portfolio.CashBalance);
-            Assert.AreEqual(1, portfolio.Positions.Count);
-            Assert.AreEqual(1100.0, portfolio.GetTotalValue(currentPrices));
+            ticks.Update(new Tick[] { msftTick, gmeTick, amcTick });
         }
 
         [TestMethod]
-        public void EnterPositionInsufficientCash()
+        public void GetTotalValue()
         {
-            Portfolio portfolio = new Portfolio(100);
-            Assert.ThrowsException<InvalidOrderException>(
-                () => portfolio.BuySymbol("GME", 10, 100.0));
+            var msftPos = new Position("MSFT", 10.0);
+            var gmePos = new Position("GME", -5.0);
+            var amcPos = new Position("AMC", 12.0);
+            double cashBalance = 100.0;
+
+            var portfolio = new Portfolio(1000);
+            portfolio.Buy("GME", 10, 49.51);
+
+            Assert.AreEqual(504.9, portfolio.CashBalance.Round());
+            Assert.AreEqual(1, portfolio.Positions.Count);
+            Assert.AreEqual(1000.0, portfolio.CurrentValue(ticks, (t) => t.AdjClose));
         }
 
         [TestMethod]
@@ -35,11 +45,11 @@ namespace PortfolioTests
         {
             var portfolio = new Portfolio(1000);
 
-            portfolio.BuySymbol("GME", 10, 100.0);
+            portfolio.Buy("GME", 10, 100.0);
             Assert.AreEqual(0, portfolio.CashBalance);
             Assert.AreEqual(1, portfolio.Positions.Count);
 
-            portfolio.SellSymbol("GME", 10, 90.0);
+            portfolio.Sell("GME", 10, 90.0);
             Assert.AreEqual(900.0, portfolio.CashBalance);
             Assert.AreEqual(0, portfolio.Positions.Count);
         }
@@ -49,11 +59,11 @@ namespace PortfolioTests
         {
             var portfolio = new Portfolio(1000);
 
-            portfolio.SellSymbol("GME", 10, 100.0);
+            portfolio.Sell("GME", 10, 100.0);
             Assert.AreEqual(2000.0, portfolio.CashBalance);
             Assert.AreEqual(portfolio.Positions.Count, 1);
 
-            portfolio.BuySymbol("GME", 10, 90.0);
+            portfolio.Buy("GME", 10, 90.0);
             Assert.AreEqual(1100.0, portfolio.CashBalance);
             Assert.AreEqual(0, portfolio.Positions.Count);
         }

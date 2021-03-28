@@ -1,8 +1,7 @@
 ﻿using Bot.Configuration;
-using Bot.DataCollection;
-using Bot.DataStorage;
-using Bot.DataStorage.Models;
 using Bot.Models;
+using Bot.Strategies;
+using Bot.Engine;
 using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -12,14 +11,27 @@ using RDotNet;
 using System;
 using System.Data.Common;
 using System.Net.Http;
+using Bot.Analyzers;
+using System.Collections.Generic;
+using Bot.Data;
+using System.IO;
 
 namespace Bot
 {
-    class Program
+    public class Program
     {
+        public delegate IDataSource DataSourceResolver(string key);
+
+        public delegate IBroker BrokerResolver(string key);
+
+        public delegate IStrategy StrategyResolver(string key);
+
+        public delegate IAnalyzer AnalyzerResolver(string key);
+
         public static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
+            string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/CSharpTradeBot";
 
             // setup configurations
             IConfiguration configuration = new ConfigurationBuilder()
@@ -36,15 +48,120 @@ namespace Bot
             // entity framework stuff
             DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
 
-            // inject singletons
+            // inject platform level things
             services.AddSingleton<IKeyVaultManager, KeyVaultManager>();
             services.AddSingleton<HttpClient>();
-            services.AddSingleton<IDataSource, YahooDataSource>();
-            services.AddSingleton<ITickStorage, TickStorage>();
 
-            IServiceProvider provider = services.BuildServiceProvider();
+            // inject data sources
+            services.AddSingleton<YahooDataSource>();
 
-            TestStuff(provider);
+            // inject brokers
+            services.AddSingleton<BackTestingBroker>();
+
+            // inject strategies
+            services.AddSingleton<SMACrossoverStrategy>();
+            services.AddSingleton<BollingerMeanReversion>();
+
+            // inject analyzers
+            services.AddSingleton<ConsoleLogger>();
+            services.AddSingleton<TickCsvLogger>();
+            services.AddSingleton<SharpeRatio>();
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // resolvers do named lookup on singleton services
+            services.AddSingleton<DataSourceResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(YahooDataSource):
+                        return serviceProvider.GetService<YahooDataSource>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<BrokerResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(BackTestingBroker):
+                        return serviceProvider.GetService<BackTestingBroker>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<StrategyResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(SMACrossoverStrategy):
+                        return serviceProvider.GetService<SMACrossoverStrategy>();
+                    case nameof(BollingerMeanReversion):
+                        return serviceProvider.GetService<BollingerMeanReversion>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<AnalyzerResolver>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(ConsoleLogger):
+                        return serviceProvider.GetService<ConsoleLogger>();
+                    case nameof(SharpeRatio):
+                        return serviceProvider.GetService<SharpeRatio>();
+                    case nameof(TickCsvLogger):
+                        return serviceProvider.GetService<TickCsvLogger>();
+                    default:
+                        return null;
+                }
+            });
+
+            services.AddSingleton<ITradingEngine, TradingEngine>();
+            serviceProvider = services.BuildServiceProvider();
+
+            ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
+
+            var engineConfig = new EngineConfig()
+            {
+                Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
+                Interval = TickInterval.Day,
+                Start = new DateTime(2020, 1, 1),
+                End = new DateTime(2021, 3, 21),
+                DataSource = new DependencyConfig()
+                {
+                    Name = "YahooDataSource"
+                },
+                Broker = new DependencyConfig()
+                {
+                    Name = "BackTestingBroker",
+                    Args = new string[] { "1000" }
+                },
+                Strategy = new DependencyConfig()
+                {
+                    Name = "BollingerMeanReversion",
+                    Args = new string[] { "10", "1", ".05", "2.90852161;-2.22481014;-.00132392013" }
+                },
+                Analyzers = new List<DependencyConfig>()
+                {
+                    new DependencyConfig()
+                    {
+                        Name = "CsvLogger",
+                        Args = new string[] { outputPath }
+                    },
+                    new DependencyConfig()
+                    {
+                        Name = "SharpeRatio",
+                        Args = new string[] { "0.00005357"}
+                    },
+                }
+            };
+
+            engine.Initialize(engineConfig);
+            engine.RunAsync().Wait();
         }
 
         public static void TestStuff(IServiceProvider provider)
@@ -72,5 +189,6 @@ namespace Bot
                 Console.WriteLine(ex);
             }
         }
+
     }
 }
