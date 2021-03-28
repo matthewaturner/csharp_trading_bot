@@ -24,11 +24,12 @@ namespace Bot.Analyzers
         /// <param name="args"></param>
         public void Initialize(ITradingEngine engine, string[] args)
         {
-            string outputPath = args[0];
             this.engine = engine;
 
-            string csvPath = Path.Combine(outputPath, $"{engine.Strategy.GetType()}.{DateTimeOffset.Now.ToUnixTimeSeconds()}.csv");
-            Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
+            string csvPath = Path.Combine(
+                engine.OutputPath, 
+                $"{engine.Strategy.GetType()}.{DateTimeOffset.Now.ToUnixTimeSeconds()}.csv");
+
             fileStream = new FileStream(csvPath, FileMode.OpenOrCreate, FileAccess.Write);
             streamWriter = new StreamWriter(fileStream);
             csv = new CsvWriter(streamWriter, CultureInfo.InvariantCulture);

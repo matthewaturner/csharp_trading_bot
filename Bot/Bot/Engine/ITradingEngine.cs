@@ -47,6 +47,11 @@ namespace Bot.Engine
         public IList<IAnalyzer> Analyzers { get; }
 
         /// <summary>
+        /// Gets the path for output data.
+        /// </summary>
+        public string OutputPath { get; }
+
+        /// <summary>
         /// Runs the engine.
         /// </summary>
         /// <param name="engineConfig"></param>

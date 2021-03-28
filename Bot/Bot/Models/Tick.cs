@@ -78,11 +78,6 @@ namespace Bot.Models
                 $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
         }
 
-        public string PrimaryKey()
-        {
-            return Symbol + DateTime.ToString("O") + TickInterval.ToString();
-        }
-
         private double AdjValue(double value)
         {
             if (AdjClose == 0.0)

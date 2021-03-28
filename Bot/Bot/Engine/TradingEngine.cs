@@ -11,6 +11,7 @@ using System;
 
 using static Bot.Program;
 using Bot.Data;
+using System.IO;
 
 namespace Bot.Engine
 {
@@ -88,6 +89,11 @@ namespace Bot.Engine
         public IList<IAnalyzer> Analyzers => analyzers;
 
         /// <summary>
+        /// Output path for logging.
+        /// </summary>
+        public string OutputPath { get; private set; }
+
+        /// <summary>
         /// Setup everything.
         /// </summary>
         /// <param name="configFileName"></param>
@@ -95,6 +101,12 @@ namespace Bot.Engine
         {
             this.config = config;
             ClearReceiverLists();
+
+            // setup path for output
+            OutputPath = Path.Join(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
+                $"/{config.Strategy.Name}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+            Directory.CreateDirectory(OutputPath);
 
             // initialize stuff
             ticks = new Ticks(config.Symbols.ToArray());
