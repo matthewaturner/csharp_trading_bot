@@ -4,7 +4,7 @@ using System;
 
 namespace Bot.Indicators
 {
-    public class BollingerBand : IIndicator
+    public class BollingerBand : IndicatorBase
     {
         enum Position
         {
@@ -19,11 +19,19 @@ namespace Bot.Indicators
         double zScore, entryZScore, exitZScore;
         Position position;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="lookback"></param>
+        /// <param name="entryZScore"></param>
+        /// <param name="exitZScore"></param>
+        /// <param name="transform"></param>
         public BollingerBand(
             int lookback, 
             double entryZScore, 
             double exitZScore, 
             Func<ITicks, double> transform)
+            : base()
         {
             if (lookback < 1)
             {
@@ -49,45 +57,40 @@ namespace Bot.Indicators
             position = Position.Neutral;
         }
 
-        public int Lookback { get; private set; }
-
-        public bool Hydrated { get { return sma.Hydrated && stdDev.Hydrated; } }
-
-        public object Value
-        {
-            get
-            {
-                if (!Hydrated)
-                {
-                    return double.NaN;
-                }
-                return position;
-            }
-        }
-
-        public void OnTick(ITicks ticks)
+        /// <summary>
+        /// Recalculate values.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public override void OnTick(ITicks ticks)
         {
             sma.OnTick(ticks);
             stdDev.OnTick(ticks);
 
-            if (Hydrated)
+            if (!Hydrated && sma.Hydrated && stdDev.Hydrated)
             {
-                zScore = (transform(ticks) - (double)sma.Value) / (double)stdDev.Value;
-
-                // entry logic
-                if (Math.Abs(zScore) > entryZScore)
-                {
-                    position = (Position)(-Math.Sign(zScore));
-                }
-
-                // exit logic
-                if (position == Position.Long && zScore >= -exitZScore
-                    || position == Position.Short && zScore <= exitZScore)
-                {
-                    position = Position.Neutral;
-                }
+                Hydrated = true;
             }
 
+            zScore = (transform(ticks) - sma.Value) / stdDev.Value;
+
+            // entry logic
+            if (Math.Abs(zScore) > entryZScore)
+            {
+                position = (Position)(-Math.Sign(zScore));
+            }
+
+            // exit logic
+            if (position == Position.Long && zScore >= -exitZScore
+                || position == Position.Short && zScore <= exitZScore)
+            {
+                position = Position.Neutral;
+            }
+
+            Values["default"] = (double)position;
+            Values["position"] = (double)position;
+            Values["upperBand"] = sma.Value + (entryZScore * stdDev.Value);
+            Values["lowerBand"] = sma.Value - (entryZScore * stdDev.Value);
+            Values["midBand"] = sma.Value;
         }
     }
 }
