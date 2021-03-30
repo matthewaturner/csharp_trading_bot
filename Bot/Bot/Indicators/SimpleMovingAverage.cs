@@ -1,6 +1,5 @@
 ﻿
 using Bot.Models;
-using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
