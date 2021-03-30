@@ -4,15 +4,22 @@ using System;
 
 namespace Bot.Indicators
 {
-    public class MovingAverageCrossover : IIndicator
+    public class MovingAverageCrossover : IndicatorBase
     {
         private SimpleMovingAverage shortMA;
         private SimpleMovingAverage longMA;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="shortLookback"></param>
+        /// <param name="longLookback"></param>
+        /// <param name="transform"></param>
         public MovingAverageCrossover(
             int shortLookback, 
             int longLookback, 
             Func<ITicks, double> transform)
+            : base()
         {
             if (shortLookback >= longLookback)
             {
@@ -24,29 +31,21 @@ namespace Bot.Indicators
             Lookback = longLookback;
         }
 
-        public object Value
-        {
-            get
-            {
-                if (!Hydrated)
-                {
-                    throw new NotHydratedException();
-                }
-                return Helpers.CompareDoubles((double)shortMA.Value, (double)longMA.Value);
-            }
-        }
-
-        public bool Hydrated
-        {
-            get { return shortMA.Hydrated && longMA.Hydrated; }
-        }
-
-        public int Lookback { get; private set; }
-
-        public void OnTick(ITicks ticks)
+        /// <summary>
+        /// Calculate new values.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public override void OnTick(ITicks ticks)
         {
             shortMA.OnTick(ticks);
             longMA.OnTick(ticks);
+
+            if (!Hydrated && shortMA.Hydrated && longMA.Hydrated)
+            {
+                Hydrated = true;
+            }
+
+            Values["default"] = Helpers.CompareDoubles(shortMA.Value, longMA.Value);
         }
     }
 }

@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Bot;
-using Bot.Exceptions;
 using Moq;
 
 namespace IndicatorTests
@@ -17,7 +16,7 @@ namespace IndicatorTests
     public class IndicatorTests
     {
         private IList<ITicks> msftData;
-        private IDictionary<string, IList<object>> msftResults;
+        private IDictionary<string, IList<double>> msftResults;
 
         [TestInitialize]
         public void Setup()
@@ -36,7 +35,7 @@ namespace IndicatorTests
             ReplayData(sma, msftData.Take(29).ToList());
             Assert.IsFalse(sma.Hydrated);
 
-            Assert.ThrowsException<NotHydratedException>(() => sma.Value);
+            Assert.AreEqual(double.NaN, sma.Value);
 
             sma = new SimpleMovingAverage(30, (ITicks t) => t["MSFT"].AdjClose);
             ReplayData(sma, msftData.Take(30).ToList());
@@ -64,7 +63,10 @@ namespace IndicatorTests
                 .ToList();
 
             ReplayData(sma, msftData.Take(29).ToList());
-            ReplayAndCompare(sma, msftData.Skip(29).ToList<ITicks>(), smaResults.Skip(29).ToList(), Helpers.CompareDoubles);
+            ReplayAndCompare(
+                sma, 
+                msftData.Skip(29).ToList(), 
+                smaResults.Skip(29).ToList());
         }
 
         [TestMethod]
@@ -79,7 +81,7 @@ namespace IndicatorTests
             ReplayData(mac, msftData.Skip(15).Take(48).ToList());
             Assert.IsFalse(mac.Hydrated);
 
-            Assert.ThrowsException<NotHydratedException>(() => mac.Value);
+            Assert.AreEqual(double.NaN, mac.Value);
 
             ReplayData(mac, msftData.Skip(63).Take(1).ToList());
             Assert.IsTrue(mac.Hydrated);
@@ -89,16 +91,15 @@ namespace IndicatorTests
         public void MAC_Values()
         {
             IIndicator mac = new MovingAverageCrossover(10, 30, (ITicks t) => t["MSFT"].AdjClose);
-            IList<int> macResults = msftResults[nameof(MovingAverageCrossover)]
-                .Select(obj => (int)obj)
+            IList<double> macResults = msftResults[nameof(MovingAverageCrossover)]
+                .Select(obj => (double)obj)
                 .ToList();
 
             ReplayData(mac, msftData.Take(29).ToList());
             ReplayAndCompare(
-                mac, 
-                msftData.Skip(29).ToList<ITicks>(), 
-                macResults.Skip(29).ToList(), 
-                (int a, int b) => { return a == b ? 0 : -1; });
+                mac,
+                msftData.Skip(29).ToList(),
+                macResults.Skip(29).ToList());
         }
 
         [TestMethod]
@@ -113,7 +114,7 @@ namespace IndicatorTests
             ReplayData(stdDev, msftData.Skip(15).Take(14).ToList());
             Assert.IsFalse(stdDev.Hydrated);
 
-            Assert.ThrowsException<NotHydratedException>(() => stdDev.Value);
+            Assert.AreEqual(double.NaN, stdDev.Value);
 
             ReplayData(stdDev, msftData.Skip(29).Take(1).ToList());
             Assert.IsTrue(stdDev.Hydrated);
@@ -129,10 +130,9 @@ namespace IndicatorTests
 
             ReplayData(stdDev, msftData.Take(9).ToList());
             ReplayAndCompare(
-                stdDev, 
-                msftData.Skip(9).ToList(), 
-                stdDevResults.Skip(9).ToList(), 
-                Helpers.CompareDoubles);
+                stdDev,
+                msftData.Skip(9).ToList(),
+                stdDevResults.Skip(9).ToList());
         }
 
         [TestMethod]
@@ -149,6 +149,8 @@ namespace IndicatorTests
             ReplayData(boll, msftData.Skip(4).Take(5).ToList());
             Assert.IsFalse(boll.Hydrated);
 
+            Assert.AreEqual(double.NaN, boll.Value);
+
             ReplayData(boll, msftData.Skip(9).Take(1).ToList());
             Assert.IsTrue(boll.Hydrated);
         }
@@ -157,30 +159,28 @@ namespace IndicatorTests
         public void Bollinger_Values()
         {
             IIndicator boll = new BollingerBand(10, 1, .05, (ITicks t) => t["MSFT"].AdjClose);
-            IList<int> bollResults = msftResults[nameof(BollingerBand)]
-                .Select(obj => (int)obj)
+            IList<double> bollResults = msftResults[nameof(BollingerBand)]
+                .Select(obj => (double)obj)
                 .ToList();
 
             ReplayData(boll, msftData.Take(9).ToList());
             ReplayAndCompare(
                 boll,
                 msftData.Skip(9).ToList(),
-                bollResults.Skip(9).ToList(),
-                (int a, int b) => { return a == b ? 0 : -1; });
+                bollResults.Skip(9).ToList());
         }
 
-        public void ReplayAndCompare<T>(
+        public void ReplayAndCompare(
             IIndicator indicator, 
             IList<ITicks> data, 
-            IList<T> results, 
-            Func<T, T, int> compareFunc)
+            IList<double> results)
         {
-            IList<T> values = new List<T>();
+            IList<double> values = new List<double>();
             for (int i=0; i<data.Count; i++)
             {
                 indicator.OnTick(data[i]);
-                values.Add((T)indicator.Value);
-                if (compareFunc((T)indicator.Value, results[i]) != 0)
+                values.Add(indicator.Value);
+                if (Helpers.CompareDoubles(indicator.Value, results[i]) != 0)
                 {
                     Assert.Fail($"Values {indicator.Value} and {results[i]} " +
                         $"are unequal at line {i}.");
@@ -196,15 +196,15 @@ namespace IndicatorTests
             }
         }
 
-        public Dictionary<string, IList<object>> LoadResults(string fileName)
+        public Dictionary<string, IList<double>> LoadResults(string fileName)
         {
             Path.GetFullPath(fileName);
 
-            Dictionary<string, IList<object>> results = new Dictionary<string, IList<object>>();
-            List<object> sma30Results = new List<object>();
-            List<object> mac10_30Results = new List<object>();
-            List<object> stdDevResults = new List<object>();
-            List<object> bollResults = new List<object>();
+            Dictionary<string, IList<double>> results = new Dictionary<string, IList<double>>();
+            List<double> sma30Results = new List<double>();
+            List<double> mac10_30Results = new List<double>();
+            List<double> stdDevResults = new List<double>();
+            List<double> bollResults = new List<double>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -220,11 +220,11 @@ namespace IndicatorTests
 
                     double sma30 = string.IsNullOrWhiteSpace(fields[7]) ?
                         double.NaN : double.Parse(fields[7]);
-                    int mac10_30 = string.IsNullOrWhiteSpace(fields[9]) ?
+                    double mac10_30 = string.IsNullOrWhiteSpace(fields[9]) ?
                         -2 : int.Parse(fields[9]);
                     double stdDev = string.IsNullOrWhiteSpace(fields[10]) ?
                         double.NaN : double.Parse(fields[10]);
-                    int boll = string.IsNullOrWhiteSpace(fields[15]) ?
+                    double boll = string.IsNullOrWhiteSpace(fields[15]) ?
                         -2 : int.Parse(fields[15]);
 
                     sma30Results.Add(sma30);

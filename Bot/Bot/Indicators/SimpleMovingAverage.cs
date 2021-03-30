@@ -1,18 +1,23 @@
 ﻿
 using Bot.Models;
-using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
 {
-    public class SimpleMovingAverage : IIndicator
+    public class SimpleMovingAverage : IndicatorBase
     {
         private readonly Func<ITicks, double> transform;
         private double[] data;
         private double average;
         private int index;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="lookback"></param>
+        /// <param name="transform"></param>
         public SimpleMovingAverage(int lookback, Func<ITicks, double> transform)
+            : base()
         {
             if (lookback < 1)
             {
@@ -28,23 +33,11 @@ namespace Bot.Indicators
             Lookback = lookback;
         }
 
-        public object Value
-        {
-            get
-            {
-                if (!Hydrated)
-                {
-                    throw new NotHydratedException();
-                }
-                return average;
-            }
-        }
-
-        public bool Hydrated { get; private set; }
-
-        public int Lookback { get; private set; }
-
-        public void OnTick(ITicks ticks)
+        /// <summary>
+        /// Calculates new values.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public override void OnTick(ITicks ticks)
         {
             average = average - (data[index] / Lookback);
             data[index] = transform(ticks);
@@ -56,6 +49,9 @@ namespace Bot.Indicators
             {
                 Hydrated = true;
             }
+
+            Values["default"] = average;
+            Values["ma"] = average;
         }
     }
 }
