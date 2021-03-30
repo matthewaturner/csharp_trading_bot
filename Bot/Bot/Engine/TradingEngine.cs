@@ -105,7 +105,7 @@ namespace Bot.Engine
             // setup path for output
             OutputPath = Path.Join(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-                $"/{config.Strategy.Name}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+                $"/CSharpTradeBot/{config.Strategy.Name}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
             Directory.CreateDirectory(OutputPath);
 
             // initialize stuff

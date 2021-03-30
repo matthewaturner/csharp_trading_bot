@@ -149,8 +149,6 @@ namespace IndicatorTests
             ReplayData(boll, msftData.Skip(4).Take(5).ToList());
             Assert.IsFalse(boll.Hydrated);
 
-            Assert.ThrowsException<NotHydratedException>(() => boll.Value);
-
             ReplayData(boll, msftData.Skip(9).Take(1).ToList());
             Assert.IsTrue(boll.Hydrated);
         }

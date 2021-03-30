@@ -10,7 +10,7 @@ using System.IO;
 
 namespace Bot.Analyzers
 {
-    public class TickCsvLogger : IAnalyzer, ITickReceiver, ITerminateReceiver
+    public class CsvLogger : IAnalyzer, ITickReceiver, ITerminateReceiver
     {
         private ITradingEngine engine;
         private FileStream fileStream;

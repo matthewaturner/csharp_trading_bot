@@ -64,7 +64,7 @@ namespace Bot
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
-            services.AddSingleton<TickCsvLogger>();
+            services.AddSingleton<CsvLogger>();
             services.AddSingleton<SharpeRatio>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -113,8 +113,8 @@ namespace Bot
                         return serviceProvider.GetService<ConsoleLogger>();
                     case nameof(SharpeRatio):
                         return serviceProvider.GetService<SharpeRatio>();
-                    case nameof(TickCsvLogger):
-                        return serviceProvider.GetService<TickCsvLogger>();
+                    case nameof(CsvLogger):
+                        return serviceProvider.GetService<CsvLogger>();
                     default:
                         return null;
                 }
@@ -160,11 +160,14 @@ namespace Bot
                 }
             };
 
+            /*
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
+            */
+            TestStuff();
         }
 
-        public static void TestStuff(IServiceProvider provider)
+        public static void TestStuff()
         {
             try
             {
