@@ -1,17 +1,22 @@
-﻿using Bot.Exceptions;
+﻿
 using Bot.Models;
 using System;
 
 namespace Bot.Indicators
 {
-    public class MovingStandardDeviation : IIndicator
+    public class MovingStandardDeviation : IndicatorBase
     {
         private readonly Func<ITicks, double> transform;
         private double[] data;
         private int index;
-        private double stdDev;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="lookback"></param>
+        /// <param name="transform"></param>
         public MovingStandardDeviation(int lookback, Func<ITicks, double> transform)
+            : base()
         {
             if (lookback < 1)
             {
@@ -25,33 +30,22 @@ namespace Bot.Indicators
             Hydrated = false;
         }
 
-        public int Lookback { get; private set; }
-
-        public bool Hydrated { get; private set; }
-
-        public object Value
-        {
-            get
-            {
-                if (!Hydrated)
-                {
-                    throw new NotHydratedException();
-                }
-                return stdDev;
-            }
-        }
-
-        public void OnTick(ITicks ticks)
+        /// <summary>
+        /// Calculate new values.
+        /// </summary>
+        /// <param name="ticks"></param>
+        public override void OnTick(ITicks ticks)
         {
             data[index] = transform(ticks);
             index = (index + 1) % Lookback;
-
-            stdDev = Helpers.StandardDeviation(data);
 
             if (!Hydrated && index == 0)
             {
                 Hydrated = true;
             }
+
+            Values["default"] = Helpers.StandardDeviation(data);
+            Values["stdDev"] = Values["default"];
         }
     }
 }
