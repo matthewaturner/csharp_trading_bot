@@ -18,9 +18,9 @@ namespace Bot.Strategies
 
         private ITradingEngine engine;
         private BollingerBand bollingerBand;
+        private JohansenIndicator johansenIndicator;
         private IList<IIndicator> indicators;
         private string[] symbols;
-        private double[] hedgeRatios;
         private Position position;
 
         /// <summary>
@@ -45,16 +45,14 @@ namespace Bot.Strategies
             double exitZScore = double.Parse(args[2]);
 
             symbols = engine.Symbols.ToArray();
-            hedgeRatios = args[3].Split(';').Select(str => double.Parse(str)).ToArray();
 
-            if (symbols.Length != hedgeRatios.Length)
-            {
-                throw new ArgumentException("Hedge ratios array length != symbols array length");
-            }
+            johansenIndicator = new JohansenIndicator(lookback, symbols, (Tick t) => t.AdjClose);
+            bollingerBand = new BollingerBand(lookback, entryZScore, exitZScore, HedgedPortfolioValue);
 
             indicators = new List<IIndicator>();
-            bollingerBand = new BollingerBand(lookback, entryZScore, exitZScore, HedgedPortfolioValue);
+            indicators.Add(johansenIndicator);
             indicators.Add(bollingerBand);
+
             position = Position.Neutral;
         }
 
@@ -91,7 +89,7 @@ namespace Bot.Strategies
             for (int i=0; i<symbols.Length; i++)
             {
                 string symbol = symbols[i];
-                double hedgeRatio = hedgeRatios[i];
+                double hedgeRatio = johansenIndicator[symbols[i]];
 
                 value += ticks[symbol].AdjClose * hedgeRatio;
             }
@@ -110,7 +108,8 @@ namespace Bot.Strategies
             for (int i=0; i<symbols.Length; i++)
             {
                 string symbol = symbols[i];
-                double hedgeRatio = hedgeRatios[i];
+                double hedgeRatio = johansenIndicator[symbols[i]];
+
 
                 value += Math.Abs(ticks[symbol].AdjClose * hedgeRatio);
             }
@@ -131,7 +130,7 @@ namespace Bot.Strategies
             {
                 string symbol = symbols[i];
                 double currentPrice = engine.Ticks[symbol].AdjClose;
-                double desiredUnits = numUnitPortfolios * hedgeRatios[i] * longOrShort;
+                double desiredUnits = numUnitPortfolios * johansenIndicator[symbols[i]] * longOrShort;
 
                 double currentUnits = 0;
                 if (engine.Broker.Portfolio.Positions.ContainsKey(symbol))

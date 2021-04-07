@@ -160,11 +160,9 @@ namespace Bot
                 }
             };
 
-            /*
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
-            */
-            TestStuff();
+            // TestStuff();
         }
 
         public static void TestStuff()
@@ -176,6 +174,7 @@ namespace Bot
                 rinit.RHome = "C:/Program Files/R/R-3.4.3";
                 rinit.Interactive = true;
                 REngine rEngine = REngine.GetInstance(null, true, rinit);
+                rEngine.Evaluate("library('urca')");
 
                 // A somewhat contrived but customary Hello World:
                 CharacterVector charVec = rEngine.CreateCharacterVector(new[] { "Hello, R world!, .NET speaking" });

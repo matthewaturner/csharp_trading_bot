@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Bot.Models
 {
@@ -40,6 +38,11 @@ namespace Bot.Models
                 symbolMap[ticks[i].Symbol] = i;
             }
         }
+
+        /// <summary>
+        /// Returns the number of symbols in the symbol map.
+        /// </summary>
+        public int NumSymbols => ticks.Length;
 
         /// <summary>
         /// Gets the latest tick data for a symbol.
