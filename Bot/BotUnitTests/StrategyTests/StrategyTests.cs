@@ -23,6 +23,7 @@ namespace StrategyTests
             amcData = LoadData("./StrategyTests/AMC.csv", "AMC", TickInterval.Day);
         }
 
+        /*
         [TestMethod]
         public void SMACrossoverStrategy_LongOnly()
         {
@@ -95,6 +96,7 @@ namespace StrategyTests
                 Assert.IsTrue(orderFound);
             }
         }
+        */
 
 
         public IList<Tick> LoadData(

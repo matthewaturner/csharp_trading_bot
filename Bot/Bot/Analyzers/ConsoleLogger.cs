@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Bot.Analyzers
 {
-    public class ConsoleLogger : IAnalyzer, ITickReceiver, ITerminateReceiver
+    public class ConsoleLogger : IAnalyzer, ITerminateReceiver
     {
         private ITradingEngine engine;
 
@@ -19,21 +19,6 @@ namespace Bot.Analyzers
         public void Initialize(ITradingEngine engine, string[] args)
         {
             this.engine = engine;
-        }
-
-        /// <summary>
-        /// When a new tick comes in.
-        /// </summary>
-        /// <param name="ticks"></param>
-        public void OnTick(ITicks ticks)
-        {
-            string openOrders = string.Join(',', engine.Broker.OpenOrders.Select(o => o.ToString()));
-            string orderHistory = string.Join(',', engine.Broker.OrderHistory.Select(o => o.ToString()));
-
-            Console.WriteLine($"Tick: {ticks}");
-            Console.WriteLine($"Portfolio: {engine.Broker.Portfolio}");
-            Console.WriteLine($"Portfolio Value: {engine.Broker.PortfolioValue()}");
-            Console.WriteLine($"Open Orders: {openOrders}");
         }
 
         /// <summary>

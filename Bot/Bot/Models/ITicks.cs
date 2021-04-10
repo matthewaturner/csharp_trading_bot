@@ -37,5 +37,10 @@ namespace Bot.Models
         /// </summary>
         /// <returns></returns>
         string ToString();
+
+        /// <summary>
+        /// Returns the number of symbols.
+        /// </summary>
+        int NumSymbols { get; }
     }
 }

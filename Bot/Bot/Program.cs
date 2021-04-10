@@ -7,6 +7,7 @@ using Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using RDotNet;
 using System;
 using System.Data.Common;
 using System.Net.Http;
@@ -63,7 +64,7 @@ namespace Bot
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
-            services.AddSingleton<TickCsvLogger>();
+            services.AddSingleton<CsvLogger>();
             services.AddSingleton<SharpeRatio>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -112,8 +113,8 @@ namespace Bot
                         return serviceProvider.GetService<ConsoleLogger>();
                     case nameof(SharpeRatio):
                         return serviceProvider.GetService<SharpeRatio>();
-                    case nameof(TickCsvLogger):
-                        return serviceProvider.GetService<TickCsvLogger>();
+                    case nameof(CsvLogger):
+                        return serviceProvider.GetService<CsvLogger>();
                     default:
                         return null;
                 }
@@ -161,6 +162,35 @@ namespace Bot
 
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
+            // TestREngine();
         }
+
+        public static void TestREngine()
+        {
+            try
+            {
+                StartupParameter rinit = new StartupParameter();
+                rinit.Quiet = true;
+                rinit.RHome = "C:/Program Files/R/R-3.4.3";
+                rinit.Interactive = true;
+                REngine rEngine = REngine.GetInstance(null, true, rinit);
+                rEngine.Evaluate("library('urca')");
+
+                // A somewhat contrived but customary Hello World:
+                CharacterVector charVec = rEngine.CreateCharacterVector(new[] { "Hello, R world!, .NET speaking" });
+                rEngine.SetSymbol("greetings", charVec);
+                rEngine.Evaluate("str(greetings)"); // print out in the console
+                string[] a = rEngine.Evaluate("'Hi there .NET, from the R engine'").AsCharacter().ToArray();
+                Console.WriteLine("R answered: '{0}'", a[0]);
+                Console.WriteLine("Press any key to exit the program");
+                Console.ReadKey();
+                rEngine.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
     }
 }
