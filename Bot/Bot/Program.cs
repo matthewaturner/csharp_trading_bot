@@ -162,10 +162,10 @@ namespace Bot
 
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
-            // TestStuff();
+            // TestREngine();
         }
 
-        public static void TestStuff()
+        public static void TestREngine()
         {
             try
             {
