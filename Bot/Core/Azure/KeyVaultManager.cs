@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
 
-namespace Core
+namespace Core.Azure
 {
     public class KeyVaultManager : IKeyVaultManager
     {
@@ -21,7 +21,7 @@ namespace Core
 
             var options = new DefaultAzureCredentialOptions();
             options.ExcludeSharedTokenCacheCredential = true;
-            this.client = new SecretClient(
+            client = new SecretClient(
                 vaultUri: new Uri(config.Value.BaseUrl),
                 credential: new DefaultAzureCredential(options));
         }

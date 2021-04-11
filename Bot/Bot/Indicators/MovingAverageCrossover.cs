@@ -18,7 +18,7 @@ namespace Bot.Indicators
         public MovingAverageCrossover(
             int shortLookback, 
             int longLookback, 
-            Func<ITicks, double> transform)
+            Func<IMultiTick, double> transform)
             : base()
         {
             if (shortLookback >= longLookback)
@@ -35,7 +35,7 @@ namespace Bot.Indicators
         /// Calculate new values.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void OnTick(ITicks ticks)
+        public override void OnTick(IMultiTick ticks)
         {
             shortMA.OnTick(ticks);
             longMA.OnTick(ticks);

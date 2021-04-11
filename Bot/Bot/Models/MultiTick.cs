@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bot.Models
 {
-    public class Ticks : ITicks
+    public class MultiTick : IMultiTick
     {
         private Tick[] ticks;
         private IDictionary<string, int> symbolMap;
@@ -12,7 +12,7 @@ namespace Bot.Models
         /// Initializes ticks with no data.
         /// </summary>
         /// <param name="symbols"></param>
-        public Ticks(string[] symbols)
+        public MultiTick(string[] symbols)
         {
             ticks = new Tick[symbols.Length];
 
@@ -29,7 +29,7 @@ namespace Bot.Models
         /// Initialize the ticks object.
         /// </summary>
         /// <param name="ticks"></param>
-        public Ticks(Tick[] ticks)
+        public MultiTick(Tick[] ticks)
         {
             this.ticks = ticks;
 

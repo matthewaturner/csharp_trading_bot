@@ -60,7 +60,7 @@ namespace Bot.Strategies
         /// OnTick method which call the strategy on tick when indicators are hydrated.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(ITicks ticks)
+        public void OnTick(IMultiTick ticks)
         {
             foreach (IIndicator ind in Indicators)
             {
@@ -77,6 +77,6 @@ namespace Bot.Strategies
         /// Strategy logic goes here.
         /// </summary>
         /// <param name="ticks"></param>
-        public abstract void StrategyOnTick(ITicks ticks);
+        public abstract void StrategyOnTick(IMultiTick ticks);
     }
 }

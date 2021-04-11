@@ -2,7 +2,6 @@
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Engine;
-using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -15,6 +14,9 @@ using Bot.Analyzers;
 using System.Collections.Generic;
 using Bot.Data;
 using System.IO;
+using Bot.Brokers;
+using Core.Azure;
+using Bot.Brokers.BackTest;
 
 namespace Bot
 {
@@ -40,10 +42,11 @@ namespace Bot
                     Path = "./appsettings.dev.json"
                 })
                 .Build();
+            services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
             services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
-            services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
+            services.Configure<AlpacaConfiguration>(configuration.GetSection(ConfigurationPaths.Alpaca));
 
             // entity framework stuff
             DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);

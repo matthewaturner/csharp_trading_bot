@@ -3,14 +3,18 @@ using Bot.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bot.Engine.Events;
+using Bot.Models.Interfaces;
+using Bot.Brokers.BackTest.Models;
+using Bot.Models;
 
-namespace Bot.Models
+namespace Bot.Brokers.BackTest
 {
-    public class BackTestingBroker : IBroker, ITickReceiver
+    public class BackTestingBroker : IBroker
     {
-        private ITicks ticks;
+        private IMultiTick ticks;
         private ITradingEngine engine;
+        private BackTestAccount account;
+        private IList<BackTestPosition> positions;
 
         public BackTestingBroker()
         { }
@@ -26,16 +30,33 @@ namespace Bot.Models
             this.engine = engine;
             ticks = engine.Ticks;
 
-            Portfolio = new Portfolio();
-            Portfolio.AddFunds(initialFunds);
+            account = new BackTestAccount(initialFunds);
+            positions = new List<BackTestPosition>();
+
             OpenOrders = new List<Order>();
             OrderHistory = new List<Order>();
         }
 
         /// <summary>
-        /// Get portfolio object.
+        /// Gets account object.
         /// </summary>
-        public Portfolio Portfolio { get; private set; }
+        public IAccount GetAccount()
+        {
+            return account;
+        }
+
+        /// <summary>
+        /// Positions held.
+        /// </summary>
+        public IList<IPosition> GetPositions()
+        {
+            return positions.ToList<IPosition>();
+        }
+
+        public IPosition GetPosition(string symbol)
+        {
+            return positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+        }
 
         /// <summary>
         /// Get open orders.
@@ -83,7 +104,7 @@ namespace Bot.Models
         /// Open orders execute at the open price of the next tick.
         /// </summary>
         /// <param name="_"></param>
-        public void OnTick(ITicks _)
+        public void OnTick(IMultiTick ticks)
         {
             Order order = OpenOrders.FirstOrDefault();
             while (order != null)
@@ -98,11 +119,11 @@ namespace Bot.Models
                     switch (order.Type)
                     {
                         case OrderType.MarketBuy:
-                            Portfolio.Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
                             break;
 
                         case OrderType.MarketSell:
-                            Portfolio.Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
                             break;
                     }
 
@@ -114,6 +135,8 @@ namespace Bot.Models
                 OpenOrders.RemoveAt(0);
                 order = OpenOrders.FirstOrDefault();
             }
+
+            UpdateAccountValue(ticks);
         }
 
         /// <summary>
@@ -155,20 +178,20 @@ namespace Bot.Models
             {
                 // logic is the same for now
                 case OrderType.MarketBuy:
-                    if (orderPrice > Portfolio.CashBalance)
+                    if (orderPrice > account.CashBalance)
                     {
                         return OrderState.Rejected;
                     }
                     break;
 
                 case OrderType.MarketSell:
-                    double netQuantity = Portfolio.HasPosition(order.Symbol) ?
-                        Portfolio[order.Symbol].Quantity - order.Quantity :
-                        -order.Quantity;
+
+                    IPosition pos = positions.FirstOrDefault(pos => pos.Symbol.Equals(order.Symbol));
+                    double netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
 
                     if (netQuantity < 0)
                     {
-                        if (currentPrice * -netQuantity > Portfolio.CurrentValue(ticks, (t) => t.AdjOpen))
+                        if (currentPrice * -netQuantity > account.TotalValue)
                         {
                             return OrderState.Rejected;
                         }
@@ -188,16 +211,96 @@ namespace Bot.Models
         /// <returns></returns>
         public double PortfolioValue()
         {
-            return Portfolio.CurrentValue(ticks, (tick) => tick.AdjClose);
+            return account.TotalValue;
         }
 
         /// <summary>
         /// Gets the current cash balance.
         /// </summary>
         /// <returns></returns>
-        public double CashValue()
+        public double CashBalance()
         {
-            return Portfolio.CashBalance;
+            return account.CashBalance;
+        }
+
+        /// <summary>
+        /// Updates the total account value based on latest prices.
+        /// </summary>
+        /// <param name="tick"></param>
+        private void UpdateAccountValue(IMultiTick tick)
+        {
+            double total = account.CashBalance;
+            foreach (IPosition pos in positions)
+            {
+                total += pos.Quantity * tick[pos.Symbol].AdjClose;
+            }
+
+            account.TotalValue = total;
+        }
+
+        /// <summary>
+        /// Buys a security.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="quantity"></param>
+        /// <param name="price"></param>
+        private void Buy(string symbol, double quantity, double price)
+        {
+            if (quantity == 0)
+            {
+                return;
+            }
+
+            BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+
+            if (currentPosition != null)
+            {
+                currentPosition.Quantity += quantity;
+                currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
+                account.CashBalance -= price * quantity;
+
+                if (currentPosition.Quantity == 0)
+                {
+                    positions.Remove(currentPosition);
+                }
+            }
+            else
+            {
+                positions.Add(new BackTestPosition(symbol, quantity));
+                account.CashBalance -= price * quantity;
+            }
+        }
+
+        /// <summary>
+        /// Sells a symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="quantity"></param>
+        private void Sell(string symbol, double quantity, double price)
+        {
+            if (quantity == 0)
+            {
+                return;
+            }
+
+            BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+
+            if (currentPosition != null)
+            {
+                currentPosition.Quantity -= quantity;
+                currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
+                account.CashBalance += price * quantity;
+
+                if (currentPosition.Quantity == 0)
+                {
+                    positions.Remove(currentPosition);
+                }
+            }
+            else
+            {
+                positions.Add(new BackTestPosition(symbol, -quantity));
+                account.CashBalance += price * quantity;
+            }
         }
     }
 }

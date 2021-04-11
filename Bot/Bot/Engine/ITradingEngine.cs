@@ -1,4 +1,5 @@
 ﻿using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.Configuration;
 using Bot.Data;
 using Bot.Models;
@@ -24,7 +25,7 @@ namespace Bot.Engine
         /// <summary>
         /// Get current ticks.
         /// </summary>
-        public ITicks Ticks { get; }
+        public IMultiTick Ticks { get; }
 
         /// <summary>
         /// Gets current data source.

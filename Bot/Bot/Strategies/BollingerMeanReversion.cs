@@ -1,6 +1,8 @@
-﻿using Bot.Engine;
+﻿using Bot.Brokers;
+using Bot.Engine;
 using Bot.Indicators;
 using Bot.Models;
+using Bot.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,8 @@ namespace Bot.Strategies
         };
 
         private ITradingEngine engine;
+        private IBroker broker;
+
         private BollingerBand bollingerBand;
         private IList<IIndicator> indicators;
         private string[] symbols;
@@ -39,6 +43,7 @@ namespace Bot.Strategies
         public override void Initialize(ITradingEngine engine, string[] args)
         {
             this.engine = engine;
+            broker = engine.Broker;
 
             int lookback = int.Parse(args[0]);
             double entryZScore = double.Parse(args[1]);
@@ -85,7 +90,7 @@ namespace Bot.Strategies
         /// </summary>
         /// <param name="ticks"></param>
         /// <returns></returns>
-        public double HedgedPortfolioValue(ITicks ticks)
+        public double HedgedPortfolioValue(IMultiTick ticks)
         {
             double value = 0;
             for (int i=0; i<symbols.Length; i++)
@@ -104,7 +109,7 @@ namespace Bot.Strategies
         /// </summary>
         /// <param name="ticks"></param>
         /// <returns></returns>
-        public double HedgedTradeValue(ITicks ticks)
+        public double HedgedTradeValue(IMultiTick ticks)
         {
             double value = 0;
             for (int i=0; i<symbols.Length; i++)
@@ -134,9 +139,11 @@ namespace Bot.Strategies
                 double desiredUnits = numUnitPortfolios * hedgeRatios[i] * longOrShort;
 
                 double currentUnits = 0;
-                if (engine.Broker.Portfolio.Positions.ContainsKey(symbol))
+                IPosition currentPosition = broker.GetPositions().Where(pos => pos.Symbol.Equals(symbol)).FirstOrDefault();
+
+                if (currentPosition != null)
                 {
-                    currentUnits = engine.Broker.Portfolio.Positions[symbol].Quantity;
+                    currentUnits = currentPosition.Quantity;
                 }
 
                 double difference = desiredUnits - currentUnits;
@@ -172,9 +179,11 @@ namespace Bot.Strategies
                 double currentPrice = engine.Ticks[symbol].AdjClose;
 
                 double currentUnits = 0;
-                if (engine.Broker.Portfolio.Positions.ContainsKey(symbol))
+                IPosition currentPosition = broker.GetPositions().Where(pos => pos.Symbol.Equals(symbol)).FirstOrDefault();
+
+                if (currentPosition != null)
                 {
-                    currentUnits = engine.Broker.Portfolio.Positions[symbol].Quantity;
+                    currentUnits = currentPosition.Quantity;
                 }
 
                 if (currentUnits > 0)
@@ -202,7 +211,7 @@ namespace Bot.Strategies
         /// What to do when a new tick of data comes in.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void StrategyOnTick(ITicks ticks)
+        public override void StrategyOnTick(IMultiTick ticks)
         {
             int bollValue = (int)bollingerBand.Value;
 

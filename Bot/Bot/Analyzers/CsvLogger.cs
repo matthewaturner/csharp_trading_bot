@@ -67,7 +67,7 @@ namespace Bot.Analyzers
         /// Log at every tick.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(ITicks ticks)
+        public void OnTick(IMultiTick ticks)
         {
             csv.WriteField(ticks[0].DateTime.ToString("o"));
 
@@ -87,7 +87,7 @@ namespace Bot.Analyzers
             }
 
             csv.WriteField(engine.Broker.PortfolioValue());
-            csv.WriteField(engine.Broker.CashValue());
+            csv.WriteField(engine.Broker.CashBalance());
             csv.NextRecord();
         }
 

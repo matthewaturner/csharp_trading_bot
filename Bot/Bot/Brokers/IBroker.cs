@@ -1,10 +1,13 @@
 ﻿using Bot.Engine;
+using Bot.Engine.Events;
+using Bot.Models;
+using Bot.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace Bot.Models
+namespace Bot.Brokers
 {
-    public interface IBroker
+    public interface IBroker : ITickReceiver
     {
         /// <summary>
         /// Initializes the broker with custom arguments.
@@ -22,7 +25,7 @@ namespace Bot.Models
         /// Gets the current portfolio cash value.
         /// </summary>
         /// <returns></returns>
-        public double CashValue();
+        public double CashBalance();
 
         /// <summary>
         /// Gets the history of orders.
@@ -50,9 +53,22 @@ namespace Bot.Models
         public void CancelOrder(string orderId);
 
         /// <summary>
-        /// Portfolio held by the broker.
+        /// Get account information.
         /// </summary>
-        Portfolio Portfolio { get; }
+        IAccount GetAccount();
+
+        /// <summary>
+        /// Get current positions.
+        /// </summary>
+        /// <returns></returns>
+        IList<IPosition> GetPositions();
+
+        /// <summary>
+        /// Gets a single position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        IPosition GetPosition(string symbol);
 
         /// <summary>
         /// List of open orders.

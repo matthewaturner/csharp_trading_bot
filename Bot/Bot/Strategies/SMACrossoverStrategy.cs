@@ -2,6 +2,10 @@
 using Bot.Models;
 using System.Collections.Generic;
 using Bot.Engine;
+using Bot.Brokers;
+using Bot.Brokers.BackTest.Models;
+using Bot.Models.Interfaces;
+using System.Linq;
 
 namespace Bot.Strategies
 {
@@ -10,7 +14,7 @@ namespace Bot.Strategies
         private IBroker broker;
         private IList<IIndicator> indicators;
         private IIndicator mac;
-        private Position currentPosition;
+        private IPosition currentPosition;
         private bool longOnly;
         private int maxUnits = 10;
         private string orderId;
@@ -37,7 +41,7 @@ namespace Bot.Strategies
             mac = new MovingAverageCrossover(
                 shortMa,
                 longMa,
-                (ITicks t) => t[symbol].AdjClose);
+                (IMultiTick t) => t[symbol].AdjClose);
             indicators.Add(mac);
         }
 
@@ -49,7 +53,7 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void StrategyOnTick(ITicks ticks)
+        public override void StrategyOnTick(IMultiTick ticks)
         {
             Tick tick = ticks[symbol];
             mac.OnTick(ticks);
@@ -65,21 +69,20 @@ namespace Bot.Strategies
                     }
                 }
 
-                currentPosition = broker.Portfolio.Positions.ContainsKey(tick.Symbol) ? broker.Portfolio.Positions[tick.Symbol] : null;
+                currentPosition = broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(tick.Symbol));
                 int macVal = (int)mac.Value;
-                
 
                 if (macVal == 0 && currentPosition != null)
                 {
                     //Exit any position
                     ExitPosition(tick);
                 }
-                else if (macVal > 0 && (currentPosition == null || currentPosition.GetPositionType() != PositionType.Long))
+                else if (macVal > 0 && (currentPosition == null || currentPosition.Type != PositionType.Long))
                 {
                     //Enter long position
                     EnterLongPosition(tick);
                 }
-                else if (macVal < 0 && (currentPosition == null || currentPosition.GetPositionType() != PositionType.Short))
+                else if (macVal < 0 && (currentPosition == null || currentPosition.Type != PositionType.Short))
                 {
                     if (!longOnly)
                     {
@@ -96,7 +99,7 @@ namespace Bot.Strategies
 
         public void ExitPosition(Tick tick)
         {
-            var orderType = currentPosition.GetPositionType() == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
+            var orderType = currentPosition.Type == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
             var quantity = currentPosition.Quantity;
             var targetPrice = tick.AdjClose;
             var order = new OrderRequest(

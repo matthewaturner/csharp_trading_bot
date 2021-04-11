@@ -1,15 +1,14 @@
 using Bot.Analyzers;
+using Bot.Brokers.BackTest;
 using Bot.Configuration;
 using Bot.Data;
 using Bot.Engine;
-using Bot.Models;
 using Bot.Strategies;
-using Core;
+using Core.Azure;
 using Core.Configuration;
 using ElectronNET.API;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
