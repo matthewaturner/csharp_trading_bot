@@ -41,7 +41,7 @@ namespace BrokerUnitTests
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.GetPositions().Any(pos => pos.Symbol.Equals("GME")));
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
-            Assert.AreEqual(1, broker.GetOrdersByState(OrderState.Open).Count);
+            Assert.AreEqual(1, broker.QueryOrders(OrderState.Open).Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
             // execution happens on ticks
@@ -49,7 +49,7 @@ namespace BrokerUnitTests
             Assert.IsNotNull(broker.GetPosition("GME"));
             Assert.AreEqual(10.0, broker.GetPosition("GME").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
-            Assert.AreEqual(0, broker.GetOrdersByState(OrderState.Open).Count);
+            Assert.AreEqual(0, broker.QueryOrders(OrderState.Open).Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(orderId).State);
         }
 

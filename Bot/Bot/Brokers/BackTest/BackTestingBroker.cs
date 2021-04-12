@@ -6,10 +6,11 @@ using System.Linq;
 using Bot.Models.Interfaces;
 using Bot.Brokers.BackTest.Models;
 using Bot.Models;
+using Bot.Engine.Events;
 
 namespace Bot.Brokers.BackTest
 {
-    public class BackTestingBroker : IBroker
+    public class BackTestingBroker : IBroker, ITickReceiver
     {
         private IMultiTick ticks;
         private ITradingEngine engine;
@@ -102,7 +103,7 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IList<IOrder> GetOrdersByState(OrderState state)
+        public IList<IOrder> QueryOrders(OrderState state)
         {
             return allOrders.Where(order => order.State == state).ToList<IOrder>();
         }

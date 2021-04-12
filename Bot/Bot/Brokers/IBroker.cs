@@ -1,5 +1,4 @@
 ﻿using Bot.Engine;
-using Bot.Engine.Events;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using System;
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Bot.Brokers
 {
-    public interface IBroker : ITickReceiver
+    public interface IBroker
     {
         /// <summary>
         /// Initializes the broker with custom arguments.
@@ -66,7 +65,7 @@ namespace Bot.Brokers
         /// <summary>
         /// Get all orders in some state.
         /// </summary>
-        IList<IOrder> GetOrdersByState(OrderState state);
+        IList<IOrder> QueryOrders(string symbol, OrderState state, DateTime after, DateTime until, int limit = 50);
 
         /// <summary>
         /// Gets all open orders.

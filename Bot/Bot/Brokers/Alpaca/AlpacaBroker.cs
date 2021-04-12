@@ -2,13 +2,18 @@
 using Bot.Brokers.Alpaca.Models;
 using Bot.Configuration;
 using Bot.Engine;
+using Bot.Exceptions;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using Core.Azure;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 
 namespace Bot.Brokers
@@ -17,9 +22,10 @@ namespace Bot.Brokers
     {
         private readonly string apiKeyId;
         private readonly string apiKeySecret;
-        private readonly HttpClient httpClient;
         private readonly AlpacaConfiguration config;
+
         private ITradingEngine engine;
+        private RestClient restClient;
         private string baseUrl;
 
         /// <summary>
@@ -30,13 +36,12 @@ namespace Bot.Brokers
         /// <param name="httpClient"></param>
         public AlpacaBroker(
             IOptionsSnapshot<AlpacaConfiguration> config,
-            IKeyVaultManager keyVaultManager,
-            HttpClient httpClient)
+            IKeyVaultManager keyVaultManager)
         {
             this.config = config.Value;
             apiKeyId = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeyIdSecretName).Result;
             apiKeySecret = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeySecretName).Result;
-            this.httpClient = httpClient;
+            restClient = new RestClient();
         }
 
         /// <summary>
@@ -49,19 +54,25 @@ namespace Bot.Brokers
         {
             this.engine = engine;
             baseUrl = bool.Parse(args[0]) ? config.PaperApiBaseUrl : config.ApiBaseUrl;
+
+            restClient.BaseUrl = new Uri(baseUrl);
         }
 
         /// <summary>
         /// Sends an authenticated http request to the alpaca api.
         /// </summary>
         /// <param name="request"></param>
-        private HttpResponseMessage SendAuthenticatedHttpRequest(HttpRequestMessage request)
+        private IRestResponse SendAuthenticatedHttpRequest(IRestRequest request, bool validate = true)
         {
-            request.Headers.Add("APCA-API-KEY-ID", apiKeyId);
-            request.Headers.Add("APCA-API-SECRET-KEY", apiKeySecret);
+            request.AddHeader("APCA-API-KEY-ID", apiKeyId);
+            request.AddHeader("APCA-API-SECRET-KEY", apiKeySecret);
 
-            HttpResponseMessage response = httpClient.Send(request);
-            response.EnsureSuccessStatusCode();
+            IRestResponse response = restClient.Execute(request);
+
+            if (!response.IsSuccessful && validate)
+            {
+                throw new RestException($"Failure calling alpaca resource {request.Resource}. Status code {response.StatusCode}");
+            }
 
             return response;
         }
@@ -72,63 +83,135 @@ namespace Bot.Brokers
         /// <returns></returns>
         public IAccount GetAccount()
         {
-            try
-            {
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUrl + "/v2/account");
-                HttpResponseMessage response = SendAuthenticatedHttpRequest(request);
-
-                return JsonConvert.DeserializeObject<AlpacaAccount>(response.Content.ReadAsStringAsync().Result);
-            }
-            catch (HttpRequestException ex)
-            {
-                engine.Log($"Caught exception in method {nameof(GetAccount)} : {ex}");
-            }
-            catch (JsonSerializationException ex)
-            {
-                engine.Log($"Failed to deserialize AlpacaAccount : {ex}");
-            }
-
-            return null;
+            IRestRequest request = new RestRequest("/v2/account", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaAccount>(response.Content);
         }
 
+        /// <summary>
+        /// Gets all currently held positions.
+        /// </summary>
+        /// <returns></returns>
         public IList<IPosition> GetPositions()
         {
-            throw new NotImplementedException();
+            IRestRequest request = new RestRequest("/v2/positions", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            var positions = JsonConvert.DeserializeObject<IList<AlpacaPosition>>(response.Content);
+            return positions.ToList<IPosition>();
         }
 
+        /// <summary>
+        /// Gets a specific position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public IPosition GetPosition(string symbol)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentNullException(nameof(symbol));
+            }
+
+            IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaPosition>(response.Content);
         }
 
+        /// <summary>
+        /// Gets current cash balance. Actually makes a call to get account information.
+        /// </summary>
+        /// <returns></returns>
         public double GetCashBalance()
         {
-            throw new NotImplementedException();
+            return GetAccount().Cash;
         }
 
+        /// <summary>
+        /// Gets an order by id.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         public IOrder GetOrder(string orderId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new ArgumentNullException(nameof(orderId));
+            }
+            
+            IRestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request, validate:false);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+            if (!response.IsSuccessful)
+            {
+                throw new RestException($"Failure calling alpaca resource {request.Resource}. Status code {response.StatusCode}");
+            }
+
+            return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
         }
 
-        public IList<IOrder> GetOrdersByState(OrderState state)
+        /// <summary>
+        /// Get orders matching some state. (filled, open, etc.)
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public IList<IOrder> QueryOrders(
+            string symbol,
+            OrderState state,
+            DateTime after,
+            DateTime until,
+            int limit = 50)
         {
-            throw new NotImplementedException();
+            IRestRequest request = new RestRequest($"/v2/orders", Method.GET);
+
+            if (!string.IsNullOrWhiteSpace(symbol))
+            {
+                request.AddQueryParameter("symbol", symbol);
+            }
+
+            if (state != OrderState.Unknown)
+            {
+                if (state == OrderState.Open)
+                {
+                    request.AddQueryParameter("status", "open");
+                }
+                else
+                {
+                    request.AddQueryParameter("status", "closed");
+                }
+            }
+            request.AddQueryParameter("after", after.ToString("O"));
+            request.AddQueryParameter("until", until.ToString("O"));
+            request.AddQueryParameter("limit", limit.ToString("O"));
+
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<IList<AlpacaOrder>>(response.Content).ToList<IOrder>();
         }
 
+        /// <summary>
+        /// Get all open orders.
+        /// </summary>
+        /// <returns></returns>
         public IList<IOrder> GetOpenOrders()
         {
-            return GetOrdersByState(OrderState.Open);
+            return QueryOrders(null, OrderState.Open, DateTime.MinValue, DateTime.MaxValue, 50);
         }
 
+        /// <summary>
+        /// Gets all orders.
+        /// </summary>
+        /// <returns></returns>
         public IList<IOrder> GetAllOrders()
         {
-            throw new NotImplementedException();
+            return QueryOrders(null, OrderState.Unknown, DateTime.MinValue, DateTime.MaxValue, 500);
         }
 
         public double GetPortfolioValue()
         {
-            throw new NotImplementedException();
+            return GetAccount().TotalValue;
         }
 
         public void OnTick(IMultiTick ticks)
