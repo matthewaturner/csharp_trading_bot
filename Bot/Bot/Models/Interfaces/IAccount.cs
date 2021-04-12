@@ -11,7 +11,7 @@ namespace Bot.Models.Interfaces
         /// <summary>
         /// Cash available to trade.
         /// </summary>
-        public double CashBalance { get; }
+        public double Cash { get; }
 
         /// <summary>
         /// Amount that can be bought or sold currently.

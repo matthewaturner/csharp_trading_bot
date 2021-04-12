@@ -4,7 +4,6 @@ using Bot.Indicators;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Bot.Strategies
@@ -22,7 +21,6 @@ namespace Bot.Strategies
         private IBroker broker;
 
         private BollingerBand bollingerBand;
-        private IList<IIndicator> indicators;
         private string[] symbols;
         private double[] hedgeRatios;
         private Position position;
@@ -31,9 +29,8 @@ namespace Bot.Strategies
         /// Base constructor.
         /// </summary>
         public BollingerMeanReversion()
+            : base()
         { }
-
-        public override IList<IIndicator> Indicators => indicators;
 
         /// <summary>
         /// Initialize.
@@ -57,9 +54,9 @@ namespace Bot.Strategies
                 throw new ArgumentException("Hedge ratios array length != symbols array length");
             }
 
-            indicators = new List<IIndicator>();
             bollingerBand = new BollingerBand(lookback, entryZScore, exitZScore, HedgedPortfolioValue);
-            indicators.Add(bollingerBand);
+            Indicators.Add(bollingerBand);
+
             position = Position.Neutral;
         }
 
@@ -128,7 +125,7 @@ namespace Bot.Strategies
         /// <param name="longOrShort"></param>
         public void EnterPositions(int longOrShort)
         {
-            double tradeableValue = engine.Broker.PortfolioValue() * .95;
+            double tradeableValue = engine.Broker.GetPortfolioValue() * .95;
             double unitPortfolioValue = HedgedTradeValue(engine.Ticks);
             double numUnitPortfolios = tradeableValue / unitPortfolioValue;
 

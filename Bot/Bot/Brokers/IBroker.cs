@@ -13,44 +13,31 @@ namespace Bot.Brokers
         /// Initializes the broker with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        public void Initialize(ITradingEngine engine, string[] args);
+        void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
         /// Gets the current portfolio value.
         /// </summary>
         /// <returns></returns>
-        public double PortfolioValue();
+        double GetPortfolioValue();
 
         /// <summary>
         /// Gets the current portfolio cash value.
         /// </summary>
         /// <returns></returns>
-        public double CashBalance();
-
-        /// <summary>
-        /// Gets the history of orders.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public IList<Order> GetOrderHistory(DateTime start, DateTime end);
+        double GetCashBalance();
 
         /// <summary>
         /// Places an order.
         /// </summary>
-        /// <returns></returns>
-        public string PlaceOrder(OrderRequest order);
-
-        /// <summary>
-        /// Gets the status of an order.
-        /// </summary>
-        public Order GetOrder(string orderId);
+        /// <returns>Order id.</returns>
+        string PlaceOrder(IOrderRequest order);
 
         /// <summary>
         /// Cancel an order if it hasn't been filled yet.
         /// </summary>
         /// <param name="order"></param>
-        public void CancelOrder(string orderId);
+        void CancelOrder(string orderId);
 
         /// <summary>
         /// Get account information.
@@ -70,14 +57,26 @@ namespace Bot.Brokers
         /// <returns></returns>
         IPosition GetPosition(string symbol);
 
+
         /// <summary>
-        /// List of open orders.
+        /// Gets the status of an order.
         /// </summary>
-        IList<Order> OpenOrders { get; }
+        IOrder GetOrder(string orderId);
+
+        /// <summary>
+        /// Get all orders in some state.
+        /// </summary>
+        IList<IOrder> GetOrdersByState(OrderState state);
+
+        /// <summary>
+        /// Gets all open orders.
+        /// </summary>
+        /// <returns></returns>
+        IList<IOrder> GetOpenOrders();
 
         /// <summary>
         /// Order history.
         /// </summary>
-        IList<Order> OrderHistory { get; }
+        IList<IOrder> GetAllOrders();
     }
 }

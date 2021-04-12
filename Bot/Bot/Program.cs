@@ -60,6 +60,7 @@ namespace Bot
 
             // inject brokers
             services.AddSingleton<BackTestingBroker>();
+            services.AddSingleton<AlpacaBroker>();
 
             // inject strategies
             services.AddSingleton<SMACrossoverStrategy>();
@@ -90,6 +91,8 @@ namespace Bot
                 {
                     case nameof(BackTestingBroker):
                         return serviceProvider.GetService<BackTestingBroker>();
+                    case nameof(AlpacaBroker):
+                        return serviceProvider.GetService<AlpacaBroker>();
                     default:
                         return null;
                 }
@@ -165,7 +168,20 @@ namespace Bot
 
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
+
             // TestREngine();
+            // TestAlpaca(serviceProvider);
+        }
+
+        public static void TestAlpaca(ServiceProvider provider)
+        {
+            ITradingEngine engine = provider.GetService<ITradingEngine>();
+            AlpacaBroker broker = provider.GetService<AlpacaBroker>();
+
+            broker.Initialize(engine, new string[] { "true" });
+
+            var account = broker.GetAccount();
+            Console.WriteLine(account.Cash);
         }
 
         public static void TestREngine()

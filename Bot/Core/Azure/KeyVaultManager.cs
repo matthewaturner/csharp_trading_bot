@@ -1,8 +1,9 @@
-﻿using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
+﻿
 using Core.Configuration;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.KeyVault.Models;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Options;
-using System;
 using System.Threading.Tasks;
 
 namespace Core.Azure
@@ -10,27 +11,23 @@ namespace Core.Azure
     public class KeyVaultManager : IKeyVaultManager
     {
         KeyVaultConfiguration config;
-        SecretClient client;
+        KeyVaultClient client;
 
         public KeyVaultManager(IOptions<KeyVaultConfiguration> config)
         {
             this.config = config.Value;
-            /*this.client = new KeyVaultClient(
+            this.client = new KeyVaultClient(
                 new KeyVaultClient.AuthenticationCallback(
-                    new AzureServiceTokenProvider().KeyVaultTokenCallback));*/
-
-            var options = new DefaultAzureCredentialOptions();
-            options.ExcludeSharedTokenCacheCredential = true;
-            client = new SecretClient(
-                vaultUri: new Uri(config.Value.BaseUrl),
-                credential: new DefaultAzureCredential(options));
+                    new AzureServiceTokenProvider().KeyVaultTokenCallback));
         }
 
         public async Task<string> GetSecretAsync(string secretName)
         {
-            var bundle = await client.GetSecretAsync(secretName);
+            SecretBundle bundle = await client.GetSecretAsync(
+                vaultBaseUrl: config.BaseUrl,
+                secretName: secretName);
 
-            return bundle.Value.Value;
+            return bundle.Value;
         }
     }
 }

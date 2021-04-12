@@ -1,6 +1,8 @@
-﻿namespace Bot.Models
+﻿using Bot.Models.Interfaces;
+
+namespace Bot.Models
 {
-    public class OrderRequest
+    public class OrderRequest : IOrderRequest
     {
         public OrderRequest(
             OrderType type,

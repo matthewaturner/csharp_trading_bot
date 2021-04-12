@@ -86,8 +86,8 @@ namespace Bot.Analyzers
                 csv.WriteField(value);
             }
 
-            csv.WriteField(engine.Broker.PortfolioValue());
-            csv.WriteField(engine.Broker.CashBalance());
+            csv.WriteField(engine.Broker.GetPortfolioValue());
+            csv.WriteField(engine.Broker.GetCashBalance());
             csv.NextRecord();
         }
 

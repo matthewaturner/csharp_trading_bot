@@ -15,7 +15,12 @@ namespace Bot.Brokers.BackTest
         private ITradingEngine engine;
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
+        private IList<BackTestOrder> openOrders;
+        private IList<BackTestOrder> allOrders;
 
+        /// <summary>
+        /// Dependency injection constructor.
+        /// </summary>
         public BackTestingBroker()
         { }
 
@@ -23,6 +28,7 @@ namespace Bot.Brokers.BackTest
         /// Initialize with custom arguments.
         /// </summary>
         /// <param name="args"></param>
+        /// <param name="args[0]">Initial funds.</param>
         public void Initialize(ITradingEngine engine, string[] args)
         {
             double initialFunds = double.Parse(args[0]);
@@ -33,8 +39,8 @@ namespace Bot.Brokers.BackTest
             account = new BackTestAccount(initialFunds);
             positions = new List<BackTestPosition>();
 
-            OpenOrders = new List<Order>();
-            OrderHistory = new List<Order>();
+            openOrders = new List<BackTestOrder>();
+            allOrders = new List<BackTestOrder>();
         }
 
         /// <summary>
@@ -46,58 +52,77 @@ namespace Bot.Brokers.BackTest
         }
 
         /// <summary>
-        /// Positions held.
+        /// Gets all positions held.
         /// </summary>
         public IList<IPosition> GetPositions()
         {
             return positions.ToList<IPosition>();
         }
 
+        /// <summary>
+        /// Gets the position held in some symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
         public IPosition GetPosition(string symbol)
         {
             return positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
         }
 
         /// <summary>
-        /// Get open orders.
+        /// Gets the status of an order.
         /// </summary>
-        public IList<Order> OpenOrders { get; private set; }
-
-        /// <summary>
-        /// Get order history.
-        /// </summary>
-        public IList<Order> OrderHistory { get; private set; }
-
-        /// <summary>
-        /// Placing an order just puts it into the open orders list.
-        /// </summary>
-        /// <param name="order"></param>
-        public string PlaceOrder(OrderRequest request)
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public IOrder GetOrder(string orderId)
         {
-            Order order = new Order(request);
-
-            if (!ticks.HasSymbol(order.Symbol))
-            {
-                throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
-            }
-
-            order.OrderId = Guid.NewGuid().ToString();
-            order.PlacementTime = ticks[order.Symbol].DateTime;
-            OpenOrders.Add(order);
-            OrderHistory.Add(order);
-
-            return order.OrderId;
+            return allOrders.FirstOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
         }
 
         /// <summary>
-        /// Returns order history.
+        /// Gets all outstanding orders.
         /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
         /// <returns></returns>
-        public IList<Order> GetOrderHistory(DateTime start, DateTime end)
+        public IList<IOrder> GetOpenOrders()
         {
-            return OrderHistory.Where(order => order.PlacementTime >= start && order.PlacementTime < end).ToList();
+            return openOrders.ToList<IOrder>();
+        }
+
+        /// <summary>
+        /// Gets all orders.
+        /// </summary>
+        /// <returns></returns>
+        public IList<IOrder> GetAllOrders()
+        {
+            return allOrders.ToList<IOrder>();
+        }
+
+        /// <summary>
+        /// Gets all orders in some state (open, filled, etc.)
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public IList<IOrder> GetOrdersByState(OrderState state)
+        {
+            return allOrders.Where(order => order.State == state).ToList<IOrder>();
+        }
+
+        /// <summary>
+        /// Gets the current portfolio value.
+        /// </summary>
+        /// <returns></returns>
+        public double GetPortfolioValue()
+        {
+            return account.TotalValue;
+        }
+
+        /// <summary>
+        /// Gets the current cash balance.
+        /// </summary>
+        /// <returns></returns>
+        public double GetCashBalance()
+        {
+            return account.Cash;
         }
 
         /// <summary>
@@ -106,7 +131,7 @@ namespace Bot.Brokers.BackTest
         /// <param name="_"></param>
         public void OnTick(IMultiTick ticks)
         {
-            Order order = OpenOrders.FirstOrDefault();
+            BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)
             {
                 OrderState state = PreviewOrder(order);
@@ -132,22 +157,34 @@ namespace Bot.Brokers.BackTest
                     order.Fill(ticks[order.Symbol].AdjOpen, ticks[order.Symbol].DateTime);
                 }
 
-                OpenOrders.RemoveAt(0);
-                order = OpenOrders.FirstOrDefault();
+                openOrders.RemoveAt(0);
+                order = openOrders.FirstOrDefault();
             }
 
             UpdateAccountValue(ticks);
         }
 
         /// <summary>
-        /// Gets the status of an order.
+        /// Placing an order just puts it into the open orders list.
         /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        public Order GetOrder(string orderId)
+        /// <param name="order"></param>
+        public string PlaceOrder(IOrderRequest request)
         {
-            return OrderHistory.FirstOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
+            BackTestOrder order = new BackTestOrder(request);
+
+            if (!ticks.HasSymbol(order.Symbol))
+            {
+                throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
+            }
+
+            order.OrderId = Guid.NewGuid().ToString();
+            order.PlacementTime = ticks[order.Symbol].DateTime;
+            openOrders.Add(order);
+            allOrders.Add(order);
+
+            return order.OrderId;
         }
+
 
         /// <summary>
         /// Cancels an order if it hasn't been filled yet.
@@ -155,12 +192,12 @@ namespace Bot.Brokers.BackTest
         /// <param name="orderId"></param>
         public void CancelOrder(string orderId)
         {
-            Order order = OpenOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
+            BackTestOrder order = openOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
 
             if (order != null)
             {
                 order.State = OrderState.Cancelled;
-                OpenOrders.Remove(order);
+                openOrders.Remove(order);
             }
         }
 
@@ -169,7 +206,7 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public OrderState PreviewOrder(Order order)
+        public OrderState PreviewOrder(BackTestOrder order)
         {
             double currentPrice = ticks[order.Symbol].AdjOpen;
             double orderPrice = currentPrice * order.Quantity;
@@ -178,7 +215,7 @@ namespace Bot.Brokers.BackTest
             {
                 // logic is the same for now
                 case OrderType.MarketBuy:
-                    if (orderPrice > account.CashBalance)
+                    if (orderPrice > account.Cash)
                     {
                         return OrderState.Rejected;
                     }
@@ -206,30 +243,12 @@ namespace Bot.Brokers.BackTest
         }
 
         /// <summary>
-        /// Gets the current portfolio value.
-        /// </summary>
-        /// <returns></returns>
-        public double PortfolioValue()
-        {
-            return account.TotalValue;
-        }
-
-        /// <summary>
-        /// Gets the current cash balance.
-        /// </summary>
-        /// <returns></returns>
-        public double CashBalance()
-        {
-            return account.CashBalance;
-        }
-
-        /// <summary>
         /// Updates the total account value based on latest prices.
         /// </summary>
         /// <param name="tick"></param>
         private void UpdateAccountValue(IMultiTick tick)
         {
-            double total = account.CashBalance;
+            double total = account.Cash;
             foreach (IPosition pos in positions)
             {
                 total += pos.Quantity * tick[pos.Symbol].AdjClose;
@@ -257,7 +276,7 @@ namespace Bot.Brokers.BackTest
             {
                 currentPosition.Quantity += quantity;
                 currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
-                account.CashBalance -= price * quantity;
+                account.Cash -= price * quantity;
 
                 if (currentPosition.Quantity == 0)
                 {
@@ -267,7 +286,7 @@ namespace Bot.Brokers.BackTest
             else
             {
                 positions.Add(new BackTestPosition(symbol, quantity));
-                account.CashBalance -= price * quantity;
+                account.Cash -= price * quantity;
             }
         }
 
@@ -289,7 +308,7 @@ namespace Bot.Brokers.BackTest
             {
                 currentPosition.Quantity -= quantity;
                 currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
-                account.CashBalance += price * quantity;
+                account.Cash += price * quantity;
 
                 if (currentPosition.Quantity == 0)
                 {
@@ -299,7 +318,7 @@ namespace Bot.Brokers.BackTest
             else
             {
                 positions.Add(new BackTestPosition(symbol, -quantity));
-                account.CashBalance += price * quantity;
+                account.Cash += price * quantity;
             }
         }
     }

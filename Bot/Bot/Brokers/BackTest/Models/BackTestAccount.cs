@@ -11,7 +11,7 @@ namespace Bot.Brokers.BackTest.Models
         public BackTestAccount()
         {
             AccountId = "backtest-account";
-            CashBalance = 0;
+            Cash = 0;
             BuyingPower = 0;
             TotalValue = 0;
         }
@@ -23,7 +23,7 @@ namespace Bot.Brokers.BackTest.Models
         public BackTestAccount(double initialCash)
         {
             AccountId = "backtest-account";
-            CashBalance = initialCash;
+            Cash = initialCash;
             BuyingPower = initialCash;
             TotalValue = initialCash;
         }
@@ -36,7 +36,7 @@ namespace Bot.Brokers.BackTest.Models
         /// <summary>
         /// Cash balance.
         /// </summary>
-        public double CashBalance { get; set; }
+        public double Cash { get; set; }
 
         /// <summary>
         /// Buying power.

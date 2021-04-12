@@ -11,6 +11,14 @@ namespace Bot.Strategies
     public abstract class StrategyBase : IStrategy, ITickReceiver
     {
         /// <summary>
+        /// Constructor.
+        /// </summary>
+        public StrategyBase()
+        {
+            Indicators = new List<IIndicator>();
+        }
+
+        /// <summary>
         /// Returns the max lookback for any of the indicators.
         /// </summary>
         public int Lookback
@@ -29,7 +37,7 @@ namespace Bot.Strategies
         /// <summary>
         /// List of indicators used to calculate lookback and hydrated values.
         /// </summary>
-        public abstract IList<IIndicator> Indicators { get; }
+        public IList<IIndicator> Indicators { get; set; }
 
         /// <summary>
         /// Get csv headers.
