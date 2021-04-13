@@ -74,9 +74,9 @@ namespace ElectronSPA.Controllers
             await tradingEngine.RunAsync();
 
             Console.WriteLine("Completed running the engine");
-            var orders = tradingEngine.Broker.OrderHistory.OrderBy(x => x.ExecutionTime).ToArray();
+            var orders = tradingEngine.Broker.GetAllOrders().OrderBy(x => x.ExecutionTime).ToArray();
             var dateArray = orders.Select(x => x.ExecutionTime).ToArray();
-            var portfolioValueArray = orders.Select(x => x.FillPrice * x.Quantity).ToArray();
+            var portfolioValueArray = orders.Select(x => x.AverageFillPrice * x.Quantity).ToArray();
             var quantityArray = orders.Select(x => x.Quantity).ToArray();
 
             var orderHistory = new OrderHistory()

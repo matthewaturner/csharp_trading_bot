@@ -3,6 +3,7 @@ using Bot.Engine;
 using Bot.Engine.Events;
 using Bot.Indicators;
 using Bot.Models;
+using Bot.Models.Interfaces;
 using CsvHelper;
 using System;
 using System.Globalization;
@@ -67,7 +68,7 @@ namespace Bot.Analyzers
         /// Log at every tick.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(ITicks ticks)
+        public void OnTick(IMultiTick ticks)
         {
             csv.WriteField(ticks[0].DateTime.ToString("o"));
 
@@ -86,8 +87,10 @@ namespace Bot.Analyzers
                 csv.WriteField(value);
             }
 
-            csv.WriteField(engine.Broker.PortfolioValue());
-            csv.WriteField(engine.Broker.CashValue());
+            IAccount account = engine.Broker.GetAccount();
+
+            csv.WriteField(account.TotalValue);
+            csv.WriteField(account.Cash);
             csv.NextRecord();
         }
 

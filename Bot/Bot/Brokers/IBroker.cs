@@ -1,8 +1,10 @@
 ﻿using Bot.Engine;
+using Bot.Models;
+using Bot.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace Bot.Models
+namespace Bot.Brokers
 {
     public interface IBroker
     {
@@ -10,58 +12,58 @@ namespace Bot.Models
         /// Initializes the broker with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        public void Initialize(ITradingEngine engine, string[] args);
-
-        /// <summary>
-        /// Gets the current portfolio value.
-        /// </summary>
-        /// <returns></returns>
-        public double PortfolioValue();
-
-        /// <summary>
-        /// Gets the current portfolio cash value.
-        /// </summary>
-        /// <returns></returns>
-        public double CashValue();
-
-        /// <summary>
-        /// Gets the history of orders.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public IList<Order> GetOrderHistory(DateTime start, DateTime end);
+        void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
         /// Places an order.
         /// </summary>
-        /// <returns></returns>
-        public string PlaceOrder(OrderRequest order);
-
-        /// <summary>
-        /// Gets the status of an order.
-        /// </summary>
-        public Order GetOrder(string orderId);
+        /// <returns>Order id.</returns>
+        string PlaceOrder(IOrderRequest order);
 
         /// <summary>
         /// Cancel an order if it hasn't been filled yet.
         /// </summary>
         /// <param name="order"></param>
-        public void CancelOrder(string orderId);
+        void CancelOrder(string orderId);
 
         /// <summary>
-        /// Portfolio held by the broker.
+        /// Get account information.
         /// </summary>
-        Portfolio Portfolio { get; }
+        IAccount GetAccount();
 
         /// <summary>
-        /// List of open orders.
+        /// Get current positions.
         /// </summary>
-        IList<Order> OpenOrders { get; }
+        /// <returns></returns>
+        IList<IPosition> GetPositions();
+
+        /// <summary>
+        /// Gets a single position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        IPosition GetPosition(string symbol);
+
+
+        /// <summary>
+        /// Gets the status of an order.
+        /// </summary>
+        IOrder GetOrder(string orderId);
+
+        /// <summary>
+        /// Get all orders in some state.
+        /// </summary>
+        IList<IOrder> QueryOrders(string symbol, OrderState state, DateTime after, DateTime until, int limit = 50);
+
+        /// <summary>
+        /// Gets all open orders.
+        /// </summary>
+        /// <returns></returns>
+        IList<IOrder> GetOpenOrders();
 
         /// <summary>
         /// Order history.
         /// </summary>
-        IList<Order> OrderHistory { get; }
+        IList<IOrder> GetAllOrders();
     }
 }

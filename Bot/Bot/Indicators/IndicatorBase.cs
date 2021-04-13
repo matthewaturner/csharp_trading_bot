@@ -60,6 +60,6 @@ namespace Bot.Indicators
         /// Calculate new values.
         /// </summary>
         /// <param name="ticks"></param>
-        public abstract void OnTick(ITicks ticks);
+        public abstract void OnTick(IMultiTick ticks);
     }
 }

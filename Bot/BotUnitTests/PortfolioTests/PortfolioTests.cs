@@ -1,21 +1,21 @@
 ﻿using Bot;
+using Bot.Brokers.BackTest.Models;
 using Bot.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 
 namespace PortfolioTests
 {
     [TestClass]
     public class PortfolioTests
     {
-        Ticks ticks;
+        MultiTick ticks;
 
         [TestInitialize]
         public void Setup()
         {
             // order matters
-            ticks = new Ticks(new string[] { "MSFT", "GME", "AMC" });
+            ticks = new MultiTick(new string[] { "MSFT", "GME", "AMC" });
 
             var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
             var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 52.22, 53.50, 49.04, 49.51, 49.51, 8140700);
@@ -27,9 +27,9 @@ namespace PortfolioTests
         [TestMethod]
         public void GetTotalValue()
         {
-            var msftPos = new Position("MSFT", 10.0);
-            var gmePos = new Position("GME", -5.0);
-            var amcPos = new Position("AMC", 12.0);
+            var msftPos = new BackTestPosition("MSFT", 10.0);
+            var gmePos = new BackTestPosition("GME", -5.0);
+            var amcPos = new BackTestPosition("AMC", 12.0);
             double cashBalance = 100.0;
 
             var portfolio = new Portfolio(1000);

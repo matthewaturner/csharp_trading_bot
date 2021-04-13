@@ -1,25 +1,25 @@
 ﻿using Bot.Indicators;
 using Bot.Models;
-using System.Collections.Generic;
 using Bot.Engine;
+using Bot.Brokers;
+using Bot.Models.Interfaces;
+using System.Linq;
 
 namespace Bot.Strategies
 {
     public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
         private IBroker broker;
-        private IList<IIndicator> indicators;
         private IIndicator mac;
-        private Position currentPosition;
+        private IPosition currentPosition;
         private bool longOnly;
         private int maxUnits = 10;
         private string orderId;
         private string symbol;
 
         public SMACrossoverStrategy()
-        {
-            indicators = new List<IIndicator>();
-        }
+            : base()
+        { }
 
         /// <summary>
         /// Initialize.
@@ -37,11 +37,9 @@ namespace Bot.Strategies
             mac = new MovingAverageCrossover(
                 shortMa,
                 longMa,
-                (ITicks t) => t[symbol].AdjClose);
-            indicators.Add(mac);
+                (IMultiTick t) => t[symbol].AdjClose);
+            Indicators.Add(mac);
         }
-
-        public override IList<IIndicator> Indicators => indicators;
 
         /// <summary>
         /// Enter Long position if the Moving average crossover value is greater than 0,
@@ -49,14 +47,14 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void StrategyOnTick(ITicks ticks)
+        public override void StrategyOnTick(IMultiTick ticks)
         {
             Tick tick = ticks[symbol];
             mac.OnTick(ticks);
 
             if (Hydrated)
             {
-                foreach (var order in broker.OpenOrders)
+                foreach (var order in broker.GetOpenOrders())
                 {
                     if (order.OrderId == orderId)
                     {
@@ -65,21 +63,20 @@ namespace Bot.Strategies
                     }
                 }
 
-                currentPosition = broker.Portfolio.Positions.ContainsKey(tick.Symbol) ? broker.Portfolio.Positions[tick.Symbol] : null;
+                currentPosition = broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(tick.Symbol));
                 int macVal = (int)mac.Value;
-                
 
                 if (macVal == 0 && currentPosition != null)
                 {
                     //Exit any position
                     ExitPosition(tick);
                 }
-                else if (macVal > 0 && (currentPosition == null || currentPosition.GetPositionType() != PositionType.Long))
+                else if (macVal > 0 && (currentPosition == null || currentPosition.Type != PositionType.Long))
                 {
                     //Enter long position
                     EnterLongPosition(tick);
                 }
-                else if (macVal < 0 && (currentPosition == null || currentPosition.GetPositionType() != PositionType.Short))
+                else if (macVal < 0 && (currentPosition == null || currentPosition.Type != PositionType.Short))
                 {
                     if (!longOnly)
                     {
@@ -94,9 +91,9 @@ namespace Bot.Strategies
             }            
         }
 
-        public void ExitPosition(Tick tick)
+        private void ExitPosition(Tick tick)
         {
-            var orderType = currentPosition.GetPositionType() == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
+            var orderType = currentPosition.Type == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
             var quantity = currentPosition.Quantity;
             var targetPrice = tick.AdjClose;
             var order = new OrderRequest(
@@ -108,7 +105,7 @@ namespace Bot.Strategies
             broker.PlaceOrder(order);
         }
 
-        public void EnterLongPosition(Tick tick)
+        private void EnterLongPosition(Tick tick)
         {
             double quantity;
             if (currentPosition != null)
@@ -137,7 +134,7 @@ namespace Bot.Strategies
             orderId = broker.PlaceOrder(order);
         }
 
-        public void EnterShortPosition(Tick tick)
+        private void EnterShortPosition(Tick tick)
         {
             var quantity = currentPosition != null ? 2 * currentPosition.Quantity * -1 : maxUnits;
             var targetPrice = tick.AdjClose;

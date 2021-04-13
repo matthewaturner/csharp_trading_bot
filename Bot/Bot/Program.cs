@@ -2,7 +2,6 @@
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Engine;
-using Core;
 using Core.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -15,6 +14,9 @@ using Bot.Analyzers;
 using System.Collections.Generic;
 using Bot.Data;
 using System.IO;
+using Bot.Brokers;
+using Core.Azure;
+using Bot.Brokers.BackTest;
 
 namespace Bot
 {
@@ -40,10 +42,11 @@ namespace Bot
                     Path = "./appsettings.dev.json"
                 })
                 .Build();
+            services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
             services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
-            services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
+            services.Configure<AlpacaConfiguration>(configuration.GetSection(ConfigurationPaths.Alpaca));
 
             // entity framework stuff
             DbProviderFactories.RegisterFactory("System.Data.SqlClient", System.Data.SqlClient.SqlClientFactory.Instance);
@@ -57,6 +60,7 @@ namespace Bot
 
             // inject brokers
             services.AddSingleton<BackTestingBroker>();
+            services.AddSingleton<AlpacaBroker>();
 
             // inject strategies
             services.AddSingleton<SMACrossoverStrategy>();
@@ -87,6 +91,8 @@ namespace Bot
                 {
                     case nameof(BackTestingBroker):
                         return serviceProvider.GetService<BackTestingBroker>();
+                    case nameof(AlpacaBroker):
+                        return serviceProvider.GetService<AlpacaBroker>();
                     default:
                         return null;
                 }
@@ -162,7 +168,20 @@ namespace Bot
 
             engine.Initialize(engineConfig);
             engine.RunAsync().Wait();
+
             // TestREngine();
+            // TestAlpaca(serviceProvider);
+        }
+
+        public static void TestAlpaca(ServiceProvider provider)
+        {
+            ITradingEngine engine = provider.GetService<ITradingEngine>();
+            AlpacaBroker broker = provider.GetService<AlpacaBroker>();
+
+            broker.Initialize(engine, new string[] { "true" });
+
+            var account = broker.GetAccount();
+            Console.WriteLine(account.Cash);
         }
 
         public static void TestREngine()

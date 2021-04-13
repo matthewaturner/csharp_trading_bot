@@ -35,7 +35,7 @@ namespace Bot.Analyzers
                 }
             }
 
-            string orderHistory = string.Join(',', engine.Broker.OrderHistory.Select(o => o.ToString() + "\n"));
+            string orderHistory = string.Join(',', engine.Broker.GetAllOrders().Select(o => o.ToString() + "\n"));
             Console.WriteLine($"Order History: {orderHistory}");
 
             Console.WriteLine(output);

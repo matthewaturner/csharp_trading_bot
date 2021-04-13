@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bot.Brokers.BackTest.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Bot.Models
         public Portfolio()
         {
             CashBalance = 0;
-            Positions = new Dictionary<string, Position>();
+            Positions = new Dictionary<string, BackTestPosition>();
         }
 
         /// <summary>
@@ -22,18 +23,7 @@ namespace Bot.Models
         public Portfolio(double initialCash)
         {
             CashBalance = initialCash;
-            Positions = new Dictionary<string, Position>();
-        }
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="positions"></param>
-        /// <param name="initialCash"></param>
-        public Portfolio(IDictionary<string, Position> positions, double initialCash)
-        {
-            CashBalance = initialCash;
-            Positions = positions;
+            Positions = new Dictionary<string, BackTestPosition>();
         }
 
         /// <summary>
@@ -44,14 +34,14 @@ namespace Bot.Models
         /// <summary>
         /// symbol : position.
         /// </summary>
-        public IDictionary<string, Position> Positions { get; set; }
+        public IDictionary<string, BackTestPosition> Positions { get; set; }
 
         /// <summary>
         /// Gets the latest tick data for a symbol.
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public Position this[string symbol]
+        public BackTestPosition this[string symbol]
         {
             get => Positions[symbol];
         }
@@ -100,7 +90,7 @@ namespace Bot.Models
             }
             else
             {
-                Positions[symbol] = new Position(symbol, quantity);
+                Positions[symbol] = new BackTestPosition(symbol, quantity);
                 CashBalance -= price * quantity;
             }
 
@@ -130,7 +120,7 @@ namespace Bot.Models
             }
             else
             {
-                Positions[symbol] = new Position(symbol, -quantity);
+                Positions[symbol] = new BackTestPosition(symbol, -quantity);
                 CashBalance += price * quantity;
             }
         }
@@ -141,10 +131,10 @@ namespace Bot.Models
         /// <param name="ticks"></param>
         /// <param name="transform"></param>
         /// <returns></returns>
-        public double CurrentValue(ITicks ticks, Func<Tick, double> transform)
+        public double CurrentValue(IMultiTick ticks, Func<Tick, double> transform)
         {
             double value = 0;
-            foreach(Position p in Positions.Values)
+            foreach(BackTestPosition p in Positions.Values)
             {
                 value += p.Quantity * transform(ticks[p.Symbol]);
             }

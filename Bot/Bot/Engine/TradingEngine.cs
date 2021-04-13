@@ -12,6 +12,7 @@ using System;
 using static Bot.Program;
 using Bot.Data;
 using System.IO;
+using Bot.Brokers;
 
 namespace Bot.Engine
 {
@@ -23,7 +24,7 @@ namespace Bot.Engine
         private readonly AnalyzerResolver analyzerResolver;
 
         private EngineConfig config;
-        private Ticks ticks;
+        private MultiTick ticks;
         private IList<string> symbols;
 
         private IList<ITickReceiver> tickReceivers;
@@ -66,7 +67,7 @@ namespace Bot.Engine
         /// <summary>
         /// Current ticks.
         /// </summary>
-        public ITicks Ticks => ticks;
+        public IMultiTick Ticks => ticks;
 
         /// <summary>
         /// Current broker.
@@ -109,7 +110,7 @@ namespace Bot.Engine
             Directory.CreateDirectory(OutputPath);
 
             // initialize stuff
-            ticks = new Ticks(config.Symbols.ToArray());
+            ticks = new MultiTick(config.Symbols.ToArray());
             symbols = config.Symbols;
 
             // data source
@@ -259,7 +260,7 @@ namespace Bot.Engine
             }
 
             Tick[] tickArray = new Tick[symbols.Length];
-            Ticks currentTicks = new Ticks(symbols);
+            MultiTick currentTicks = new MultiTick(symbols);
             IList<IEnumerator<Tick>> enumerators = new List<IEnumerator<Tick>>();
 
             for (int i = 0; i < symbols.Length; i++)

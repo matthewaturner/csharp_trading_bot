@@ -1,16 +1,12 @@
 ﻿
+using Bot.Brokers.BackTest.Models;
+using Bot.Models.Interfaces;
 using System;
 
 namespace Bot.Models
 {
-    public class Order
+    public class BackTestOrder : IOrder
     {
-        /// <summary>
-        /// Null constructor.
-        /// </summary>
-        public Order()
-        { }
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -23,7 +19,7 @@ namespace Bot.Models
         /// <param name="quantity"></param>
         /// <param name="type"></param>
         /// <param name="state"></param>
-        public Order(
+        public BackTestOrder(
             string orderId,
             DateTime placementTime,
             DateTime executionTime,
@@ -38,7 +34,7 @@ namespace Bot.Models
             PlacementTime = placementTime;
             ExecutionTime = executionTime;
             Symbol = symbol.ToUpper();
-            FillPrice = executionPrice;
+            AverageFillPrice = executionPrice;
             TargetPrice = targetPrice;
             Quantity = quantity;
             Type = type;
@@ -49,13 +45,13 @@ namespace Bot.Models
         /// Constructor.
         /// </summary>
         /// <param name="request"></param>
-        public Order(OrderRequest request)
+        public BackTestOrder(IOrderRequest request)
         {
             OrderId = Guid.NewGuid().ToString();
             PlacementTime = DateTime.Now;
             ExecutionTime = new DateTime();
             Symbol = request.Symbol.ToUpper();
-            FillPrice = double.NaN;
+            AverageFillPrice = double.NaN;
             TargetPrice = request.TargetPrice;
             Quantity = request.Quantity;
             Type = request.Type;
@@ -85,7 +81,7 @@ namespace Bot.Models
         /// <summary>
         /// Price the order actually executed at.
         /// </summary>
-        public double FillPrice { get; set; }
+        public double AverageFillPrice { get; set; }
 
         /// <summary>
         /// Price the order is for at placement time.
@@ -115,7 +111,7 @@ namespace Bot.Models
         /// <param name="executionTime"></param>
         public void Fill(double price, DateTime executionTime)
         {
-            FillPrice = price;
+            AverageFillPrice = price;
             State = OrderState.Filled;
             ExecutionTime = executionTime;
         }
@@ -126,7 +122,7 @@ namespace Bot.Models
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{{Symbol:{Symbol}, Quantity:{Quantity} Type:{Type}, State:{State}, Price:{FillPrice}}}";
+            return $"{{Symbol:{Symbol}, Quantity:{Quantity} Type:{Type}, State:{State}, Price:{AverageFillPrice}}}";
         }
     }
 }

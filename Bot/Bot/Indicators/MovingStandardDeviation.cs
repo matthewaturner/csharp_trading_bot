@@ -6,7 +6,7 @@ namespace Bot.Indicators
 {
     public class MovingStandardDeviation : IndicatorBase
     {
-        private readonly Func<ITicks, double> transform;
+        private readonly Func<IMultiTick, double> transform;
         private double[] data;
         private int index;
 
@@ -15,7 +15,7 @@ namespace Bot.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public MovingStandardDeviation(int lookback, Func<ITicks, double> transform)
+        public MovingStandardDeviation(int lookback, Func<IMultiTick, double> transform)
             : base()
         {
             if (lookback < 1)
@@ -34,7 +34,7 @@ namespace Bot.Indicators
         /// Calculate new values.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void OnTick(ITicks ticks)
+        public override void OnTick(IMultiTick ticks)
         {
             data[index] = transform(ticks);
             index = (index + 1) % Lookback;

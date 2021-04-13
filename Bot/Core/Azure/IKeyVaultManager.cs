@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Core
+namespace Core.Azure
 {
     public interface IKeyVaultManager
     {
