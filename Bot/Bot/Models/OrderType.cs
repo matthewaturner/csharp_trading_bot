@@ -1,10 +1,11 @@
 ﻿
+using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
-/// <summary>
-/// Enum for trade type.
-/// </summary>
+using System.Text.Json.Serialization;
+
 namespace Bot.Models
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum OrderType
     {
         [EnumMember(Value = "marketBuy")]

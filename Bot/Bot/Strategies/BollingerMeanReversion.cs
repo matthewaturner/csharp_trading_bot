@@ -125,7 +125,7 @@ namespace Bot.Strategies
         /// <param name="longOrShort"></param>
         public void EnterPositions(int longOrShort)
         {
-            double tradeableValue = engine.Broker.GetPortfolioValue() * .95;
+            double tradeableValue = engine.Broker.GetAccount().TotalValue * .95;
             double unitPortfolioValue = HedgedTradeValue(engine.Ticks);
             double numUnitPortfolios = tradeableValue / unitPortfolioValue;
 

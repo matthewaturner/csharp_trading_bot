@@ -15,18 +15,6 @@ namespace Bot.Brokers
         void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
-        /// Gets the current portfolio value.
-        /// </summary>
-        /// <returns></returns>
-        double GetPortfolioValue();
-
-        /// <summary>
-        /// Gets the current portfolio cash value.
-        /// </summary>
-        /// <returns></returns>
-        double GetCashBalance();
-
-        /// <summary>
         /// Places an order.
         /// </summary>
         /// <returns>Order id.</returns>

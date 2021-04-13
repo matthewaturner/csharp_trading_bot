@@ -3,6 +3,7 @@ using Bot.Engine;
 using Bot.Engine.Events;
 using Bot.Indicators;
 using Bot.Models;
+using Bot.Models.Interfaces;
 using CsvHelper;
 using System;
 using System.Globalization;
@@ -86,8 +87,10 @@ namespace Bot.Analyzers
                 csv.WriteField(value);
             }
 
-            csv.WriteField(engine.Broker.GetPortfolioValue());
-            csv.WriteField(engine.Broker.GetCashBalance());
+            IAccount account = engine.Broker.GetAccount();
+
+            csv.WriteField(account.TotalValue);
+            csv.WriteField(account.Cash);
             csv.NextRecord();
         }
 

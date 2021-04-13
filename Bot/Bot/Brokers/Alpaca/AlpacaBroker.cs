@@ -9,12 +9,11 @@ using Core.Azure;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
-using RestSharp.Authenticators;
+using RestSharp.Serializers.NewtonsoftJson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 
 namespace Bot.Brokers
 {
@@ -42,6 +41,7 @@ namespace Bot.Brokers
             apiKeyId = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeyIdSecretName).Result;
             apiKeySecret = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeySecretName).Result;
             restClient = new RestClient();
+            restClient.UseNewtonsoftJson();
         }
 
         /// <summary>
@@ -115,15 +115,6 @@ namespace Bot.Brokers
             IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.GET);
             IRestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaPosition>(response.Content);
-        }
-
-        /// <summary>
-        /// Gets current cash balance. Actually makes a call to get account information.
-        /// </summary>
-        /// <returns></returns>
-        public double GetCashBalance()
-        {
-            return GetAccount().Cash;
         }
 
         /// <summary>
@@ -209,24 +200,37 @@ namespace Bot.Brokers
             return QueryOrders(null, OrderState.Unknown, DateTime.MinValue, DateTime.MaxValue, 500);
         }
 
-        public double GetPortfolioValue()
+        /// <summary>
+        /// Send an order to alpaca.
+        /// </summary>
+        /// <param name="orderRequest"></param>
+        /// <returns></returns>
+        public string PlaceOrder(IOrderRequest orderRequest)
         {
-            return GetAccount().TotalValue;
+            AlpacaOrderRequest alpacaRequest = new AlpacaOrderRequest(orderRequest);
+
+            IRestRequest request = new RestRequest($"/v2/orders", Method.POST);
+            request.AddJsonBody(alpacaRequest);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            IOrder newOrder = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
+            return newOrder.OrderId;
         }
 
-        public void OnTick(IMultiTick ticks)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string PlaceOrder(IOrderRequest order)
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <summary>
+        /// Cancel an existing / outstanding order.
+        /// </summary>
+        /// <param name="orderId"></param>
         public void CancelOrder(string orderId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(orderId))
+            {
+                throw new ArgumentNullException(nameof(orderId));
+            }
+
+            IRestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.DELETE);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            IOrder order = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
+            return;
         }
     }
 }

@@ -103,27 +103,14 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IList<IOrder> QueryOrders(OrderState state)
+        public IList<IOrder> QueryOrders(string symbol, OrderState state, DateTime after, DateTime until, int limit = 50)
         {
-            return allOrders.Where(order => order.State == state).ToList<IOrder>();
-        }
-
-        /// <summary>
-        /// Gets the current portfolio value.
-        /// </summary>
-        /// <returns></returns>
-        public double GetPortfolioValue()
-        {
-            return account.TotalValue;
-        }
-
-        /// <summary>
-        /// Gets the current cash balance.
-        /// </summary>
-        /// <returns></returns>
-        public double GetCashBalance()
-        {
-            return account.Cash;
+            return allOrders.Where(order => 
+                string.CompareOrdinal(symbol, order.Symbol) == 0 
+                && order.State == state
+                && order.PlacementTime > after 
+                && order.PlacementTime < until)
+                .Take(limit).ToList<IOrder>();
         }
 
         /// <summary>
