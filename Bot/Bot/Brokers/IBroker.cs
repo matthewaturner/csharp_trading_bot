@@ -1,4 +1,5 @@
-﻿using Bot.Engine;
+﻿using Bot.Configuration;
+using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using System;
@@ -12,7 +13,7 @@ namespace Bot.Brokers
         /// Initializes the broker with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        void Initialize(ITradingEngine engine, string[] args);
+        void Initialize(ITradingEngine engine, RunMode runMode, string[] args);
 
         /// <summary>
         /// Places an order.
@@ -53,7 +54,7 @@ namespace Bot.Brokers
         /// <summary>
         /// Get all orders in some state.
         /// </summary>
-        IList<IOrder> QueryOrders(string symbol, OrderState state, DateTime after, DateTime until, int limit = 50);
+        IList<IOrder> QueryOrders(IEnumerable<string> symbols, OrderState state, DateTime after, DateTime until, int limit = 50);
 
         /// <summary>
         /// Gets all open orders.

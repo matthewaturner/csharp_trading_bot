@@ -19,6 +19,9 @@ namespace Bot.Configuration
         [JsonProperty("end")]
         public DateTime End { get; set; }
 
+        [JsonProperty("runMode")]
+        public RunMode RunMode { get; set; }
+
         [JsonProperty("dataSource")]
         public DependencyConfig DataSource { get; set; }
 

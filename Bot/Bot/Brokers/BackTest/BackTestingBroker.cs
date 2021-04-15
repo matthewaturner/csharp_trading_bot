@@ -7,6 +7,7 @@ using Bot.Models.Interfaces;
 using Bot.Brokers.BackTest.Models;
 using Bot.Models;
 using Bot.Engine.Events;
+using Bot.Configuration;
 
 namespace Bot.Brokers.BackTest
 {
@@ -30,8 +31,13 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="args"></param>
         /// <param name="args[0]">Initial funds.</param>
-        public void Initialize(ITradingEngine engine, string[] args)
+        public void Initialize(ITradingEngine engine, RunMode runMode, string[] args)
         {
+            if (runMode != RunMode.BackTest)
+            {
+                throw new NotImplementedException();
+            }
+
             double initialFunds = double.Parse(args[0]);
 
             this.engine = engine;
@@ -103,10 +109,10 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IList<IOrder> QueryOrders(string symbol, OrderState state, DateTime after, DateTime until, int limit = 50)
+        public IList<IOrder> QueryOrders(IEnumerable<string> symbols, OrderState state, DateTime after, DateTime until, int limit = 50)
         {
             return allOrders.Where(order => 
-                string.CompareOrdinal(symbol, order.Symbol) == 0 
+                symbols.Contains(order.Symbol, StringComparer.OrdinalIgnoreCase)
                 && order.State == state
                 && order.PlacementTime > after 
                 && order.PlacementTime < until)

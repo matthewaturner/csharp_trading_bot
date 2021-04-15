@@ -8,7 +8,9 @@ using Core.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace BotIntegrationTests
 {
@@ -76,6 +78,60 @@ namespace BotIntegrationTests
             IOrder cancelledOrder = alpaca.GetOrder(orderId);
             Assert.IsNotNull(cancelledOrder);
             Assert.AreEqual(OrderState.Cancelled, cancelledOrder.State);
+        }
+
+        [TestMethod]
+        public void PlaceOrderThenQueryOrders()
+        {
+            string orderId1, orderId2, orderId3;
+            orderId1 = orderId2 = orderId3 = null;
+
+            try
+            {
+
+                IOrderRequest request1 = new OrderRequest(OrderType.MarketSell, "MSFT", 1, 0);
+                IOrderRequest request2 = new OrderRequest(OrderType.MarketBuy, "GOOG", 1, 0);
+                IOrderRequest request3 = new OrderRequest(OrderType.MarketSell, "TSLA", 1, 0);
+
+                orderId1 = alpaca.PlaceOrder(request1);
+
+                Thread.Sleep(1000);
+                var queryTime = DateTime.UtcNow;
+
+                orderId2 = alpaca.PlaceOrder(request2);
+                orderId3 = alpaca.PlaceOrder(request3);
+
+                IList<IOrder> orders = alpaca.QueryOrders(null, OrderState.Open, DateTime.UtcNow.AddHours(-1), DateTime.UtcNow);
+                Assert.IsNotNull(orders);
+                Assert.AreEqual(3, orders.Count);
+
+                orders = alpaca.QueryOrders(new string[] { "MSFT" }, OrderState.Open, DateTime.UtcNow.AddHours(-1), DateTime.UtcNow);
+                Assert.IsNotNull(orders);
+                Assert.AreEqual(1, orders.Count);
+
+                orders = alpaca.QueryOrders(null, OrderState.Open, queryTime, DateTime.UtcNow);
+                Assert.IsNotNull(orders);
+                Assert.AreEqual(2, orders.Count);
+
+                orders = alpaca.QueryOrders(new string[] { "GOOG", "TSLA" }, OrderState.Open, DateTime.UtcNow.AddHours(-1), DateTime.UtcNow);
+                Assert.IsNotNull(orders);
+                Assert.AreEqual(2, orders.Count);
+            }
+            finally
+            {
+                if (orderId1 != null)
+                {
+                    alpaca.CancelOrder(orderId1);
+                }
+                if (orderId2 != null)
+                {
+                    alpaca.CancelOrder(orderId2);
+                }
+                if (orderId3 != null)
+                {
+                    alpaca.CancelOrder(orderId3);
+                }
+            }
         }
     }
 }
