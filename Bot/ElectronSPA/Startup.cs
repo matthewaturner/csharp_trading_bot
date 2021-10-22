@@ -1,4 +1,5 @@
 using Bot.Analyzers;
+using Bot.Analyzers.Loggers;
 using Bot.Brokers.BackTest;
 using Bot.Configuration;
 using Bot.Data;

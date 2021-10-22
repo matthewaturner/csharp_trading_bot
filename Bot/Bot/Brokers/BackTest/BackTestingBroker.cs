@@ -13,7 +13,7 @@ namespace Bot.Brokers.BackTest
 {
     public class BackTestingBroker : IBroker, ITickReceiver
     {
-        private IMultiTick ticks;
+        private IMultiBar ticks;
         private ITradingEngine engine;
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
@@ -48,6 +48,16 @@ namespace Bot.Brokers.BackTest
 
             openOrders = new List<BackTestOrder>();
             allOrders = new List<BackTestOrder>();
+        }
+
+        /// <summary>
+        /// Gets asset information.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public IAssetInformation GetAssetInformation(string symbol)
+        {
+            return new BackTestAssetInformation(symbol);
         }
 
         /// <summary>
@@ -123,7 +133,7 @@ namespace Bot.Brokers.BackTest
         /// Open orders execute at the open price of the next tick.
         /// </summary>
         /// <param name="_"></param>
-        public void OnTick(IMultiTick ticks)
+        public void OnTick(IMultiBar ticks)
         {
             BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)
@@ -138,17 +148,17 @@ namespace Bot.Brokers.BackTest
                     switch (order.Type)
                     {
                         case OrderType.MarketBuy:
-                            Buy(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            Buy(order.Symbol, order.Quantity, ticks[order.Symbol].Close);
                             break;
 
                         case OrderType.MarketSell:
-                            Sell(order.Symbol, order.Quantity, ticks[order.Symbol].AdjOpen);
+                            Sell(order.Symbol, order.Quantity, ticks[order.Symbol].Close);
                             break;
                     }
 
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
-                    order.Fill(ticks[order.Symbol].AdjOpen, ticks[order.Symbol].DateTime);
+                    order.Fill(ticks[order.Symbol].Close, ticks[order.Symbol].DateTime);
                 }
 
                 openOrders.RemoveAt(0);
@@ -202,7 +212,7 @@ namespace Bot.Brokers.BackTest
         /// <returns></returns>
         public OrderState PreviewOrder(BackTestOrder order)
         {
-            double currentPrice = ticks[order.Symbol].AdjOpen;
+            double currentPrice = ticks[order.Symbol].Open;
             double orderPrice = currentPrice * order.Quantity;
 
             switch (order.Type)
@@ -240,12 +250,12 @@ namespace Bot.Brokers.BackTest
         /// Updates the total account value based on latest prices.
         /// </summary>
         /// <param name="tick"></param>
-        private void UpdateAccountValue(IMultiTick tick)
+        private void UpdateAccountValue(IMultiBar tick)
         {
             double total = account.Cash;
             foreach (IPosition pos in positions)
             {
-                total += pos.Quantity * tick[pos.Symbol].AdjClose;
+                total += pos.Quantity * tick[pos.Symbol].Close;
             }
 
             account.TotalValue = total;

@@ -1,5 +1,4 @@
-﻿
-using Bot.Engine;
+﻿using Bot.Engine;
 using Bot.Engine.Events;
 using Bot.Indicators;
 using Bot.Models;
@@ -9,7 +8,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace Bot.Analyzers
+namespace Bot.Analyzers.Loggers
 {
     public class CsvLogger : IAnalyzer, ITickReceiver, ITerminateReceiver
     {
@@ -28,7 +27,7 @@ namespace Bot.Analyzers
             this.engine = engine;
 
             string csvPath = Path.Combine(
-                engine.OutputPath, 
+                engine.OutputPath,
                 $"{engine.Strategy.GetType()}.{DateTimeOffset.Now.ToUnixTimeSeconds()}.csv");
 
             fileStream = new FileStream(csvPath, FileMode.OpenOrCreate, FileAccess.Write);
@@ -43,7 +42,7 @@ namespace Bot.Analyzers
         private void WriteHeaders()
         {
             csv.WriteField("Date");
-            
+
             foreach (Tick t in engine.Ticks.ToArray())
             {
                 csv.WriteField(t.Symbol);
@@ -68,13 +67,13 @@ namespace Bot.Analyzers
         /// Log at every tick.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(IMultiTick ticks)
+        public void OnTick(IMultiBar ticks)
         {
             csv.WriteField(ticks[0].DateTime.ToString("o"));
 
             foreach (Tick t in engine.Ticks.ToArray())
             {
-                csv.WriteField(t.AdjClose);
+                csv.WriteField(t.Close);
             }
 
             foreach (IIndicator ind in engine.Strategy.Indicators)

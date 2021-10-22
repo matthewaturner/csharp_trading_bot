@@ -98,6 +98,21 @@ namespace Bot
         }
 
         /// <summary>
+        /// Gets n trading days before date.
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static DateTime GetNthPreviousTradingDay(this DateTime dt, int n)
+        {
+            for (int i=0; i<n; i++)
+            {
+                dt = dt.GetPreviousTradingDay();
+            }
+            return dt;
+        }
+
+        /// <summary>
         /// Determines if this date is a federal holiday.
         /// </summary>
         /// <param name="date">This date</param>

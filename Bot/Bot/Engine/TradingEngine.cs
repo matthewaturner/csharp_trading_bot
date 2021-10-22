@@ -13,6 +13,7 @@ using static Bot.Program;
 using Bot.Data;
 using System.IO;
 using Bot.Brokers;
+using Bot.Indicators;
 
 namespace Bot.Engine
 {
@@ -67,7 +68,7 @@ namespace Bot.Engine
         /// <summary>
         /// Current ticks.
         /// </summary>
-        public IMultiTick Ticks => ticks;
+        public IMultiBar Ticks => ticks;
 
         /// <summary>
         /// Current broker.
@@ -120,7 +121,7 @@ namespace Bot.Engine
 
             // broker - needs to come before strategy
             broker = brokerResolver(config.Broker.Name);
-            broker.Initialize(this, config.Broker.Args);
+            broker.Initialize(this, config.RunMode, config.Broker.Args);
             AddToReceiverLists(broker);
 
             // strategy
@@ -148,14 +149,28 @@ namespace Bot.Engine
         /// <param name="tickInterval"></param>
         public async Task RunAsync()
         {
-            await StreamTicks(
-                config.Symbols.ToArray(),
-                config.Interval,
-                config.Start,
-                config.End,
-                SendOnTickEvents);
+            if (config.RunMode == RunMode.Live || config.RunMode == RunMode.Paper)
+            {
+                await DataSource.StreamTicks(
+                    config.Symbols.ToArray(),
+                    config.Interval,
+                    DateTime.UtcNow.GetNthPreviousTradingDay(Strategy.Lookback + 1),
+                    null,
+                    SendOnTickEvents);
 
-            SendTerminateEvents();
+
+            }
+            else if (config.RunMode == RunMode.BackTest)
+            {
+                await DataSource.StreamTicks(
+                    config.Symbols.ToArray(),
+                    config.Interval,
+                    config.Start.Value,
+                    config.End.Value,
+                    SendOnTickEvents);
+
+                SendTerminateEvents();
+            }
         }
 
         /// <summary>
@@ -223,59 +238,6 @@ namespace Bot.Engine
             foreach (ILogReceiver receiver in logReceivers)
             {
                 receiver.OnLog(log);
-            }
-        }
-
-        /// <summary>
-        /// Call get ticks for each symbol and unify into one multi-tick stream of events.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="symbols"></param>
-        /// <param name="interval"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <param name="onTickCallback"></param>
-        private async Task StreamTicks(
-            string[] symbols,
-            TickInterval interval,
-            DateTime start,
-            DateTime end,
-            Action<Tick[]> onTickCallback)
-        {
-            IList<Tick>[] allTicks = new List<Tick>[symbols.Length];
-            int tickCount = 0;
-
-            for (int i = 0; i < symbols.Length; i++)
-            {
-                allTicks[i] = await dataSource.GetTicksAsync(symbols[i], interval, start, end);
-
-                if (tickCount == 0)
-                {
-                    tickCount = allTicks[i].Count;
-                }
-                else if (allTicks[i].Count != tickCount)
-                {
-                    throw new BadDataException("Received varying number of ticks from each symbol.");
-                }
-            }
-
-            Tick[] tickArray = new Tick[symbols.Length];
-            MultiTick currentTicks = new MultiTick(symbols);
-            IList<IEnumerator<Tick>> enumerators = new List<IEnumerator<Tick>>();
-
-            for (int i = 0; i < symbols.Length; i++)
-            {
-                enumerators.Add(allTicks[i].GetEnumerator());
-            }
-
-            while (enumerators.All(e => e.MoveNext()))
-            {
-                for (int i = 0; i < enumerators.Count; i++)
-                {
-                    tickArray[i] = enumerators[i].Current;
-                }
-
-                onTickCallback(tickArray);
             }
         }
     }

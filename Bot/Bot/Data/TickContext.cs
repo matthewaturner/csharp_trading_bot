@@ -32,7 +32,6 @@ namespace Bot.Data
             data.Columns.Add(new DataColumn("High", typeof(double)));
             data.Columns.Add(new DataColumn("Low", typeof(double)));
             data.Columns.Add(new DataColumn("Close", typeof(double)));
-            data.Columns.Add(new DataColumn("AdjClose", typeof(double)));
             data.Columns.Add(new DataColumn("Volume", typeof(int)));
 
             foreach (Tick t in ticks)
@@ -45,7 +44,6 @@ namespace Bot.Data
                 row["High"] = t.High;
                 row["Low"] = t.Low;
                 row["Close"] = t.Close;
-                row["AdjClose"] = t.AdjClose;
                 row["Volume"] = t.Volume;
                 data.Rows.Add(row);
             }
@@ -59,7 +57,6 @@ namespace Bot.Data
                new SqlBulkCopyColumnMapping("High", "High"),
                new SqlBulkCopyColumnMapping("Low", "Low"),
                new SqlBulkCopyColumnMapping("Close", "Close"),
-               new SqlBulkCopyColumnMapping("AdjClose", "AdjClose"),
                new SqlBulkCopyColumnMapping("Volume", "Volume")
             };
 

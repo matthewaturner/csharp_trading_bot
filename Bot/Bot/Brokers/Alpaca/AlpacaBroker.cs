@@ -84,10 +84,29 @@ namespace Bot.Brokers
 
             if (!response.IsSuccessful && validate)
             {
-                throw new RestException($"Failure calling alpaca resource {request.Resource}. Status code {response.StatusCode}");
+                throw new RestException($"Failure calling alpaca resource {request.Resource}. " +
+                    $"Status code {response.StatusCode}. " +
+                    $"Body '{response.Content}'");
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Gets information for an asset like whether it is easy to borrow.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public IAssetInformation GetAssetInformation(string symbol)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentNullException(nameof(symbol));
+            }
+
+            IRestRequest request = new RestRequest($"/v2/assets/{symbol}", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaAssetInformation>(response.Content);
         }
 
         /// <summary>
@@ -221,6 +240,8 @@ namespace Bot.Brokers
         public string PlaceOrder(IOrderRequest orderRequest)
         {
             AlpacaOrderRequest alpacaRequest = new AlpacaOrderRequest(orderRequest);
+
+            string request_string = JsonConvert.SerializeObject(alpacaRequest);
 
             IRestRequest request = new RestRequest($"/v2/orders", Method.POST);
             request.AddJsonBody(alpacaRequest);

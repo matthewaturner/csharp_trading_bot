@@ -46,7 +46,16 @@ namespace BotIntegrationTests
             KeyVaultManager keyVaultManager = new KeyVaultManager(kvConfigSnapshot.Object);
             alpaca = new AlpacaBroker(alpacaConfigSnapshot.Object, keyVaultManager);
 
-            alpaca.Initialize(engine.Object, new string[] { "true" });
+            alpaca.Initialize(engine.Object, RunMode.Paper, new string[] { "true" });
+        }
+
+        [TestMethod]
+        public void GetAssetInformation()
+        {
+            IAssetInformation assetInfo = alpaca.GetAssetInformation("MSFT");
+            Assert.IsNotNull(assetInfo);
+            Assert.AreEqual("MSFT", assetInfo.Symbol);
+            Assert.IsTrue(assetInfo.Marginable);
         }
 
         [TestMethod]
@@ -79,6 +88,24 @@ namespace BotIntegrationTests
             Assert.IsNotNull(cancelledOrder);
             Assert.AreEqual(OrderState.Cancelled, cancelledOrder.State);
         }
+
+        [TestMethod]
+        public void PlaceFractionalOrderThenCancel()
+        {
+            IOrderRequest request = new OrderRequest(OrderType.MarketBuy, "MSFT", 1.5555555, 15);
+            string orderId = alpaca.PlaceOrder(request);
+            Assert.IsNotNull(orderId);
+
+            IOrder placedOrder = alpaca.GetOrder(orderId);
+            Assert.IsNotNull(placedOrder);
+            Assert.AreEqual("MSFT", placedOrder.Symbol);
+
+            alpaca.CancelOrder(orderId);
+            IOrder cancelledOrder = alpaca.GetOrder(orderId);
+            Assert.IsNotNull(cancelledOrder);
+            Assert.AreEqual(OrderState.Cancelled, cancelledOrder.State);
+        }
+
 
         [TestMethod]
         public void PlaceOrderThenQueryOrders()

@@ -17,6 +17,8 @@ using System.IO;
 using Bot.Brokers;
 using Core.Azure;
 using Bot.Brokers.BackTest;
+using Newtonsoft.Json;
+using Bot.Analyzers.Loggers;
 
 namespace Bot
 {
@@ -131,12 +133,16 @@ namespace Bot
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
 
-            var engineConfig = new EngineConfig()
+            string configString = File.ReadAllText("./engineConfig.json");
+            var engineConfig = JsonConvert.DeserializeObject<EngineConfig>(configString);
+
+            new EngineConfig()
             {
                 Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
                 Interval = TickInterval.Day,
                 Start = new DateTime(2020, 1, 1),
                 End = new DateTime(2021, 3, 21),
+                RunMode = RunMode.BackTest,
                 DataSource = new DependencyConfig()
                 {
                     Name = "YahooDataSource"
@@ -178,7 +184,7 @@ namespace Bot
             ITradingEngine engine = provider.GetService<ITradingEngine>();
             AlpacaBroker broker = provider.GetService<AlpacaBroker>();
 
-            broker.Initialize(engine, new string[] { "true" });
+            broker.Initialize(engine, RunMode.Paper, new string[] { "true" });
 
             var account = broker.GetAccount();
             Console.WriteLine(account.Cash);

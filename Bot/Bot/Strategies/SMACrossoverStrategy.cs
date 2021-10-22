@@ -37,7 +37,7 @@ namespace Bot.Strategies
             mac = new MovingAverageCrossover(
                 shortMa,
                 longMa,
-                (IMultiTick t) => t[symbol].AdjClose);
+                (IMultiBar t) => t[symbol].Close);
             Indicators.Add(mac);
         }
 
@@ -47,7 +47,7 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void StrategyOnTick(IMultiTick ticks)
+        public override void StrategyOnTick(IMultiBar ticks)
         {
             Tick tick = ticks[symbol];
             mac.OnTick(ticks);
@@ -95,7 +95,7 @@ namespace Bot.Strategies
         {
             var orderType = currentPosition.Type == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
             var quantity = currentPosition.Quantity;
-            var targetPrice = tick.AdjClose;
+            var targetPrice = tick.Close;
             var order = new OrderRequest(
                 orderType,
                 currentPosition.Symbol,
@@ -124,7 +124,7 @@ namespace Bot.Strategies
                 quantity = maxUnits;
             }
 
-            var targetPrice = tick.AdjClose;
+            var targetPrice = tick.Close;
             var order = new OrderRequest(
                 OrderType.MarketBuy,
                 tick.Symbol,
@@ -137,7 +137,7 @@ namespace Bot.Strategies
         private void EnterShortPosition(Tick tick)
         {
             var quantity = currentPosition != null ? 2 * currentPosition.Quantity * -1 : maxUnits;
-            var targetPrice = tick.AdjClose;
+            var targetPrice = tick.Close;
             var order = new OrderRequest(
                 OrderType.MarketSell,
                 tick.Symbol,

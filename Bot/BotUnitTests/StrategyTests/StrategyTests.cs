@@ -129,7 +129,7 @@ namespace StrategyTests
                     int volume = int.Parse(fields[6]);
 
                     Tick tick = new Tick(
-                        symbol, interval, dateTime, open, high, low, close, adjClose, volume);
+                        symbol, interval, dateTime, open, high, low, close, volume);
 
                     tickList.Add(tick);
                 }

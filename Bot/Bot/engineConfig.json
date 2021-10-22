@@ -1,23 +1,24 @@
 {
-  "symbols": [ "MSFT" ],
+  "symbols": [ "MJ", "POTX", "MSOS" ],
   "interval": "day",
-  "start": "2010-01-01",
-  "end": "2020-01-01",
+  "start": null,
+  "end": null,
+  "runMode": "paper",
   "dataSource": {
     "name": "YahooDataSource",
     "args": []
   },
   "broker": {
-    "name": "BackTestingBroker",
+    "name": "AlpacaBroker",
     "args": [ "1000" ]
   },
   "strategy": {
-    "name": "SMACrossoverStrategy",
-    "args": [ "MSFT", "16", "64", "true" ]
+    "name": "BollingerMeanReversion",
+    "args": [ "10", "1", "0", "2.6048756;-1.70736671;-0.19896952" ]
   },
   "analyzers": [
     {
-      "name": "ConsoleLogger",
+      "name": "CsvLogger",
       "args": []
     },
     {

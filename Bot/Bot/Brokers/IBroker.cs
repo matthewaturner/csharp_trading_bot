@@ -16,10 +16,17 @@ namespace Bot.Brokers
         void Initialize(ITradingEngine engine, RunMode runMode, string[] args);
 
         /// <summary>
+        /// Gets information for an asset like whether it is easy to borrow.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        IAssetInformation GetAssetInformation(string symbol);
+
+        /// <summary>
         /// Places an order.
         /// </summary>
         /// <returns>Order id.</returns>
-        string PlaceOrder(IOrderRequest order);
+        IOrder PlaceOrder(IOrderRequest order);
 
         /// <summary>
         /// Cancel an order if it hasn't been filled yet.
@@ -45,6 +52,12 @@ namespace Bot.Brokers
         /// <returns></returns>
         IPosition GetPosition(string symbol);
 
+        /// <summary>
+        /// Closes a position in a given symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        IOrder ClosePosition(string symbol);
 
         /// <summary>
         /// Gets the status of an order.

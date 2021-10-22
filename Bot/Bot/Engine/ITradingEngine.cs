@@ -25,7 +25,7 @@ namespace Bot.Engine
         /// <summary>
         /// Get current ticks.
         /// </summary>
-        public IMultiTick Ticks { get; }
+        public IMultiBar Ticks { get; }
 
         /// <summary>
         /// Gets current data source.

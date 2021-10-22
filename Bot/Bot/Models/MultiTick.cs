@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Bot.Models
 {
-    public class MultiTick : IMultiTick
+    public class MultiTick : IMultiBar
     {
-        private Tick[] ticks;
+        private Tick[] bars;
         private IDictionary<string, int> symbolMap;
 
         /// <summary>
@@ -14,13 +14,13 @@ namespace Bot.Models
         /// <param name="symbols"></param>
         public MultiTick(string[] symbols)
         {
-            ticks = new Tick[symbols.Length];
+            bars = new Tick[symbols.Length];
 
             symbolMap = new Dictionary<string, int>(symbols.Length);
             for (int i=0; i<symbols.Length; i++)
             {
-                ticks[i] = new Tick();
-                ticks[i].Symbol = symbols[i];
+                bars[i] = new Tick();
+                bars[i].Symbol = symbols[i];
                 symbolMap[symbols[i]] = i;
             }
         }
@@ -28,21 +28,21 @@ namespace Bot.Models
         /// <summary>
         /// Initialize the ticks object.
         /// </summary>
-        /// <param name="ticks"></param>
-        public MultiTick(Tick[] ticks)
+        /// <param name="bars"></param>
+        public MultiTick(Tick[] bars)
         {
-            this.ticks = ticks;
+            this.bars = bars;
 
-            for (int i=0; i<ticks.Length; i++)
+            for (int i=0; i<bars.Length; i++)
             {
-                symbolMap[ticks[i].Symbol] = i;
+                symbolMap[bars[i].Symbol] = i;
             }
         }
 
         /// <summary>
         /// Returns the number of symbols in the symbol map.
         /// </summary>
-        public int NumSymbols => ticks.Length;
+        public int NumSymbols => bars.Length;
 
         /// <summary>
         /// Gets the latest tick data for a symbol.
@@ -51,7 +51,7 @@ namespace Bot.Models
         /// <returns></returns>
         public Tick this[string symbol]
         {
-            get => ticks[symbolMap[symbol]];
+            get => bars[symbolMap[symbol]];
         }
 
         /// <summary>
@@ -61,30 +61,30 @@ namespace Bot.Models
         /// <returns></returns>
         public Tick this[int index]
         {
-            get => ticks[index];
+            get => bars[index];
         }
 
         /// <summary>
         /// Updates the current prices. Called by engine.
         /// </summary>
-        /// <param name="newTicks"></param>
-        public void Update(Tick[] newTicks)
+        /// <param name="newBars"></param>
+        public void Update(Tick[] newBars)
         {
             // iterate this way because we should never add ticks
             // in the middle of a run
 
-            if (newTicks.Length != ticks.Length)
+            if (newBars.Length != bars.Length)
             {
-                throw new ArgumentOutOfRangeException("new ticks contain more or less ticks than previously.");
+                throw new ArgumentOutOfRangeException("new bars contain more or less bars than previously.");
             }
 
-            for (int i=0; i<ticks.Length; i++)
+            for (int i=0; i<bars.Length; i++)
             {
-                if (string.Compare(ticks[i].Symbol, newTicks[i].Symbol, ignoreCase: true) != 0)
+                if (string.Compare(bars[i].Symbol, newBars[i].Symbol, ignoreCase: true) != 0)
                 {
-                    throw new ArgumentException($"newTicks[{i}] was for symbol {newTicks[i].Symbol}. Expected {ticks[i].Symbol}");
+                    throw new ArgumentException($"newBars[{i}] was for symbol {newBars[i].Symbol}. Expected {bars[i].Symbol}");
                 }
-                ticks[i] = newTicks[i];
+                bars[i] = newBars[i];
             }
         }
 
@@ -104,7 +104,7 @@ namespace Bot.Models
         /// <returns></returns>
         public Tick[] ToArray()
         {
-            return ticks;
+            return bars;
         }
 
         /// <summary>
@@ -114,9 +114,9 @@ namespace Bot.Models
         public override string ToString()
         {
             string output = string.Empty;
-            for (int i=0; i<ticks.Length; i++)
+            for (int i=0; i<bars.Length; i++)
             {
-                output += ticks[i].ToString() + "\n";
+                output += bars[i].ToString() + "\n";
             }
             return output;
         }

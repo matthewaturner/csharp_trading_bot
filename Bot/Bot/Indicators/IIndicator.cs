@@ -22,7 +22,7 @@ namespace Bot.Indicators
         /// Updates the indicator with a new row of data.
         /// </summary>
         /// <param name="tick"></param>
-        void OnTick(IMultiTick ticks);
+        void OnTick(IMultiBar ticks);
 
         /// <summary>
         /// Gets the default value of the indicator.

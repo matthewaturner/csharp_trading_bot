@@ -50,7 +50,7 @@ namespace Bot.Indicators
         /// Calculate outputs.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void OnTick(IMultiTick ticks)
+        public override void OnTick(IMultiBar ticks)
         {
             // if we aren't hydrated we are just adding to the list then returning
             if (!Hydrated)
