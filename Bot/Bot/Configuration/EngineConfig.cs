@@ -14,10 +14,13 @@ namespace Bot.Configuration
         public TickInterval Interval { get; set; }
 
         [JsonProperty("start")]
-        public DateTime Start { get; set; }
+        public DateTime? Start { get; set; }
 
         [JsonProperty("end")]
-        public DateTime End { get; set; }
+        public DateTime? End { get; set; }
+
+        [JsonProperty("runMode")]
+        public RunMode RunMode { get; set; }
 
         [JsonProperty("dataSource")]
         public DependencyConfig DataSource { get; set; }

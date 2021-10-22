@@ -1,4 +1,6 @@
 ﻿
+using Bot.Analyzers.Loggers;
+
 namespace Bot.Engine.Events
 {
     public interface ILogReceiver
@@ -7,6 +9,6 @@ namespace Bot.Engine.Events
         /// Receives log events.
         /// </summary>
         /// <param name="log"></param>
-        void OnLog(string log);
+        void OnLog(string caller, string message, LogLevel level = LogLevel.Information);
     }
 }

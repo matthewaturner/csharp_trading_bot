@@ -28,6 +28,9 @@
     <None Update="appsettings.dev.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Config\backtest_fljh_ewje_fltw.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="engineConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

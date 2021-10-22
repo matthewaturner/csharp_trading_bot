@@ -49,11 +49,24 @@ namespace Bot.Brokers
         /// </summary>
         /// <param name="engine"></param>
         /// <param name="args"></param>
-        /// <param name="args[0]">Bool indicating paper trading api (true) or live api (false).</param>
-        public void Initialize(ITradingEngine engine, string[] args)
+        public void Initialize(ITradingEngine engine, RunMode runMode, string[] args)
         {
             this.engine = engine;
-            baseUrl = bool.Parse(args[0]) ? config.PaperApiBaseUrl : config.ApiBaseUrl;
+
+            if (runMode == RunMode.BackTest)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (runMode == RunMode.Paper)
+            {
+                baseUrl = config.PaperApiBaseUrl;
+            }
+
+            if (runMode == RunMode.Live)
+            {
+                baseUrl = config.ApiBaseUrl;
+            }
 
             restClient.BaseUrl = new Uri(baseUrl);
         }
@@ -71,10 +84,29 @@ namespace Bot.Brokers
 
             if (!response.IsSuccessful && validate)
             {
-                throw new RestException($"Failure calling alpaca resource {request.Resource}. Status code {response.StatusCode}");
+                throw new RestException($"Failure calling alpaca resource {request.Resource}. " +
+                    $"Status code {response.StatusCode}. " +
+                    $"Body '{response.Content}'");
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Gets information for an asset like whether it is easy to borrow.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public IAssetInformation GetAssetInformation(string symbol)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentNullException(nameof(symbol));
+            }
+
+            IRestRequest request = new RestRequest($"/v2/assets/{symbol}", Method.GET);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaAssetInformation>(response.Content);
         }
 
         /// <summary>
@@ -150,7 +182,7 @@ namespace Bot.Brokers
         /// <param name="state"></param>
         /// <returns></returns>
         public IList<IOrder> QueryOrders(
-            string symbol,
+            IEnumerable<string> symbols,
             OrderState state,
             DateTime after,
             DateTime until,
@@ -158,9 +190,9 @@ namespace Bot.Brokers
         {
             IRestRequest request = new RestRequest($"/v2/orders", Method.GET);
 
-            if (!string.IsNullOrWhiteSpace(symbol))
+            if (symbols != null && symbols.Any())
             {
-                request.AddQueryParameter("symbol", symbol);
+                request.AddQueryParameter("symbols", string.Join(",", symbols));
             }
 
             if (state != OrderState.Unknown)
@@ -176,7 +208,7 @@ namespace Bot.Brokers
             }
             request.AddQueryParameter("after", after.ToString("O"));
             request.AddQueryParameter("until", until.ToString("O"));
-            request.AddQueryParameter("limit", limit.ToString("O"));
+            request.AddQueryParameter("limit", limit.ToString());
 
             IRestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<IList<AlpacaOrder>>(response.Content).ToList<IOrder>();
@@ -205,15 +237,16 @@ namespace Bot.Brokers
         /// </summary>
         /// <param name="orderRequest"></param>
         /// <returns></returns>
-        public string PlaceOrder(IOrderRequest orderRequest)
+        public IOrder PlaceOrder(IOrderRequest orderRequest)
         {
             AlpacaOrderRequest alpacaRequest = new AlpacaOrderRequest(orderRequest);
+
+            string request_string = JsonConvert.SerializeObject(alpacaRequest);
 
             IRestRequest request = new RestRequest($"/v2/orders", Method.POST);
             request.AddJsonBody(alpacaRequest);
             IRestResponse response = SendAuthenticatedHttpRequest(request);
-            IOrder newOrder = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
-            return newOrder.OrderId;
+            return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
         }
 
         /// <summary>
@@ -232,5 +265,19 @@ namespace Bot.Brokers
             IOrder order = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
             return;
         }
+
+        /// <summary>
+        /// Close a position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public IOrder ClosePosition(string symbol)
+        {
+            IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.DELETE);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
+        }
+
+
     }
 }

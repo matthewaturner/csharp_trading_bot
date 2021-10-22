@@ -1,7 +1,6 @@
-﻿using Bot.Models;
-using Bot.Engine;
+﻿using Bot.Engine;
+using Bot.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bot.Data
@@ -15,17 +14,19 @@ namespace Bot.Data
         void Initialize(ITradingEngine engine, string[] args);
 
         /// <summary>
-        /// Gets a list of ticks for a certain interval over a period of time.
+        /// Stream ticks to the engine.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="symbols"></param>
         /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
+        /// <param name="onTickCallback"></param>
         /// <returns></returns>
-        Task<IList<Tick>> GetTicksAsync(
-            string symbol,
+        Task StreamTicks(
+            string[] symbols,
             TickInterval interval,
             DateTime start,
-            DateTime end);
+            DateTime? end,
+            Action<Tick[]> onTickCallback);
     }
 }

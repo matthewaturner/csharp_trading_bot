@@ -1,4 +1,5 @@
 ﻿using Bot.Analyzers;
+using Bot.Analyzers.Loggers;
 using Bot.Brokers;
 using Bot.Configuration;
 using Bot.Data;
@@ -25,7 +26,7 @@ namespace Bot.Engine
         /// <summary>
         /// Get current ticks.
         /// </summary>
-        public IMultiTick Ticks { get; }
+        public IMultiBar Ticks { get; }
 
         /// <summary>
         /// Gets current data source.
@@ -63,6 +64,6 @@ namespace Bot.Engine
         /// Sends log events to listeners.
         /// </summary>
         /// <param name="log"></param>
-        public void Log(string log);
+        public void Log(string caller, string message, LogLevel level = LogLevel.Information);
     }
 }

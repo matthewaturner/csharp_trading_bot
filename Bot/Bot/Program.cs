@@ -17,6 +17,8 @@ using System.IO;
 using Bot.Brokers;
 using Core.Azure;
 using Bot.Brokers.BackTest;
+using Newtonsoft.Json;
+using Bot.Analyzers.Loggers;
 
 namespace Bot
 {
@@ -44,8 +46,6 @@ namespace Bot
                 .Build();
             services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
-            services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
-            services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<AlpacaConfiguration>(configuration.GetSection(ConfigurationPaths.Alpaca));
 
             // entity framework stuff
@@ -131,12 +131,16 @@ namespace Bot
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
 
-            var engineConfig = new EngineConfig()
+            string configString = File.ReadAllText("./engineConfig.json");
+            var engineConfig = JsonConvert.DeserializeObject<EngineConfig>(configString);
+
+            new EngineConfig()
             {
                 Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
                 Interval = TickInterval.Day,
-                Start = new DateTime(2020, 1, 1),
-                End = new DateTime(2021, 3, 21),
+                Start = new DateTime(2021, 1, 1),
+                End = new DateTime(2021, 10, 1),
+                RunMode = RunMode.BackTest,
                 DataSource = new DependencyConfig()
                 {
                     Name = "YahooDataSource"
@@ -178,7 +182,7 @@ namespace Bot
             ITradingEngine engine = provider.GetService<ITradingEngine>();
             AlpacaBroker broker = provider.GetService<AlpacaBroker>();
 
-            broker.Initialize(engine, new string[] { "true" });
+            broker.Initialize(engine, RunMode.Paper, new string[] { "true" });
 
             var account = broker.GetAccount();
             Console.WriteLine(account.Cash);

@@ -31,7 +31,7 @@ namespace Bot.Analyzers
         /// When a tick is received.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(IMultiTick _)
+        public void OnTick(IMultiBar _)
         {
             double currentValue = engine.Broker.GetAccount().TotalValue;
 

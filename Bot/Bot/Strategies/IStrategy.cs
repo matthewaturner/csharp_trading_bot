@@ -17,7 +17,7 @@ namespace Bot.Strategies
 
         void Initialize(ITradingEngine engine, string[] args);
 
-        void StrategyOnTick(IMultiTick ticks);
+        void StrategyOnTick(IMultiBar ticks);
 
         string[] GetCsvHeaders();
 

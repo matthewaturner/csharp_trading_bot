@@ -18,7 +18,6 @@ namespace Bot.Models
             double high,
             double low,
             double close,
-            double adjClose,
             int volume)
         {
             Symbol = symbol;
@@ -28,7 +27,6 @@ namespace Bot.Models
             High = high;
             Low = low;
             Close = close;
-            AdjClose = adjClose;
             Volume = volume;
         }
 
@@ -50,23 +48,14 @@ namespace Bot.Models
         [Required]
         public double Open { get; set; }
 
-        public double AdjOpen { get { return AdjValue(Open); } }
-
         [Required]
         public double High { get; set; }
-
-        public double AdjHigh { get { return AdjValue(High); } }
 
         [Required]
         public double Low { get; set; }
 
-        public double AdjLow { get { return AdjValue(Low); } }
-
         [Required]
         public double Close { get; set; }
-
-        [Required]
-        public double AdjClose { get; set; }
 
         [Required]
         public int Volume { get; set; }
@@ -75,16 +64,7 @@ namespace Bot.Models
         {
             return $"{Symbol} {DateTime.StandardToString()} " +
                 $"Open:{Open} High:{High} Low:{Low} " +
-                $"Close:{Close} AdjClose:{AdjClose} Volume:{Volume}";
-        }
-
-        private double AdjValue(double value)
-        {
-            if (AdjClose == 0.0)
-            {
-                return value;
-            }
-            return (AdjClose / Close) * value;
+                $"Close:{Close} Volume:{Volume}";
         }
     }
 }

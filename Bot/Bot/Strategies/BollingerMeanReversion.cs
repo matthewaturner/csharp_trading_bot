@@ -4,6 +4,7 @@ using Bot.Indicators;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bot.Strategies
@@ -87,7 +88,7 @@ namespace Bot.Strategies
         /// </summary>
         /// <param name="ticks"></param>
         /// <returns></returns>
-        public double HedgedPortfolioValue(IMultiTick ticks)
+        public double HedgedPortfolioValue(IMultiBar ticks)
         {
             double value = 0;
             for (int i=0; i<symbols.Length; i++)
@@ -95,7 +96,7 @@ namespace Bot.Strategies
                 string symbol = symbols[i];
                 double hedgeRatio = hedgeRatios[i];
 
-                value += ticks[symbol].AdjClose * hedgeRatio;
+                value += ticks[symbol].Close * hedgeRatio;
             }
             return value;
         }
@@ -106,7 +107,7 @@ namespace Bot.Strategies
         /// </summary>
         /// <param name="ticks"></param>
         /// <returns></returns>
-        public double HedgedTradeValue(IMultiTick ticks)
+        public double HedgedTradeValue(IMultiBar ticks)
         {
             double value = 0;
             for (int i=0; i<symbols.Length; i++)
@@ -114,7 +115,7 @@ namespace Bot.Strategies
                 string symbol = symbols[i];
                 double hedgeRatio = hedgeRatios[i];
 
-                value += Math.Abs(ticks[symbol].AdjClose * hedgeRatio);
+                value += Math.Abs(ticks[symbol].Close * hedgeRatio);
             }
             return value;
         }
@@ -125,18 +126,18 @@ namespace Bot.Strategies
         /// <param name="longOrShort"></param>
         public void EnterPositions(int longOrShort)
         {
-            double tradeableValue = engine.Broker.GetAccount().TotalValue * .95;
+            double tradeableValue = engine.Broker.GetAccount().Cash * .95;
             double unitPortfolioValue = HedgedTradeValue(engine.Ticks);
             double numUnitPortfolios = tradeableValue / unitPortfolioValue;
 
             for (int i=0; i<symbols.Length; i++)
             {
                 string symbol = symbols[i];
-                double currentPrice = engine.Ticks[symbol].AdjClose;
+                double currentPrice = engine.Ticks[symbol].Close;
                 double desiredUnits = numUnitPortfolios * hedgeRatios[i] * longOrShort;
 
                 double currentUnits = 0;
-                IPosition currentPosition = broker.GetPositions().Where(pos => pos.Symbol.Equals(symbol)).FirstOrDefault();
+                IPosition currentPosition = broker.GetPosition(symbol);
 
                 if (currentPosition != null)
                 {
@@ -173,10 +174,10 @@ namespace Bot.Strategies
             for (int i=0; i<symbols.Length; i++)
             {
                 string symbol = symbols[i];
-                double currentPrice = engine.Ticks[symbol].AdjClose;
+                double currentPrice = engine.Ticks[symbol].Close;
 
                 double currentUnits = 0;
-                IPosition currentPosition = broker.GetPositions().Where(pos => pos.Symbol.Equals(symbol)).FirstOrDefault();
+                IPosition currentPosition = broker.GetPosition(symbol);
 
                 if (currentPosition != null)
                 {
@@ -208,7 +209,7 @@ namespace Bot.Strategies
         /// What to do when a new tick of data comes in.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void StrategyOnTick(IMultiTick ticks)
+        public override void StrategyOnTick(IMultiBar ticks)
         {
             int bollValue = (int)bollingerBand.Value;
 

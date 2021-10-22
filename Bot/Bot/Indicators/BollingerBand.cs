@@ -15,7 +15,7 @@ namespace Bot.Indicators
 
         SimpleMovingAverage sma;
         MovingStandardDeviation stdDev;
-        Func<IMultiTick, double> transform;
+        Func<IMultiBar, double> transform;
         double zScore, entryZScore, exitZScore;
         Position position;
 
@@ -30,7 +30,7 @@ namespace Bot.Indicators
             int lookback, 
             double entryZScore, 
             double exitZScore, 
-            Func<IMultiTick, double> transform)
+            Func<IMultiBar, double> transform)
             : base()
         {
             if (lookback < 1)
@@ -61,7 +61,7 @@ namespace Bot.Indicators
         /// Recalculate values.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void OnTick(IMultiTick ticks)
+        public override void OnTick(IMultiBar ticks)
         {
             sma.OnTick(ticks);
             stdDev.OnTick(ticks);

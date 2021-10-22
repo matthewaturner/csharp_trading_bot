@@ -12,7 +12,7 @@ using Bot.Engine;
 
 namespace Bot.Data
 {
-    public class YahooDataSource : IDataSource
+    public class YahooDataSource : DataSourceBase
     {
         const string urlFormat = "v7/finance/download/{0}?period1={1}&period2={2}&interval=1d&events=history&includeAdjustedClose=true";
 
@@ -35,7 +35,7 @@ namespace Bot.Data
         /// <summary>
         /// Initializes the data source with custom arguments.
         /// </summary>
-        public void Initialize(ITradingEngine engine, string[] args)
+        public override void Initialize(ITradingEngine engine, string[] args)
         { }
 
         /// <summary>
@@ -78,8 +78,6 @@ namespace Bot.Data
 
             try
             {
-                //httpClient.BaseAddress = new Uri(config.BaseUrl);
-                //httpClient.Timeout = TimeSpan.FromMinutes(5);
                 string requestUrl = FormalRequestUrl(symbol, start, end);
 
                 Console.WriteLine($"Downloading from {requestUrl}");
@@ -105,7 +103,11 @@ namespace Bot.Data
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        public async Task<IList<Tick>> GetTicksAsync(string symbol, TickInterval interval, DateTime start, DateTime end)
+        public override async Task<IList<Tick>> GetHistoricalTicksAsync(
+            string symbol, 
+            TickInterval interval, 
+            DateTime start, 
+            DateTime end)
         {
             Stream dataStream = await GetDataStream(symbol, interval, start, end);
             StreamReader reader = new StreamReader(dataStream);
@@ -129,7 +131,14 @@ namespace Bot.Data
                     double adjClose = Math.Round(double.Parse(tickStrings[5]), 4);
                     int volume = int.Parse(tickStrings[6]);
 
-                    tick = new Tick(symbol, interval, dateTime, open, high, low, close, adjClose, volume);
+                    double adjustmentRatio = adjClose / close;
+                    double adjOpen = adjustmentRatio * open;
+                    double adjHigh = adjustmentRatio * high;
+                    double adjLow = adjustmentRatio * low;
+
+                    // volume can't be adjusted properly with current information
+
+                    tick = new Tick(symbol, interval, dateTime, adjOpen, adjHigh, adjLow, adjClose, volume);
                     tickList.Add(tick);
                 }
                 catch (Exception ex)

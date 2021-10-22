@@ -5,6 +5,7 @@ using Moq;
 using System;
 using Bot.Brokers.BackTest;
 using System.Linq;
+using Bot.Configuration;
 
 namespace BrokerUnitTests
 {
@@ -21,9 +22,9 @@ namespace BrokerUnitTests
 
             ticks = new MultiTick(new string[] { "MSFT", "GME", "AMC" });
 
-            var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 243.70, 26708200);
-            var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 50.0, 50.0, 50.0, 50.0, 50.0, 8140700); // same open and close
-            var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.0, 6.0, 6.0, 7.0, 7.0, 60690200); // open and close off by $1
+            var msftTick = new Tick("MSFT", TickInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 26708200);
+            var gmeTick = new Tick("GME", TickInterval.Day, DateTime.Now, 50.0, 50.0, 50.0, 50.0, 8140700); // same open and close
+            var amcTick = new Tick("AMC", TickInterval.Day, DateTime.Now, 6.0, 6.0, 6.0, 7.0, 60690200); // open and close off by $1
 
             Tick[] latestTicks = new Tick[] { msftTick, gmeTick, amcTick };
             ticks.Update(latestTicks);
@@ -36,7 +37,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "GME", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "3000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "3000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsFalse(broker.GetPositions().Any(pos => pos.Symbol.Equals("GME")));
@@ -58,7 +59,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "GME", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "3000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "3000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsNull(broker.GetPosition("GME"));
@@ -80,7 +81,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "1000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "1000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsNull(broker.GetPosition("MSFT"));
@@ -100,7 +101,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "1000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "1000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsNull(broker.GetPosition("MSFT"));
@@ -121,7 +122,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "1000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "1000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsNull(broker.GetPosition("MSFT"));
@@ -141,7 +142,7 @@ namespace BrokerUnitTests
         {
             OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "3000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "3000" });
 
             string orderId = broker.PlaceOrder(orderRequest);
             Assert.IsNull(broker.GetPosition("MSFT"));
@@ -162,7 +163,7 @@ namespace BrokerUnitTests
         public void BuyThenSellAllSucceeds()
         {
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "3000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "3000" });
 
             OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "AMC", 10.0, 25.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "AMC", 10.0, 31.0);
@@ -176,7 +177,7 @@ namespace BrokerUnitTests
             broker.OnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(3010, broker.GetAccount().TotalValue); // when we calculate based on close prices it is inflated
+            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
@@ -196,7 +197,7 @@ namespace BrokerUnitTests
         public void BuyThenShortSellSucceeds()
         {
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "3000" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "3000" });
 
             OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "AMC", 10.0, 25.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "AMC", 15.0, 31.0);
@@ -210,7 +211,7 @@ namespace BrokerUnitTests
             broker.OnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(3010, broker.GetAccount().TotalValue);
+            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
@@ -221,7 +222,7 @@ namespace BrokerUnitTests
             broker.OnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(-5, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(2995.0, broker.GetAccount().TotalValue); // calculated based on close prices, we were short and it went up
+            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
             Assert.AreEqual(2, broker.GetAllOrders().Count);
@@ -232,13 +233,13 @@ namespace BrokerUnitTests
         {
             MultiTick t = new MultiTick(new string[] { "TEST" });
 
-            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
+            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 100);
             t.Update(new Tick[] { testTick });
 
             // make sure engine returns our different ticks object
             mockEngine.Setup(m => m.Ticks).Returns(t);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "100" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "100" });
 
             OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "TEST", 10.0, 10.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "TEST", 10.0, 10.0);
@@ -257,7 +258,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
             // update the prices
-            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 11, 11, 11, 11, 11, 100);
+            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 11, 11, 11, 11, 100);
             t.Update(new Tick[] { testTick });
 
             string sellOrderId = broker.PlaceOrder(sellRequest);
@@ -277,12 +278,12 @@ namespace BrokerUnitTests
         {
             MultiTick t = new MultiTick(new string[] { "TEST" });
 
-            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 10, 100);
+            var testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 10, 10, 10, 10, 100);
             t.Update(new Tick[] { testTick });
 
             mockEngine.Setup(m => m.Ticks).Returns(t);
             BackTestingBroker broker = new BackTestingBroker();
-            broker.Initialize(mockEngine.Object, new string[] { "100" });
+            broker.Initialize(mockEngine.Object, RunMode.BackTest, new string[] { "100" });
 
             OrderRequest buyRequest = new OrderRequest(OrderType.MarketBuy, "TEST", 10.0, 10.0);
             OrderRequest sellRequest = new OrderRequest(OrderType.MarketSell, "TEST", 10.0, 10.0);
@@ -301,7 +302,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
 
             // update the prices
-            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 9, 9, 9, 9, 9, 100);
+            testTick = new Tick("TEST", TickInterval.Day, DateTime.Now, 9, 9, 9, 9, 100);
             t.Update(new Tick[] { testTick });
 
             string buyOrderId = broker.PlaceOrder(buyRequest);

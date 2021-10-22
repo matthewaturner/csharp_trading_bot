@@ -1,8 +1,8 @@
 {
   "symbols": [ "FLJH", "EWJE", "FLTW" ],
   "interval": "day",
-  "start": "2021-01-01",
-  "end": "2021-10-01",
+  "start": null,
+  "end": null,
   "runMode": "backtest",
   "dataSource": {
     "name": "YahooDataSource",
