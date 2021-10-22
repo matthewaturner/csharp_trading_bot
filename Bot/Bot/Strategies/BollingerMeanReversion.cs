@@ -61,22 +61,6 @@ namespace Bot.Strategies
             position = Position.Neutral;
         }
 
-        /*
-        private Position GetCurrentPosition()
-        {
-            foreach (IPosition pos in broker.GetPositions())
-            {
-                string symbol = pos.Symbol;
-                int i = Array.FindIndex(symbols, str => str.Equals(symbol, StringComparison.OrdinalIgnoreCase));
-
-                if (i == -1)
-                {
-
-                }
-            }
-        }
-        */
-
         /// <summary>
         /// Fields included in csv output.
         /// </summary>

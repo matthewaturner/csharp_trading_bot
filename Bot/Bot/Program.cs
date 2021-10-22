@@ -46,8 +46,6 @@ namespace Bot
                 .Build();
             services.Configure<KeyVaultConfiguration>(configuration.GetSection(ConfigurationPaths.KeyVault));
             services.Configure<YahooDataConfiguration>(configuration.GetSection(ConfigurationPaths.Yahoo));
-            services.Configure<SqlConfiguration>(configuration.GetSection(ConfigurationPaths.Sql));
-            services.Configure<TickContext>(configuration.GetSection(ConfigurationPaths.Sql));
             services.Configure<AlpacaConfiguration>(configuration.GetSection(ConfigurationPaths.Alpaca));
 
             // entity framework stuff
@@ -140,8 +138,8 @@ namespace Bot
             {
                 Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
                 Interval = TickInterval.Day,
-                Start = new DateTime(2020, 1, 1),
-                End = new DateTime(2021, 3, 21),
+                Start = new DateTime(2021, 1, 1),
+                End = new DateTime(2021, 10, 1),
                 RunMode = RunMode.BackTest,
                 DataSource = new DependencyConfig()
                 {

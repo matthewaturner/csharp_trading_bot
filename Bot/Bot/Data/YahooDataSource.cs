@@ -78,8 +78,6 @@ namespace Bot.Data
 
             try
             {
-                //httpClient.BaseAddress = new Uri(config.BaseUrl);
-                //httpClient.Timeout = TimeSpan.FromMinutes(5);
                 string requestUrl = FormalRequestUrl(symbol, start, end);
 
                 Console.WriteLine($"Downloading from {requestUrl}");
