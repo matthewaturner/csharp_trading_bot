@@ -159,7 +159,7 @@ namespace Bot.Engine
                     null,
                     SendOnTickEvents);
 
-
+                // setup live streaming
             }
             else if (config.RunMode == RunMode.BackTest)
             {
