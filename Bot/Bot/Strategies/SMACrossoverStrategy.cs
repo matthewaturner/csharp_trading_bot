@@ -131,7 +131,7 @@ namespace Bot.Strategies
                 quantity,
                 targetPrice
                 );
-            orderId = broker.PlaceOrder(order);
+            orderId = broker.PlaceOrder(order).OrderId;
         }
 
         private void EnterShortPosition(Tick tick)
@@ -144,7 +144,7 @@ namespace Bot.Strategies
                 quantity,
                 targetPrice
                 );
-            orderId = broker.PlaceOrder(order);
+            orderId = broker.PlaceOrder(order).OrderId;
         }        
     }
 }

@@ -237,7 +237,7 @@ namespace Bot.Brokers
         /// </summary>
         /// <param name="orderRequest"></param>
         /// <returns></returns>
-        public string PlaceOrder(IOrderRequest orderRequest)
+        public IOrder PlaceOrder(IOrderRequest orderRequest)
         {
             AlpacaOrderRequest alpacaRequest = new AlpacaOrderRequest(orderRequest);
 
@@ -246,8 +246,7 @@ namespace Bot.Brokers
             IRestRequest request = new RestRequest($"/v2/orders", Method.POST);
             request.AddJsonBody(alpacaRequest);
             IRestResponse response = SendAuthenticatedHttpRequest(request);
-            IOrder newOrder = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
-            return newOrder.OrderId;
+            return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
         }
 
         /// <summary>
@@ -266,5 +265,19 @@ namespace Bot.Brokers
             IOrder order = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
             return;
         }
+
+        /// <summary>
+        /// Close a position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public IOrder ClosePosition(string symbol)
+        {
+            IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.DELETE);
+            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
+        }
+
+
     }
 }

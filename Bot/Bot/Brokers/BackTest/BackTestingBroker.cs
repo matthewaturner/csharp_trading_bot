@@ -172,7 +172,7 @@ namespace Bot.Brokers.BackTest
         /// Placing an order just puts it into the open orders list.
         /// </summary>
         /// <param name="order"></param>
-        public string PlaceOrder(IOrderRequest request)
+        public IOrder PlaceOrder(IOrderRequest request)
         {
             BackTestOrder order = new BackTestOrder(request);
 
@@ -185,8 +185,7 @@ namespace Bot.Brokers.BackTest
             order.PlacementTime = ticks[order.Symbol].DateTime;
             openOrders.Add(order);
             allOrders.Add(order);
-
-            return order.OrderId;
+            return order;
         }
 
 
@@ -324,6 +323,21 @@ namespace Bot.Brokers.BackTest
                 positions.Add(new BackTestPosition(symbol, -quantity));
                 account.Cash += price * quantity;
             }
+        }
+
+        /// <summary>
+        /// Closes a position.
+        /// </summary>
+        /// <param name="symbol"></param>
+        public IOrder ClosePosition(string symbol)
+        {
+            IPosition position = GetPosition(symbol);
+            OrderRequest order = new OrderRequest(
+                position.Quantity > 0 ? OrderType.MarketSell : OrderType.MarketBuy,
+                symbol,
+                Math.Abs(position.Quantity),
+                ticks[symbol].Close);
+            return PlaceOrder(order);
         }
     }
 }

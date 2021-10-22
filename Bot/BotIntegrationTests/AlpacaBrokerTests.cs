@@ -76,7 +76,7 @@ namespace BotIntegrationTests
         public void PlaceOrderThenCancel()
         {
             IOrderRequest request = new OrderRequest(OrderType.MarketBuy, "MSFT", 1, 15);
-            string orderId = alpaca.PlaceOrder(request);
+            string orderId = alpaca.PlaceOrder(request).OrderId;
             Assert.IsNotNull(orderId);
 
             IOrder placedOrder = alpaca.GetOrder(orderId);
@@ -93,7 +93,7 @@ namespace BotIntegrationTests
         public void PlaceFractionalOrderThenCancel()
         {
             IOrderRequest request = new OrderRequest(OrderType.MarketBuy, "MSFT", 1.5555555, 15);
-            string orderId = alpaca.PlaceOrder(request);
+            string orderId = alpaca.PlaceOrder(request).OrderId;
             Assert.IsNotNull(orderId);
 
             IOrder placedOrder = alpaca.GetOrder(orderId);
@@ -120,13 +120,13 @@ namespace BotIntegrationTests
                 IOrderRequest request2 = new OrderRequest(OrderType.MarketBuy, "GOOG", 1, 0);
                 IOrderRequest request3 = new OrderRequest(OrderType.MarketSell, "TSLA", 1, 0);
 
-                orderId1 = alpaca.PlaceOrder(request1);
+                orderId1 = alpaca.PlaceOrder(request1).OrderId;
 
                 Thread.Sleep(1000);
                 var queryTime = DateTime.UtcNow;
 
-                orderId2 = alpaca.PlaceOrder(request2);
-                orderId3 = alpaca.PlaceOrder(request3);
+                orderId2 = alpaca.PlaceOrder(request2).OrderId;
+                orderId3 = alpaca.PlaceOrder(request3).OrderId;
 
                 IList<IOrder> orders = alpaca.QueryOrders(null, OrderState.Open, DateTime.UtcNow.AddHours(-1), DateTime.UtcNow);
                 Assert.IsNotNull(orders);

@@ -61,6 +61,7 @@ namespace Bot.Strategies
             position = Position.Neutral;
         }
 
+        /*
         private Position GetCurrentPosition()
         {
             foreach (IPosition pos in broker.GetPositions())
@@ -74,6 +75,7 @@ namespace Bot.Strategies
                 }
             }
         }
+        */
 
         /// <summary>
         /// Fields included in csv output.

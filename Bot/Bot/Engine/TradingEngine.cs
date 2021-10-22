@@ -14,6 +14,7 @@ using Bot.Data;
 using System.IO;
 using Bot.Brokers;
 using Bot.Indicators;
+using Bot.Analyzers.Loggers;
 
 namespace Bot.Engine
 {
@@ -233,11 +234,11 @@ namespace Bot.Engine
         /// Sends logging events.
         /// </summary>
         /// <param name="log"></param>
-        public void Log(string log)
+        public void Log(string caller, string message, LogLevel level = LogLevel.Information )
         {
             foreach (ILogReceiver receiver in logReceivers)
             {
-                receiver.OnLog(log);
+                receiver.OnLog(caller, message, level);
             }
         }
     }
