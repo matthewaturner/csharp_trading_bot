@@ -16,7 +16,7 @@ namespace Bot.Engine
         /// Sets up the trading engine.
         /// </summary>
         /// <param name="configFileName"></param>
-        public void Initialize(EngineConfig config);
+        public void Initialize(EngineConfig config, string outputPath);
 
         /// <summary>
         /// Gets the symbols we are running for.

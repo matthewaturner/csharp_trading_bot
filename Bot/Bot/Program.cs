@@ -35,7 +35,6 @@ namespace Bot
         public static void Main(string[] args)
         {
             IServiceCollection services = new ServiceCollection();
-            string outputPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/CSharpTradeBot";
 
             // setup configurations
             IConfiguration configuration = new ConfigurationBuilder()
@@ -131,89 +130,20 @@ namespace Bot
 
             ITradingEngine engine = serviceProvider.GetService<ITradingEngine>();
 
-            string configString = File.ReadAllText("./engineConfig.json");
+            // read config file
+            string configString = File.ReadAllText(args[0]);
             var engineConfig = JsonConvert.DeserializeObject<EngineConfig>(configString);
+            
+            // write config file to the output directory for future reference
+            string outputPath = Path.Join(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
+                $"CSharpTradeBot/{engineConfig.Strategy.Name}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+            string configOutputPath = Path.Join(outputPath, "engineConfig.json");
+            Directory.CreateDirectory(outputPath);
+            File.WriteAllText(configOutputPath, configString);
 
-            new EngineConfig()
-            {
-                Symbols = new List<string>() { "FLJH", "EWJE", "FLTW" },
-                Interval = TickInterval.Day,
-                Start = new DateTime(2021, 1, 1),
-                End = new DateTime(2021, 10, 1),
-                RunMode = RunMode.BackTest,
-                DataSource = new DependencyConfig()
-                {
-                    Name = "YahooDataSource"
-                },
-                Broker = new DependencyConfig()
-                {
-                    Name = "BackTestingBroker",
-                    Args = new string[] { "1000" }
-                },
-                Strategy = new DependencyConfig()
-                {
-                    Name = "BollingerMeanReversion",
-                    Args = new string[] { "10", "1", ".05", "2.90852161;-2.22481014;-.00132392013" }
-                },
-                Analyzers = new List<DependencyConfig>()
-                {
-                    new DependencyConfig()
-                    {
-                        Name = "CsvLogger",
-                        Args = new string[] { outputPath }
-                    },
-                    new DependencyConfig()
-                    {
-                        Name = "SharpeRatio",
-                        Args = new string[] { "0.00005357"}
-                    },
-                }
-            };
-
-            engine.Initialize(engineConfig);
+            engine.Initialize(engineConfig, outputPath);
             engine.RunAsync().Wait();
-
-            // TestREngine();
-            // TestAlpaca(serviceProvider);
         }
-
-        public static void TestAlpaca(ServiceProvider provider)
-        {
-            ITradingEngine engine = provider.GetService<ITradingEngine>();
-            AlpacaBroker broker = provider.GetService<AlpacaBroker>();
-
-            broker.Initialize(engine, RunMode.Paper, new string[] { "true" });
-
-            var account = broker.GetAccount();
-            Console.WriteLine(account.Cash);
-        }
-
-        public static void TestREngine()
-        {
-            try
-            {
-                StartupParameter rinit = new StartupParameter();
-                rinit.Quiet = true;
-                rinit.RHome = "C:/Program Files/R/R-3.4.3";
-                rinit.Interactive = true;
-                REngine rEngine = REngine.GetInstance(null, true, rinit);
-                rEngine.Evaluate("library('urca')");
-
-                // A somewhat contrived but customary Hello World:
-                CharacterVector charVec = rEngine.CreateCharacterVector(new[] { "Hello, R world!, .NET speaking" });
-                rEngine.SetSymbol("greetings", charVec);
-                rEngine.Evaluate("str(greetings)"); // print out in the console
-                string[] a = rEngine.Evaluate("'Hi there .NET, from the R engine'").AsCharacter().ToArray();
-                Console.WriteLine("R answered: '{0}'", a[0]);
-                Console.WriteLine("Press any key to exit the program");
-                Console.ReadKey();
-                rEngine.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-
     }
 }

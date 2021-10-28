@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Bot": {
+      "commandName": "Project",
+      "commandLineArgs": "\"engineConfig.json\""
+    }
+  }
+}
