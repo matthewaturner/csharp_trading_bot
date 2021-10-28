@@ -34,6 +34,7 @@ namespace Bot
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("Running!");
             IServiceCollection services = new ServiceCollection();
 
             // setup configurations
