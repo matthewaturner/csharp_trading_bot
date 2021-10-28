@@ -100,16 +100,13 @@ namespace Bot.Engine
         /// Setup everything.
         /// </summary>
         /// <param name="configFileName"></param>
-        public void Initialize(EngineConfig config)
+        public void Initialize(EngineConfig config, string outputPath)
         {
             this.config = config;
             ClearReceiverLists();
 
             // setup path for output
-            OutputPath = Path.Join(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-                $"/CSharpTradeBot/{config.Strategy.Name}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-            Directory.CreateDirectory(OutputPath);
+            OutputPath = outputPath;
 
             // initialize stuff
             ticks = new MultiTick(config.Symbols.ToArray());
