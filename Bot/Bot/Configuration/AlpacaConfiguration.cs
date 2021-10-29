@@ -6,12 +6,12 @@ namespace Bot.Configuration
         /// <summary>
         /// The id of the api key.
         /// </summary>
-        public string PaperApiKeyIdSecretName { get; set; }
+        public string PaperApiKeyId { get; set; }
 
         /// <summary>
         /// Secret for calling the alpaca api.
         /// </summary>
-        public string PaperApiKeySecretName { get; set; }
+        public string PaperApiKey { get; set; }
 
         /// <summary>
         /// Base url for calling Alpaca paper account.

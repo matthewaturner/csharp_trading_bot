@@ -5,7 +5,6 @@ using Bot.Engine;
 using Bot.Exceptions;
 using Bot.Models;
 using Bot.Models.Interfaces;
-using Core.Azure;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
@@ -34,12 +33,11 @@ namespace Bot.Brokers
         /// <param name="keyVaultManager"></param>
         /// <param name="httpClient"></param>
         public AlpacaBroker(
-            IOptionsSnapshot<AlpacaConfiguration> config,
-            IKeyVaultManager keyVaultManager)
+            IOptionsSnapshot<AlpacaConfiguration> config)
         {
             this.config = config.Value;
-            apiKeyId = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeyIdSecretName).Result;
-            apiKeySecret = keyVaultManager.GetSecretAsync(config.Value.PaperApiKeySecretName).Result;
+            apiKeyId = config.Value.PaperApiKeyId;
+            apiKeySecret = config.Value.PaperApiKey;
             restClient = new RestClient();
             restClient.UseNewtonsoftJson();
         }

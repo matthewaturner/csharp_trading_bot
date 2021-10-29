@@ -3,8 +3,6 @@ using Bot.Configuration;
 using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;
-using Core.Azure;
-using Core.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -23,28 +21,18 @@ namespace BotIntegrationTests
         [TestInitialize]
         public void Setup()
         {
-            var kvConfig = new KeyVaultConfiguration
-            {
-                BaseUrl = "https://tradebotvault.vault.azure.net/"
-            };
-
             var alpacaConfig = new AlpacaConfiguration
             { 
                 PaperApiBaseUrl = "https://paper-api.alpaca.markets",
-                PaperApiKeyIdSecretName = "AlpacaApiKeyId",
-                PaperApiKeySecretName = "AlpacaApiKeySecret"
+                PaperApiKeyId = "AlpacaApiKeyId",
+                PaperApiKey = "AlpacaApiKeySecret"
             };
-
-            Mock<IOptionsSnapshot<KeyVaultConfiguration>> kvConfigSnapshot = new Mock<IOptionsSnapshot<KeyVaultConfiguration>>();
-            kvConfigSnapshot.Setup(m => m.Value).Returns(kvConfig);
 
             Mock<IOptionsSnapshot<AlpacaConfiguration>> alpacaConfigSnapshot = new Mock<IOptionsSnapshot<AlpacaConfiguration>>();
             alpacaConfigSnapshot.Setup(m => m.Value).Returns(alpacaConfig);
 
             engine = new Mock<ITradingEngine>();
-
-            KeyVaultManager keyVaultManager = new KeyVaultManager(kvConfigSnapshot.Object);
-            alpaca = new AlpacaBroker(alpacaConfigSnapshot.Object, keyVaultManager);
+            alpaca = new AlpacaBroker(alpacaConfigSnapshot.Object);
 
             alpaca.Initialize(engine.Object, RunMode.Paper, new string[] { "true" });
         }
