@@ -11,6 +11,9 @@ namespace Bot.Models
         Long,
 
         [EnumMember(Value = "short")]
-        Short
+        Short,
+
+        [EnumMember(Value = "neutral")]
+        Neutral,
     }
 }

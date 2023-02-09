@@ -1,4 +1,5 @@
 ﻿using Bot.Indicators;
+using Bot.Indicators.Interfaces;
 using Bot.Models;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -28,36 +29,34 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Hydration()
         {
-            IIndicator sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
-            Assert.IsFalse(sma.Hydrated);
+            var sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
+            Assert.IsFalse(sma.IsHydrated);
 
             sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(29).ToList());
-            Assert.IsFalse(sma.Hydrated);
-
-            Assert.AreEqual(double.NaN, sma.Value);
+            Assert.IsFalse(sma.IsHydrated);
 
             sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(30).ToList());
-            Assert.IsTrue(sma.Hydrated);
+            Assert.IsTrue(sma.IsHydrated);
 
             sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(60).ToList());
-            Assert.IsTrue(sma.Hydrated);
+            Assert.IsTrue(sma.IsHydrated);
 
             sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(61).ToList());
-            Assert.IsTrue(sma.Hydrated);
+            Assert.IsTrue(sma.IsHydrated);
 
             sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(62).ToList());
-            Assert.IsTrue(sma.Hydrated);
+            Assert.IsTrue(sma.IsHydrated);
         }
 
         [TestMethod]
         public void SMA_Values()
         {
-            IIndicator sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
+            var sma = new SimpleMovingAverage(30, (IMultiBar t) => t["MSFT"].Close);
             IList<double> smaResults = msftResults[nameof(SimpleMovingAverage)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -72,25 +71,23 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Hydration()
         {
-            IIndicator mac = new MovingAverageCrossover(16, 64, (IMultiBar t) => t["MSFT"].Close);
-            Assert.IsFalse(mac.Hydrated);
+            var mac = new MovingAverageCrossover(16, 64, (IMultiBar t) => t["MSFT"].Close);
+            Assert.IsFalse(mac.IsHydrated);
 
             ReplayData(mac, msftData.Take(15).ToList());
-            Assert.IsFalse(mac.Hydrated);
+            Assert.IsFalse(mac.IsHydrated);
 
             ReplayData(mac, msftData.Skip(15).Take(48).ToList());
-            Assert.IsFalse(mac.Hydrated);
-
-            Assert.AreEqual(double.NaN, mac.Value);
+            Assert.IsFalse(mac.IsHydrated);
 
             ReplayData(mac, msftData.Skip(63).Take(1).ToList());
-            Assert.IsTrue(mac.Hydrated);
+            Assert.IsTrue(mac.IsHydrated);
         }
 
         [TestMethod]
         public void MAC_Values()
         {
-            IIndicator mac = new MovingAverageCrossover(10, 30, (IMultiBar t) => t["MSFT"].Close);
+            var mac = new MovingAverageCrossover(10, 30, (IMultiBar t) => t["MSFT"].Close);
             IList<double> macResults = msftResults[nameof(MovingAverageCrossover)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -105,25 +102,23 @@ namespace IndicatorTests
         [TestMethod]
         public void MovStdDev_Hydration()
         {
-            IIndicator stdDev = new MovingStandardDeviation(30, (IMultiBar t) => t["MSFT"].Close);
-            Assert.IsFalse(stdDev.Hydrated);
+            var stdDev = new MovingStandardDeviation(30, (IMultiBar t) => t["MSFT"].Close);
+            Assert.IsFalse(stdDev.IsHydrated);
 
             ReplayData(stdDev, msftData.Take(15).ToList());
-            Assert.IsFalse(stdDev.Hydrated);
+            Assert.IsFalse(stdDev.IsHydrated);
 
             ReplayData(stdDev, msftData.Skip(15).Take(14).ToList());
-            Assert.IsFalse(stdDev.Hydrated);
-
-            Assert.AreEqual(double.NaN, stdDev.Value);
+            Assert.IsFalse(stdDev.IsHydrated);
 
             ReplayData(stdDev, msftData.Skip(29).Take(1).ToList());
-            Assert.IsTrue(stdDev.Hydrated);
+            Assert.IsTrue(stdDev.IsHydrated);
         }
 
         [TestMethod]
         public void MovStdDev_Values()
         {
-            IIndicator stdDev = new MovingStandardDeviation(10, (IMultiBar t) => t["MSFT"].Close);
+            var stdDev = new MovingStandardDeviation(10, (IMultiBar t) => t["MSFT"].Close);
             IList<double> stdDevResults = msftResults[nameof(MovingStandardDeviation)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -135,43 +130,8 @@ namespace IndicatorTests
                 stdDevResults.Skip(9).ToList());
         }
 
-        [TestMethod]
-        public void Bollinger_Hydration()
-        {
-            IIndicator boll = new BollingerBand(10, 1, .05, (IMultiBar t) => t["MSFT"].Close);
-            IList<int> bollResults = msftResults[nameof(BollingerBand)]
-                .Select(obj => (int)obj)
-                .ToList();
-
-            ReplayData(boll, msftData.Take(4).ToList());
-            Assert.IsFalse(boll.Hydrated);
-
-            ReplayData(boll, msftData.Skip(4).Take(5).ToList());
-            Assert.IsFalse(boll.Hydrated);
-
-            Assert.AreEqual(double.NaN, boll.Value);
-
-            ReplayData(boll, msftData.Skip(9).Take(1).ToList());
-            Assert.IsTrue(boll.Hydrated);
-        }
-
-        [TestMethod]
-        public void Bollinger_Values()
-        {
-            IIndicator boll = new BollingerBand(10, 1, .05, (IMultiBar t) => t["MSFT"].Close);
-            IList<double> bollResults = msftResults[nameof(BollingerBand)]
-                .Select(obj => (double)obj)
-                .ToList();
-
-            ReplayData(boll, msftData.Take(9).ToList());
-            ReplayAndCompare(
-                boll,
-                msftData.Skip(9).ToList(),
-                bollResults.Skip(9).ToList());
-        }
-
         public void ReplayAndCompare(
-            IIndicator indicator, 
+            ISimpleValueIndicator<double> indicator, 
             IList<IMultiBar> data, 
             IList<double> results)
         {
@@ -181,6 +141,24 @@ namespace IndicatorTests
                 indicator.OnTick(data[i]);
                 values.Add(indicator.Value);
                 if (Helpers.CompareDoubles(indicator.Value, results[i]) != 0)
+                {
+                    Assert.Fail($"Values {indicator.Value} and {results[i]} " +
+                        $"are unequal at line {i}.");
+                }
+            }
+        }
+
+        public void ReplayAndCompare(
+            ISimpleValueIndicator<PositionType> indicator, 
+            IList<IMultiBar> data, 
+            IList<double> results)
+        {
+            IList<double> values = new List<double>();
+            for (int i=0; i<data.Count; i++)
+            {
+                indicator.OnTick(data[i]);
+                values.Add((double)indicator.Value);
+                if (Helpers.CompareDoubles((double)indicator.Value, results[i]) != 0)
                 {
                     Assert.Fail($"Values {indicator.Value} and {results[i]} " +
                         $"are unequal at line {i}.");
@@ -204,7 +182,6 @@ namespace IndicatorTests
             List<double> sma30Results = new List<double>();
             List<double> mac10_30Results = new List<double>();
             List<double> stdDevResults = new List<double>();
-            List<double> bollResults = new List<double>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -230,14 +207,12 @@ namespace IndicatorTests
                     sma30Results.Add(sma30);
                     mac10_30Results.Add(mac10_30);
                     stdDevResults.Add(stdDev);
-                    bollResults.Add(boll);
                 }
             }
 
             results.Add(nameof(SimpleMovingAverage), sma30Results);
             results.Add(nameof(MovingAverageCrossover), mac10_30Results);
             results.Add(nameof(MovingStandardDeviation), stdDevResults);
-            results.Add(nameof(BollingerBand), bollResults);
             return results;
         }
 

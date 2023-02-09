@@ -60,11 +60,9 @@ namespace Bot
 
             // inject strategies
             services.AddSingleton<SMACrossoverStrategy>();
-            services.AddSingleton<BollingerMeanReversion>();
 
             // inject analyzers
             services.AddSingleton<ConsoleLogger>();
-            services.AddSingleton<CsvLogger>();
             services.AddSingleton<SharpeRatio>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -100,8 +98,6 @@ namespace Bot
                 {
                     case nameof(SMACrossoverStrategy):
                         return serviceProvider.GetService<SMACrossoverStrategy>();
-                    case nameof(BollingerMeanReversion):
-                        return serviceProvider.GetService<BollingerMeanReversion>();
                     default:
                         return null;
                 }
@@ -115,8 +111,6 @@ namespace Bot
                         return serviceProvider.GetService<ConsoleLogger>();
                     case nameof(SharpeRatio):
                         return serviceProvider.GetService<SharpeRatio>();
-                    case nameof(CsvLogger):
-                        return serviceProvider.GetService<CsvLogger>();
                     default:
                         return null;
                 }

@@ -1,10 +1,11 @@
 ﻿
 using Bot.Models;
+using Bot.Indicators.Interfaces;
 using System;
 
 namespace Bot.Indicators
 {
-    public class SimpleMovingAverage : IndicatorBase
+    public class SimpleMovingAverage : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
         private readonly Func<IMultiBar, double> transform;
         private double[] data;
@@ -17,7 +18,7 @@ namespace Bot.Indicators
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
         public SimpleMovingAverage(int lookback, Func<IMultiBar, double> transform)
-            : base()
+            : base(lookback)
         {
             if (lookback < 1)
             {
@@ -28,10 +29,11 @@ namespace Bot.Indicators
             data = new double[lookback];
             index = 0;
             average = 0;
-
-            Hydrated = false;
-            Lookback = lookback;
         }
+
+        public override string Name => $"SMA-{Lookback}";
+
+        public double Value => average;
 
         /// <summary>
         /// Calculates new values.
@@ -45,13 +47,15 @@ namespace Bot.Indicators
 
             index = (index + 1) % Lookback;
 
-            if (!Hydrated && index == 0)
+            if (!IsHydrated && index == 0)
             {
-                Hydrated = true;
+                IsHydrated = true;
             }
+        }
 
-            Values["default"] = average;
-            Values["ma"] = average;
+        public override string ToString()
+        {
+            return $"{Name} = {Value}";
         }
     }
 }

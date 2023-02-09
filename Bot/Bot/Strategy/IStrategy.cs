@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public interface IStrategy
+    public interface IStrategy : ITickReceiver
     {
         int Lookback { get; }
 
@@ -17,7 +17,7 @@ namespace Bot.Strategies
 
         void Initialize(ITradingEngine engine, string[] args);
 
-        void StrategyOnTick(IMultiBar ticks);
+        void OnTick(IMultiBar ticks);
 
         string[] GetCsvHeaders();
 

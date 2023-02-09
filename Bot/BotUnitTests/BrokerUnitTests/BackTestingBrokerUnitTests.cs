@@ -46,7 +46,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
             // execution happens on ticks
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("GME"));
             Assert.AreEqual(10.0, broker.GetPosition("GME").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
@@ -68,7 +68,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
             // execution happens on ticks
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("GME"));
             Assert.AreEqual(-10.0, broker.GetPosition("GME").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
@@ -89,7 +89,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
             Assert.AreEqual(1000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -109,7 +109,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
             Assert.AreEqual(1000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -130,7 +130,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
             Assert.AreEqual(1000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -152,7 +152,7 @@ namespace BrokerUnitTests
 
             broker.CancelOrder(orderId);
 
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -174,7 +174,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
@@ -185,7 +185,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
 
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("AMC"));
             Assert.AreEqual(3000.0, broker.GetAccount().TotalValue); // sold at the same price
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -208,7 +208,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
@@ -219,7 +219,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
 
-            broker.OnTick(ticks);
+            broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(-5, broker.GetPosition("AMC").Quantity);
             Assert.AreEqual(3000, broker.GetAccount().TotalValue);
@@ -250,7 +250,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
-            broker.OnTick(t);
+            broker.BaseOnTick(t);
             Assert.IsNotNull(broker.GetPosition("TEST"));
             Assert.AreEqual(10.0, broker.GetPosition("TEST").Quantity);
             Assert.AreEqual(100, broker.GetAccount().TotalValue);
@@ -265,7 +265,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
 
-            broker.OnTick(t);
+            broker.BaseOnTick(t);
             Assert.IsNull(broker.GetPosition("TEST"));
             Assert.AreEqual(110, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
@@ -294,7 +294,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
 
-            broker.OnTick(t);
+            broker.BaseOnTick(t);
             Assert.IsNotNull(broker.GetPosition("TEST"));
             Assert.AreEqual(-10.0, broker.GetPosition("TEST").Quantity);
             Assert.AreEqual(100, broker.GetAccount().TotalValue);
@@ -309,7 +309,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
-            broker.OnTick(t);
+            broker.BaseOnTick(t);
             Assert.IsNull(broker.GetPosition("TEST"));
             Assert.AreEqual(110, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);

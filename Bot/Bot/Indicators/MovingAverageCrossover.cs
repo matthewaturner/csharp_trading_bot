@@ -1,13 +1,15 @@
 ﻿using Bot.Models;
+using Bot.Indicators.Interfaces;
 using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators
 {
-    public class MovingAverageCrossover : IndicatorBase
+    public class MovingAverageCrossover : IndicatorBase<PositionType>, IMovingAverageCrossover
     {
         private SimpleMovingAverage shortMA;
         private SimpleMovingAverage longMA;
+        private PositionType position;
 
         /// <summary>
         /// Constructor.
@@ -16,10 +18,10 @@ namespace Bot.Indicators
         /// <param name="longLookback"></param>
         /// <param name="transform"></param>
         public MovingAverageCrossover(
-            int shortLookback, 
-            int longLookback, 
+            int shortLookback,
+            int longLookback,
             Func<IMultiBar, double> transform)
-            : base()
+            : base(longLookback)
         {
             if (shortLookback >= longLookback)
             {
@@ -29,7 +31,12 @@ namespace Bot.Indicators
             shortMA = new SimpleMovingAverage(shortLookback, transform);
             longMA = new SimpleMovingAverage(longLookback, transform);
             Lookback = longLookback;
+            position = PositionType.Neutral;
         }
+
+        public override string Name => $"MAC-{Lookback}";
+
+        public PositionType Value => position;
 
         /// <summary>
         /// Calculate new values.
@@ -39,13 +46,17 @@ namespace Bot.Indicators
         {
             shortMA.OnTick(ticks);
             longMA.OnTick(ticks);
+            IsHydrated = shortMA.IsHydrated && longMA.IsHydrated;
 
-            if (!Hydrated && shortMA.Hydrated && longMA.Hydrated)
+            if (IsHydrated)
             {
-                Hydrated = true;
+                position = (PositionType)Helpers.CompareDoubles(shortMA.Value, longMA.Value);
             }
+        }
 
-            Values["default"] = Helpers.CompareDoubles(shortMA.Value, longMA.Value);
+        public override string ToString()
+        {
+            return $"{Name} = {Value}";
         }
     }
 }

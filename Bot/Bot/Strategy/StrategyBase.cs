@@ -1,6 +1,5 @@
 ﻿
 using Bot.Engine;
-using Bot.Engine.Events;
 using Bot.Indicators;
 using Bot.Models;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Linq;
 
 namespace Bot.Strategies
 {
-    public abstract class StrategyBase : IStrategy, ITickReceiver
+    public abstract class StrategyBase : IStrategy
     {
         /// <summary>
         /// Constructor.
@@ -31,7 +30,7 @@ namespace Bot.Strategies
         /// </summary>
         public bool Hydrated
         {
-            get { return Indicators.All(ind => ind.Hydrated); }
+            get { return Indicators.All(ind => ind.IsHydrated); }
         }
 
         /// <summary>
@@ -68,16 +67,16 @@ namespace Bot.Strategies
         /// OnTick method which call the strategy on tick when indicators are hydrated.
         /// </summary>
         /// <param name="ticks"></param>
-        public void OnTick(IMultiBar ticks)
+        public void BaseOnTick(IMultiBar ticks)
         {
             foreach (IIndicator ind in Indicators)
             {
                 ind.OnTick(ticks);
             }
 
-            if (Indicators.All(ind => ind.Hydrated))
+            if (Indicators.All(ind => ind.IsHydrated))
             {
-                StrategyOnTick(ticks);
+                OnTick(ticks);
             }
         }
 
@@ -85,6 +84,6 @@ namespace Bot.Strategies
         /// Strategy logic goes here.
         /// </summary>
         /// <param name="ticks"></param>
-        public abstract void StrategyOnTick(IMultiBar ticks);
+        public abstract void OnTick(IMultiBar ticks);
     }
 }

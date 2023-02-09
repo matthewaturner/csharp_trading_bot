@@ -133,7 +133,7 @@ namespace Bot.Brokers.BackTest
         /// Open orders execute at the open price of the next tick.
         /// </summary>
         /// <param name="_"></param>
-        public void OnTick(IMultiBar ticks)
+        public void BaseOnTick(IMultiBar ticks)
         {
             BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)

@@ -1,10 +1,11 @@
 ﻿
 using Bot.Models;
+using Bot.Indicators.Interfaces;
 using System;
 
 namespace Bot.Indicators
 {
-    public class MovingStandardDeviation : IndicatorBase
+    public class MovingStandardDeviation : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
         private readonly Func<IMultiBar, double> transform;
         private double[] data;
@@ -16,7 +17,7 @@ namespace Bot.Indicators
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
         public MovingStandardDeviation(int lookback, Func<IMultiBar, double> transform)
-            : base()
+            : base(lookback)
         {
             if (lookback < 1)
             {
@@ -25,10 +26,11 @@ namespace Bot.Indicators
 
             this.transform = transform;
             data = new double[lookback];
-
-            Lookback = lookback;
-            Hydrated = false;
         }
+
+        public override string Name => $"MSTD-{Lookback}";
+
+        public double Value { get; private set; }
 
         /// <summary>
         /// Calculate new values.
@@ -37,15 +39,23 @@ namespace Bot.Indicators
         public override void OnTick(IMultiBar ticks)
         {
             data[index] = transform(ticks);
-            index = (index + 1) % Lookback;
+            index = (index + 1) % this.Lookback;
 
-            if (!Hydrated && index == 0)
+            if (!this.IsHydrated && index == 0)
             {
-                Hydrated = true;
+                this.IsHydrated = true;
             }
 
-            Values["default"] = Helpers.StandardDeviation(data);
-            Values["stdDev"] = Values["default"];
+            Value = Helpers.StandardDeviation(data);
+        }
+
+        /// <summary>
+        /// ToString.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"{Name} = {Value}";
         }
     }
 }

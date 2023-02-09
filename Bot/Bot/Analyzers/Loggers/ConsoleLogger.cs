@@ -21,6 +21,10 @@ namespace Bot.Analyzers.Loggers
             this.engine = engine;
         }
 
+        /// <summary>
+        /// Sets colors based on log level.
+        /// </summary>
+        /// <param name="level"></param>
         private void SetColors(LogLevel level)
         {
             switch (level)

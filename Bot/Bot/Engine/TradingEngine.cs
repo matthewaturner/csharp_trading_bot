@@ -212,7 +212,7 @@ namespace Bot.Engine
             ticks.Update(newTicks);
             foreach (ITickReceiver receiver in tickReceivers)
             {
-                receiver.OnTick(ticks);
+                receiver.BaseOnTick(ticks);
             }
         }
 

@@ -7,6 +7,6 @@ namespace Bot.Engine.Events
         /// <summary>
         /// Function to execute when new ticks come in.
         /// </summary>
-        public void OnTick(IMultiBar ticks);
+        public void BaseOnTick(IMultiBar ticks);
     }
 }

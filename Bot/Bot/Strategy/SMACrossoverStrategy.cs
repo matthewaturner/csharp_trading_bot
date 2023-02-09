@@ -1,4 +1,5 @@
 ﻿using Bot.Indicators;
+using Bot.Indicators.Interfaces;
 using Bot.Models;
 using Bot.Engine;
 using Bot.Brokers;
@@ -10,7 +11,7 @@ namespace Bot.Strategies
     public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
         private IBroker broker;
-        private IIndicator mac;
+        private IMovingAverageCrossover mac;
         private IPosition currentPosition;
         private bool longOnly;
         private int maxUnits = 10;
@@ -47,7 +48,7 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void StrategyOnTick(IMultiBar ticks)
+        public override void OnTick(IMultiBar ticks)
         {
             Tick tick = ticks[symbol];
             mac.OnTick(ticks);
