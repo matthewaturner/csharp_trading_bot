@@ -3,7 +3,6 @@ using Bot.Configuration;
 using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -28,13 +27,10 @@ namespace BotIntegrationTests
                 ApiKey = "AlpacaApiKeySecret"
             };
 
-            Mock<IOptionsSnapshot<AlpacaConfig>> alpacaConfigSnapshot = new Mock<IOptionsSnapshot<AlpacaConfig>>();
-            alpacaConfigSnapshot.Setup(m => m.Value).Returns(alpacaConfig);
-
             engine = new Mock<ITradingEngine>();
-            alpaca = new AlpacaBroker(alpacaConfigSnapshot.Object);
+            alpaca = new AlpacaBroker(alpacaConfig);
 
-            alpaca.Initialize(engine.Object, RunMode.Paper, new string[] { "true" });
+            alpaca.Initialize(engine.Object);
         }
 
         [TestMethod]
