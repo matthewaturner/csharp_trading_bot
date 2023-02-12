@@ -22,7 +22,7 @@ namespace BotIntegrationTests
         [TestInitialize]
         public void Setup()
         {
-            YahooDataConfiguration yahooConfig = new YahooDataConfiguration
+            YahooDataConfig yahooConfig = new YahooDataConfig
             {
                 BaseUrl = "https://query1.finance.yahoo.com/",
                 OutputDirectory = "data"
@@ -30,7 +30,7 @@ namespace BotIntegrationTests
 
             HttpClient httpClient = new HttpClient();
 
-            Mock<IOptionsSnapshot<YahooDataConfiguration>> yahooConfigSnapshot = new Mock<IOptionsSnapshot<YahooDataConfiguration>>();
+            Mock<IOptionsSnapshot<YahooDataConfig>> yahooConfigSnapshot = new Mock<IOptionsSnapshot<YahooDataConfig>>();
             yahooConfigSnapshot.Setup(m => m.Value).Returns(yahooConfig);
 
             yahoo = new YahooDataSource(yahooConfigSnapshot.Object, httpClient);
