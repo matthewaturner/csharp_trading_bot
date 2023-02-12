@@ -1,7 +1,7 @@
 ﻿
 namespace Bot.Configuration
 {
-    public class AlpacaConfiguration
+    public class AlpacaConfig
     {
         /// <summary>
         /// The id of the api key.

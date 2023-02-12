@@ -99,8 +99,12 @@ namespace Bot.Engine
         /// <summary>
         /// Setup everything.
         /// </summary>
-        /// <param name="configFileName"></param>
-        public void Initialize(EngineConfig config, string outputPath)
+        public void Initialize(
+            IStrategy strategy, 
+            EngineConfig config, 
+            IDataSource dataSource, 
+            IBroker broker, 
+            string outputPath)
         {
             this.config = config;
             ClearReceiverLists();
