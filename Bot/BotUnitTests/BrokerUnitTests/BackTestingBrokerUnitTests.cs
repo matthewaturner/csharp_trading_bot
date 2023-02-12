@@ -5,7 +5,6 @@ using Moq;
 using System;
 using Bot.Brokers.BackTest;
 using System.Linq;
-using Bot.Configuration;
 
 namespace BrokerUnitTests
 {

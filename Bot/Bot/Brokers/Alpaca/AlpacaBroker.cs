@@ -1,11 +1,10 @@
 ﻿
+using Bot.Brokers.Alpaca;
 using Bot.Brokers.Alpaca.Models;
-using Bot.Configuration;
 using Bot.Engine;
 using Bot.Exceptions;
 using Bot.Models;
 using Bot.Models.Interfaces;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;

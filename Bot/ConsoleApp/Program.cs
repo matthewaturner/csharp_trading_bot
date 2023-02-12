@@ -1,5 +1,4 @@
-﻿using Bot.Configuration;
-using Bot.Engine;
+﻿using Bot.Engine;
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Brokers.BackTest;
@@ -14,7 +13,7 @@ var engine = new TradingEngine()
     Broker = broker,
     DataSource = dataSource,
     Strategy = smaCrossStrat,
-    Symbols = new string[] { "MSFT" }
+    Symbols = new List<string> { "MSFT" }
 };
 
 await engine.RunAsync(

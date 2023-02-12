@@ -1,43 +1,67 @@
-﻿using Bot.Analyzers;
-using Bot.Configuration;
-using Bot.Engine.Events;
-using Bot.Exceptions;
+﻿using Bot.Engine.Events;
 using Bot.Models;
 using Bot.Strategies;
+using Bot.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-
-using Bot.Data;
-using System.IO;
 using Bot.Brokers;
-using Bot.Indicators;
-using Bot.Analyzers.Loggers;
+using Bot.Data.Interfaces;
 
 namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
+        /// <summary>
+        /// Holds the current ticks.
+        /// </summary>
         private MultiTick ticks;
 
+        /// <summary>
+        /// Objects that receive new ticks as they come in.
+        /// </summary>
         private IList<ITickReceiver> tickReceivers;
-        private IList<ITerminateReceiver> terminateReceivers;
-        private IList<ILogReceiver> logReceivers;
 
         public TradingEngine()
-        { }
+        { 
+            this.Logger = new ConsoleLogger(LogLevel.Information);
+        }
 
+        /// <summary>
+        /// Get or set current ticks.
+        /// </summary>
         public IMultiTick Ticks { get; private set; }
 
+        /// <summary>
+        /// Get or set all symbols in the universe.
+        /// </summary>
         public IList<string> Symbols { get; set; }
 
+        /// <summary>
+        /// Get or set the broker object.
+        /// </summary>
         public IBroker Broker { get; set; }
 
+        /// <summary>
+        /// Get or set the data source object.
+        /// </summary>
         public IDataSource DataSource { get; set; }
 
+        /// <summary>
+        /// Get or set the strategy object.
+        /// </summary>
         public IStrategy Strategy { get; set; }
 
+        /// <summary>
+        /// Gets or set the logger object.
+        /// </summary>
+        /// <value></value>
+        public ILogger Logger { get; set; }
+
+        /// <summary>
+        /// Get or set the output folder.
+        /// </summary>
         public string OutputFolder { get; set; }
 
         /// <summary>
@@ -70,11 +94,13 @@ namespace Bot.Engine
             ticks = new MultiTick(Symbols.ToArray());
 
             Strategy.Initialize(this);
+            Broker.Initialize(this);
+            DataSource.Initialize(this);
 
-            ClearReceiverLists();
-            AddToReceiverLists(DataSource);
-            AddToReceiverLists(Broker);
-            AddToReceiverLists(Strategy);
+            ClearReceivers();
+            RegisterReceiver(DataSource);
+            RegisterReceiver(Broker);
+            RegisterReceiver(Strategy);
         }
 
         /// <summary>
@@ -110,8 +136,6 @@ namespace Bot.Engine
                     start.Value,
                     end.Value,
                     SendOnTickEvents);
-
-                SendTerminateEvents();
             }
         }
 
@@ -119,67 +143,35 @@ namespace Bot.Engine
         /// Adds the objects to the receiver lists for the different types of events.
         /// </summary>
         /// <param name="obj"></param>
-        private void AddToReceiverLists(object obj)
+        private void RegisterReceiver(object obj)
         {
             if (obj is ITickReceiver tickReceiver)
             {
                 tickReceivers.Add(tickReceiver);
-            }
-
-            if (obj is ITerminateReceiver terminateReceiver)
-            {
-                terminateReceivers.Add(terminateReceiver);
-            }
-
-            if (obj is ILogReceiver logReceiver)
-            {
-                logReceivers.Add(logReceiver);
             }
         }
 
         /// <summary>
         /// Clears the receiver lists.
         /// </summary>
-        private void ClearReceiverLists()
+        private void ClearReceivers()
         {
             tickReceivers = new List<ITickReceiver>();
-            terminateReceivers = new List<ITerminateReceiver>();
-            logReceivers = new List<ILogReceiver>();
         }
 
         /// <summary>
         /// Sends on tick events to all interested parties.
         /// </summary>
         /// <param name="ticks"></param>
-        private void SendOnTickEvents(Tick[] newTicks)
+        private void SendOnTickEvents(Tick newTick)
         {
-            ticks.Update(newTicks);
+            // update only the tick we received
+            ticks.Update(newTick);
+
             foreach (ITickReceiver receiver in tickReceivers)
             {
+                // send all latest ticks to listeners
                 receiver.BaseOnTick(ticks);
-            }
-        }
-
-        /// <summary>
-        /// Sends finalize event to all interested parties.
-        /// </summary>
-        private void SendTerminateEvents()
-        {
-            foreach (ITerminateReceiver receiver in terminateReceivers)
-            {
-                receiver.OnTerminate();
-            }
-        }
-
-        /// <summary>
-        /// Sends logging events.
-        /// </summary>
-        /// <param name="log"></param>
-        public void Log(string caller, string message, LogLevel level = LogLevel.Information )
-        {
-            foreach (ILogReceiver receiver in logReceivers)
-            {
-                receiver.OnLog(caller, message, level);
             }
         }
     }

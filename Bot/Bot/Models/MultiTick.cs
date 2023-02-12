@@ -1,48 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot.Models
 {
     public class MultiTick : IMultiTick
     {
-        private Tick[] bars;
-        private IDictionary<string, int> symbolMap;
+        private IDictionary<string, Tick> ticks;
+        private IList<string> symbols;
 
         /// <summary>
         /// Initializes ticks with no data.
         /// </summary>
         /// <param name="symbols"></param>
-        public MultiTick(string[] symbols)
+        public MultiTick(IList<string> symbols)
         {
-            bars = new Tick[symbols.Length];
-
-            symbolMap = new Dictionary<string, int>(symbols.Length);
-            for (int i=0; i<symbols.Length; i++)
-            {
-                bars[i] = new Tick();
-                bars[i].Symbol = symbols[i];
-                symbolMap[symbols[i]] = i;
-            }
+            this.symbols = symbols;
+            ticks = new Dictionary<string, Tick>(symbols.Count);
         }
 
         /// <summary>
         /// Initialize the ticks object.
         /// </summary>
         /// <param name="bars"></param>
-        public MultiTick(Tick[] bars)
+        public MultiTick(Tick[] tickData)
         {
-            this.bars = bars;
-
-            for (int i=0; i<bars.Length; i++)
+            this.ticks = new Dictionary<string, Tick>(tickData.Length);
+            this.symbols = tickData.Select(t => t.Symbol).ToList();
+            foreach (Tick t in tickData)
             {
-                symbolMap[bars[i].Symbol] = i;
+                this.Update(t);
             }
         }
 
         /// <summary>
         /// Returns the number of symbols in the symbol map.
         /// </summary>
-        public int NumSymbols => bars.Length;
+        public int NumSymbols => ticks.Keys.Count;
 
         /// <summary>
         /// Gets the latest tick data for a symbol.
@@ -51,40 +45,36 @@ namespace Bot.Models
         /// <returns></returns>
         public Tick this[string symbol]
         {
-            get => bars[symbolMap[symbol]];
+            get => ticks[symbol];
         }
 
         /// <summary>
-        /// Gets the latest tick for symbol at index.
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public Tick this[int index]
-        {
-            get => bars[index];
-        }
-
-        /// <summary>
-        /// Updates the current prices. Called by engine.
+        /// Updates current tick for just one symbol.
         /// </summary>
         /// <param name="newBars"></param>
-        public void Update(Tick[] newBars)
+        public void Update(Tick newTick)
         {
-            // iterate this way because we should never add ticks
-            // in the middle of a run
-
-            if (newBars.Length != bars.Length)
+            // todo locking
+            if (ticks.ContainsKey(newTick.Symbol))
             {
-                throw new ArgumentOutOfRangeException("new bars contain more or less bars than previously.");
+                ticks[newTick.Symbol] = newTick;
             }
-
-            for (int i=0; i<bars.Length; i++)
+            else
             {
-                if (string.Compare(bars[i].Symbol, newBars[i].Symbol, ignoreCase: true) != 0)
-                {
-                    throw new ArgumentException($"newBars[{i}] was for symbol {newBars[i].Symbol}. Expected {bars[i].Symbol}");
-                }
-                bars[i] = newBars[i];
+                throw new Exception($"Got tick for symbol which was not in the original universe. " +
+                    $"symbol={newTick.Symbol} universe={string.Join(",", this.symbols)}");
+            }
+        }
+
+        /// <summary>
+        /// Updates current ticks for multiple symbols.
+        /// </summary>
+        /// <param name="newTicks"></param>
+        public void Update(IEnumerable<Tick> newTicks)
+        {
+            foreach (Tick t in newTicks)
+            {
+                this.Update(t);
             }
         }
 
@@ -95,16 +85,7 @@ namespace Bot.Models
         /// <returns></returns>
         public bool HasSymbol(string symbol)
         {
-            return symbolMap.ContainsKey(symbol);
-        }
-
-        /// <summary>
-        /// Returns ticks as a list.
-        /// </summary>
-        /// <returns></returns>
-        public Tick[] ToArray()
-        {
-            return bars;
+            return ticks.ContainsKey(symbol);
         }
 
         /// <summary>
@@ -114,9 +95,9 @@ namespace Bot.Models
         public override string ToString()
         {
             string output = string.Empty;
-            for (int i=0; i<bars.Length; i++)
+            foreach (var kv in ticks)
             {
-                output += bars[i].ToString() + "\n";
+                output += kv.Value.ToString() + "\n";
             }
             return output;
         }

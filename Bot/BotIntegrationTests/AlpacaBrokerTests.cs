@@ -1,5 +1,5 @@
 using Bot.Brokers;
-using Bot.Configuration;
+using Bot.Brokers.Alpaca;
 using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;

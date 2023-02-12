@@ -7,7 +7,6 @@ using Bot.Models.Interfaces;
 using Bot.Brokers.BackTest.Models;
 using Bot.Models;
 using Bot.Engine.Events;
-using Bot.Configuration;
 
 namespace Bot.Brokers.BackTest
 {

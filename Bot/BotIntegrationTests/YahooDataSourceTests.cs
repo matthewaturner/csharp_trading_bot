@@ -1,5 +1,4 @@
-﻿using Bot.Configuration;
-using Bot.Data;
+﻿using Bot.Data;
 using Bot.Engine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
@@ -15,13 +14,8 @@ namespace BotIntegrationTests
         [TestInitialize]
         public void Setup()
         {
-            YahooDataConfig yahooConfig = new YahooDataConfig
-            {
-                BaseUrl = "https://query1.finance.yahoo.com/",
-            };
             HttpClient httpClient = new HttpClient();
-
-            yahoo = new YahooDataSource(yahooConfig);
+            yahoo = new YahooDataSource(httpClient);
         }
     }
 }

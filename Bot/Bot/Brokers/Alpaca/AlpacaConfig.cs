@@ -1,5 +1,6 @@
-﻿
-namespace Bot.Configuration
+﻿using Bot.Models;
+
+namespace Bot.Brokers.Alpaca
 {
     public class AlpacaConfig
     {
@@ -16,13 +17,13 @@ namespace Bot.Configuration
         /// <summary>
         /// Base url for calling Alpaca paper account.
         /// </summary>
-        public string PaperApiBaseUrl { get; set; } 
+        public string PaperApiBaseUrl { get; set; }
             = "https://paper-api.alpaca.markets/";
 
         /// <summary>
         /// Base url for calling Alpaca live.
         /// </summary>
-        public string ApiBaseUrl { get; set; } 
+        public string ApiBaseUrl { get; set; }
             = "https://api.alpaca.markets/";
 
         /// <summary>

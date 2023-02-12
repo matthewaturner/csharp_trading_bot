@@ -1,4 +1,4 @@
-﻿using Bot.Configuration;
+﻿using Bot.Engine.Events;
 using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;
@@ -7,14 +7,8 @@ using System.Collections.Generic;
 
 namespace Bot.Brokers
 {
-    public interface IBroker
+    public interface IBroker : IInitialize
     {
-        /// <summary>
-        /// Initializes the broker with custom arguments.
-        /// </summary>
-        /// <param name="args"></param>
-        void Initialize(ITradingEngine engine);
-
         /// <summary>
         /// Gets information for an asset like whether it is easy to borrow.
         /// </summary>

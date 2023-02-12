@@ -1,11 +1,9 @@
 ﻿using Bot.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Bot.Data
+namespace Bot.Data.Interfaces
 {
     public interface IHistoricalDataSource
     {

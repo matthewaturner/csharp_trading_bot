@@ -1,4 +1,5 @@
-﻿using Bot.Engine;
+﻿using Bot.Data.Interfaces;
+using Bot.Engine;
 using Bot.Exceptions;
 using Bot.Models;
 using System;
@@ -8,14 +9,23 @@ using System.Threading.Tasks;
 
 namespace Bot.Data
 {
-    public abstract class DataSourceBase : IDataSource, IHistoricalDataSource, ILiveDataSource
+    public abstract class DataSourceBase : IDataSource, IHistoricalDataSource
     {
+        /// <summary>
+        /// Gets or sets engine object.
+        /// </summary>
+        /// <value></value>
+        public ITradingEngine Engine { get; private set;}
+
         /// <summary>
         /// Each data source must override the initialize.
         /// </summary>
         /// <param name="engine"></param>
         /// <param name="args"></param>
-        public abstract void Initialize(ITradingEngine engine, string[] args);
+        public void Initialize(ITradingEngine engine)
+        {
+            this.Engine = engine;
+        }
 
         /// <summary>
         /// Stream ticks to the engine.
@@ -24,51 +34,37 @@ namespace Bot.Data
         /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
-        /// <param name="onTickCallback"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
         public async Task StreamTicks(
             string[] symbols, 
             TickInterval interval, 
             DateTime start, 
             DateTime? end, 
-            Action<Tick[]> onTickCallback)
+            Action<Tick> callback)
         {
-            IList<Tick>[] allTicks = new List<Tick>[symbols.Length];
-            int tickCount = 0;
+            IDictionary<string, IList<Tick>> allTicks = new Dictionary<string, IList<Tick>>(symbols.Length);
             end = end.HasValue ? end.Value : DateTime.UtcNow;
 
-            for (int i = 0; i < symbols.Length; i++)
+            foreach (string s in symbols)
             {
-                allTicks[i] = await GetHistoricalTicksAsync(symbols[i], interval, start, end.Value);
-
-                if (tickCount == 0)
-                {
-                    tickCount = allTicks[i].Count;
-                }
-                else if (allTicks[i].Count != tickCount)
-                {
-                    throw new BadDataException("Received varying number of ticks from each symbol.");
-                }
+                allTicks[s] = await GetHistoricalTicksAsync(s, interval, start, end.Value);
             }
 
-            Tick[] tickArray = new Tick[symbols.Length];
-            MultiTick currentTicks = new MultiTick(symbols);
-            IList<IEnumerator<Tick>> enumerators = new List<IEnumerator<Tick>>();
-
-            for (int i = 0; i < symbols.Length; i++)
+            int tickCount = allTicks.Values.First().Count();
+            if (!allTicks.Values.All(ticks => ticks.Count() == tickCount))
             {
-                enumerators.Add(allTicks[i].GetEnumerator());
+                throw new DataMisalignedException("Got a different number of ticks for each symbol.");
             }
 
-            while (enumerators.All(e => e.MoveNext())
+            IList<IEnumerator<Tick>> enumerators = allTicks.Values.Select(ticks => ticks.GetEnumerator()).ToList();
+            while (enumerators.First(e => e.MoveNext())
                 && enumerators[0].Current.DateTime < end.Value)
             {
-                for (int i = 0; i < enumerators.Count; i++)
+                foreach (var e in enumerators)
                 {
-                    tickArray[i] = enumerators[i].Current;
+                    callback(e.Current);
                 }
-
-                onTickCallback(tickArray);
             }
         }
 

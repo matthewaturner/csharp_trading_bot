@@ -1,10 +1,8 @@
-﻿using Bot.Analyzers;
-using Bot.Analyzers.Loggers;
-using Bot.Brokers;
-using Bot.Configuration;
-using Bot.Data;
+﻿using Bot.Brokers;
+using Bot.Data.Interfaces;
 using Bot.Models;
 using Bot.Strategies;
+using Bot.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,6 +37,11 @@ namespace Bot.Engine
         public IStrategy Strategy { get; }
 
         /// <summary>
+        /// Get logger.
+        /// </summary>
+        public ILogger Logger { get; }
+
+        /// <summary>
         /// Runs the strategy.
         /// </summary>
         /// <param name="runMode"></param>
@@ -51,11 +54,5 @@ namespace Bot.Engine
             TickInterval interval,
             DateTime? start = null,
             DateTime? end = null);
-
-        /// <summary>
-        /// Sends log events to listeners.
-        /// </summary>
-        /// <param name="log"></param>
-        public void Log(string caller, string message, LogLevel level = LogLevel.Information);
     }
 }

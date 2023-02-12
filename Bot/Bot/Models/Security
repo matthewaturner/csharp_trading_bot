@@ -1,0 +1,33 @@
+namespace Bot.Models
+{
+    public class Asset
+    {
+        public Asset()
+        {}
+
+        public string Symbol { get; private set; }
+
+        /// <summary>
+        /// Normalize the symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public static string NormalizeSymbol(string symbol)
+        {
+            return symbol.Trim().ToUpper();
+        }
+        
+        /// <summary>
+        /// Create a security object from a symbol.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns>Security.</returns>
+        public static Asset FromSymbol(string symbol)
+        {
+            return new Asset()
+            {
+                Symbol = symbol,
+            };
+        }
+    }
+}
