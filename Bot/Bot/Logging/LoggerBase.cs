@@ -14,24 +14,24 @@ namespace Bot.Logging
         /// <summary>
         /// Implement this in the child class.
         /// </summary>
-        public abstract void Log(string msg, LogLevel msgLevel);
+        public abstract void Log(object log, LogLevel msgLevel);
 
-        public void LogVerbose(string msg)
+        public void LogVerbose(object msg)
         {
             this.Log(msg, LogLevel.Verbose);
         }
 
-        public void LogInformation(string msg)
+        public void LogInformation(object msg)
         {
             this.Log(msg, LogLevel.Information);
         }
 
-        public void LogWarning(string msg)
+        public void LogWarning(object msg)
         {
             this.Log(msg, LogLevel.Warning);
         }
 
-        public void LogError(string msg)
+        public void LogError(object msg)
         {
             this.Log(msg, LogLevel.Error);
         }

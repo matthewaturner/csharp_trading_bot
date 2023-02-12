@@ -29,6 +29,9 @@ namespace Bot.Strategies
                 longLookback,
                 (IMultiTick t) => t[symbol].Close);
             Indicators.Add(mac);
+
+            this.symbol = symbol;
+            this.longOnly = longOnly;
         }
 
         private IBroker broker => Engine.Broker;
@@ -42,8 +45,6 @@ namespace Bot.Strategies
         public override void OnTick(IMultiTick ticks)
         {
             Tick tick = ticks[symbol];
-            System.Console.WriteLine(tick.Close);
-
             if (IsHydrated)
             {
                 foreach (var order in broker.GetOpenOrders())

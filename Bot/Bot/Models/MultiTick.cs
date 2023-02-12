@@ -16,7 +16,7 @@ namespace Bot.Models
         public MultiTick(IList<string> symbols)
         {
             this.symbols = symbols;
-            ticks = new Dictionary<string, Tick>(symbols.Count);
+            ticks = symbols.ToDictionary(keySelector: s => s, elementSelector: s => new Tick(s));
         }
 
         /// <summary>

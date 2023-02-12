@@ -12,7 +12,7 @@ namespace Bot.Logging
         /// <summary>
         /// Log to the console.
         /// </summary>
-        public override void Log(string msg, LogLevel msgLevel)
+        public override void Log(object msg, LogLevel msgLevel)
         {
             if (msgLevel >= configured)
             {

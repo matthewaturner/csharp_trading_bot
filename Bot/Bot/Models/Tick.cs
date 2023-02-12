@@ -10,6 +10,11 @@ namespace Bot.Models
         public Tick()
         { }
 
+        public Tick(string symbol)
+        {
+            Symbol = symbol;
+        }
+
         public Tick(
             string symbol,
             TickInterval interval,

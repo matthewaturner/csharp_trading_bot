@@ -11,14 +11,13 @@ namespace BrokerUnitTests
     [TestClass]
     public class BackTestingBrokerUnitTests
     {
-        double initialFunds;
+        double initialFunds = 10000;
         MultiTick ticks;
         Mock<ITradingEngine> mockEngine;
 
         [TestInitialize]
         public void Setup()
         {
-            initialFunds = 10000;
             mockEngine = new Mock<ITradingEngine>();
 
             ticks = new MultiTick(new string[] { "MSFT", "GME", "AMC" });
@@ -42,7 +41,7 @@ namespace BrokerUnitTests
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsFalse(broker.GetPositions().Any(pos => pos.Symbol.Equals("GME")));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
@@ -50,7 +49,7 @@ namespace BrokerUnitTests
             broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("GME"));
             Assert.AreEqual(10.0, broker.GetPosition("GME").Quantity);
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(orderId).State);
         }
@@ -64,7 +63,7 @@ namespace BrokerUnitTests
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsNull(broker.GetPosition("GME"));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
@@ -72,7 +71,7 @@ namespace BrokerUnitTests
             broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("GME"));
             Assert.AreEqual(-10.0, broker.GetPosition("GME").Quantity);
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(orderId).State);
         }
@@ -80,19 +79,19 @@ namespace BrokerUnitTests
         [TestMethod]
         public void BuyOrderInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketBuy, "MSFT", 1000.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker(initialFunds);
             broker.Initialize(mockEngine.Object);
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
             broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
         }
@@ -100,19 +99,19 @@ namespace BrokerUnitTests
         [TestMethod]
         public void ShortSaleInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 1000.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker(initialFunds);
             broker.Initialize(mockEngine.Object);
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
             broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
         }
@@ -121,19 +120,19 @@ namespace BrokerUnitTests
         [TestMethod]
         public void SellOrderInsufficientCashFails()
         {
-            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 10.0, 25.0);
+            OrderRequest orderRequest = new OrderRequest(OrderType.MarketSell, "MSFT", 1000.0, 25.0);
             BackTestingBroker broker = new BackTestingBroker(initialFunds);
             broker.Initialize(mockEngine.Object);
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
 
             // execution happens on ticks
             broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(1000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Rejected, broker.GetOrder(orderId).State);
         }
@@ -147,7 +146,7 @@ namespace BrokerUnitTests
 
             string orderId = broker.PlaceOrder(orderRequest).OrderId;
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(orderId).State);
 
@@ -155,7 +154,7 @@ namespace BrokerUnitTests
 
             broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("MSFT"));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Cancelled, broker.GetOrder(orderId).State);
         }
@@ -171,14 +170,14 @@ namespace BrokerUnitTests
 
             string buyOrderId = broker.PlaceOrder(buyRequest).OrderId;
             Assert.IsNull(broker.GetPosition("AMC"));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
             broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
@@ -188,7 +187,7 @@ namespace BrokerUnitTests
 
             broker.BaseOnTick(ticks);
             Assert.IsNull(broker.GetPosition("AMC"));
-            Assert.AreEqual(3000.0, broker.GetAccount().TotalValue); // sold at the same price
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue); // sold at the same price
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
             Assert.AreEqual(2, broker.GetAllOrders().Count);
@@ -205,14 +204,14 @@ namespace BrokerUnitTests
 
             string buyOrderId = broker.PlaceOrder(buyRequest).OrderId;
             Assert.IsNull(broker.GetPosition("AMC"));
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
             broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(10.0, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
@@ -223,7 +222,7 @@ namespace BrokerUnitTests
             broker.BaseOnTick(ticks);
             Assert.IsNotNull(broker.GetPosition("AMC"));
             Assert.AreEqual(-5, broker.GetPosition("AMC").Quantity);
-            Assert.AreEqual(3000, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
             Assert.AreEqual(2, broker.GetAllOrders().Count);
@@ -247,14 +246,14 @@ namespace BrokerUnitTests
 
             string buyOrderId = broker.PlaceOrder(buyRequest).OrderId;
             Assert.IsNull(broker.GetPosition("TEST"));
-            Assert.AreEqual(100, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(buyOrderId).State);
 
             broker.BaseOnTick(t);
             Assert.IsNotNull(broker.GetPosition("TEST"));
             Assert.AreEqual(10.0, broker.GetPosition("TEST").Quantity);
-            Assert.AreEqual(100, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
@@ -268,7 +267,7 @@ namespace BrokerUnitTests
 
             broker.BaseOnTick(t);
             Assert.IsNull(broker.GetPosition("TEST"));
-            Assert.AreEqual(110, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds + 10, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
             Assert.AreEqual(2, broker.GetAllOrders().Count);
@@ -291,14 +290,14 @@ namespace BrokerUnitTests
 
             string sellOrderId = broker.PlaceOrder(sellRequest).OrderId;
             Assert.IsNull(broker.GetPosition("TEST"));
-            Assert.AreEqual(100, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(1, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Open, broker.GetOrder(sellOrderId).State);
 
             broker.BaseOnTick(t);
             Assert.IsNotNull(broker.GetPosition("TEST"));
             Assert.AreEqual(-10.0, broker.GetPosition("TEST").Quantity);
-            Assert.AreEqual(100, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
 
@@ -312,7 +311,7 @@ namespace BrokerUnitTests
 
             broker.BaseOnTick(t);
             Assert.IsNull(broker.GetPosition("TEST"));
-            Assert.AreEqual(110, broker.GetAccount().TotalValue);
+            Assert.AreEqual(initialFunds + 10, broker.GetAccount().TotalValue);
             Assert.AreEqual(0, broker.GetOpenOrders().Count);
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
             Assert.AreEqual(2, broker.GetAllOrders().Count);

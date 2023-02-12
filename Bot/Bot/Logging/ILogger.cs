@@ -3,12 +3,12 @@ namespace Bot.Logging
 {
     public interface ILogger
     {
-        void LogVerbose(string msg);
+        void LogVerbose(object msg);
 
-        void LogInformation(string msg);
+        void LogInformation(object msg);
 
-        void LogWarning(string msg);
+        void LogWarning(object msg);
 
-        void LogError(string msg);
+        void LogError(object msg);
     }
 }

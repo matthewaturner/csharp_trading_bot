@@ -58,12 +58,19 @@ namespace Bot.Data
             }
 
             IList<IEnumerator<Tick>> enumerators = allTicks.Values.Select(ticks => ticks.GetEnumerator()).ToList();
-            while (enumerators.First(e => e.MoveNext())
+            while (enumerators.All(e => e.MoveNext())
                 && enumerators[0].Current.DateTime < end.Value)
             {
                 foreach (var e in enumerators)
                 {
-                    callback(e.Current);
+                    try
+                    {
+                        callback(e.Current);
+                    }
+                    catch (Exception ex)
+                    {
+                        Engine.Logger.LogError(ex.ToString());
+                    }
                 }
             }
         }
