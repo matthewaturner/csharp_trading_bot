@@ -4,10 +4,12 @@ using System.Text;
 
 namespace Bot.Configuration
 {
-    public class YahooDataConfiguration
+    public class YahooDataConfig
     {
+        /// <summary>
+        /// Base url to query yahoo.
+        /// </summary>
         public string BaseUrl { get; set; }
-
-        public string OutputDirectory { get; set; }
+            = "https://query1.finance.yahoo.com/";
     }
 }

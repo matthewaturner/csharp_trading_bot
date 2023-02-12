@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bot.Models
 {
-    public class MultiTick : IMultiBar
+    public class MultiTick : IMultiTick
     {
         private Tick[] bars;
         private IDictionary<string, int> symbolMap;

@@ -11,16 +11,12 @@ namespace Bot.Strategies
     {
         int Lookback { get; }
 
-        bool Hydrated { get; }
+        bool IsHydrated { get; }
 
         IList<IIndicator> Indicators { get; }
 
-        void Initialize(ITradingEngine engine, string[] args);
+        void Initialize(ITradingEngine engine);
 
-        void OnTick(IMultiBar ticks);
-
-        string[] GetCsvHeaders();
-
-        string[] GetCsvValues();
+        void OnTick(IMultiTick ticks);
     }
 }

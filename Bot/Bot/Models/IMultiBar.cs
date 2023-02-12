@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bot.Models
 {
-    public interface IMultiBar
+    public interface IMultiTick
     {
         /// <summary>
         /// Gets the latest ticker for a symbol.

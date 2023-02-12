@@ -61,13 +61,6 @@ namespace Bot.Analyzers.Loggers
         public void OnTerminate()
         {
             string output = "Summary Data:\n";
-            foreach (IAnalyzer analyzer in engine.Analyzers)
-            {
-                if (analyzer != this)
-                {
-                    output += "\t" + analyzer.ToString() + "\n";
-                }
-            }
 
             string orderHistory = string.Join(',', engine.Broker.GetAllOrders().Select(o => o.ToString() + "\n"));
             Console.WriteLine($"Order History: {orderHistory}");

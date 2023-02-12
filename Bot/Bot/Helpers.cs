@@ -138,8 +138,6 @@ namespace Bot
             // President’s Day (3rd Monday in February)
             if (date.Month == 2 && isMonday && nthWeekDay == 3) return false;
 
-            // good friday
-
             // Memorial Day (Last Monday in May)
             if (date.Month == 5 && isMonday && date.AddDays(7).Month == 6) return false;
 

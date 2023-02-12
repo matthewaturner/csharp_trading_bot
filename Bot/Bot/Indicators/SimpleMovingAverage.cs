@@ -7,7 +7,7 @@ namespace Bot.Indicators
 {
     public class SimpleMovingAverage : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
-        private readonly Func<IMultiBar, double> transform;
+        private readonly Func<IMultiTick, double> transform;
         private double[] data;
         private double average;
         private int index;
@@ -17,7 +17,7 @@ namespace Bot.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public SimpleMovingAverage(int lookback, Func<IMultiBar, double> transform)
+        public SimpleMovingAverage(int lookback, Func<IMultiTick, double> transform)
             : base(lookback)
         {
             if (lookback < 1)
@@ -39,7 +39,7 @@ namespace Bot.Indicators
         /// Calculates new values.
         /// </summary>
         /// <param name="ticks"></param>
-        public override void OnTick(IMultiBar ticks)
+        public override void OnTick(IMultiTick ticks)
         {
             average = average - (data[index] / Lookback);
             data[index] = transform(ticks);

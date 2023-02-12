@@ -10,7 +10,6 @@ namespace Bot.Strategies
 {
     public class SMACrossoverStrategy : StrategyBase, IStrategy
     {
-        private IBroker broker;
         private IMovingAverageCrossover mac;
         private IPosition currentPosition;
         private bool longOnly;
@@ -18,29 +17,21 @@ namespace Bot.Strategies
         private string orderId;
         private string symbol;
 
-        public SMACrossoverStrategy()
+        public SMACrossoverStrategy(
+            string symbol,
+            int shortLookback,
+            int longLookback,
+            bool longOnly)
             : base()
-        { }
-
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        /// <param name="engine"></param>
-        /// <param name="args"></param>
-        public override void Initialize(ITradingEngine engine, string[] args)
-        {
-            symbol = args[0];
-            int shortMa = int.Parse(args[1]);
-            int longMa = int.Parse(args[2]);
-            longOnly = bool.Parse(args[3]);
-
-            broker = engine.Broker;
+        { 
             mac = new MovingAverageCrossover(
-                shortMa,
-                longMa,
-                (IMultiBar t) => t[symbol].Close);
+                shortLookback,
+                longLookback,
+                (IMultiTick t) => t[symbol].Close);
             Indicators.Add(mac);
         }
+
+        private IBroker broker => Engine.Broker;
 
         /// <summary>
         /// Enter Long position if the Moving average crossover value is greater than 0,
@@ -48,12 +39,12 @@ namespace Bot.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void OnTick(IMultiBar ticks)
+        public override void OnTick(IMultiTick ticks)
         {
             Tick tick = ticks[symbol];
-            mac.OnTick(ticks);
+            System.Console.WriteLine(tick.Close);
 
-            if (Hydrated)
+            if (IsHydrated)
             {
                 foreach (var order in broker.GetOpenOrders())
                 {
@@ -130,8 +121,7 @@ namespace Bot.Strategies
                 OrderType.MarketBuy,
                 tick.Symbol,
                 quantity,
-                targetPrice
-                );
+                targetPrice);
             orderId = broker.PlaceOrder(order).OrderId;
         }
 
@@ -143,8 +133,7 @@ namespace Bot.Strategies
                 OrderType.MarketSell,
                 tick.Symbol,
                 quantity,
-                targetPrice
-                );
+                targetPrice);
             orderId = broker.PlaceOrder(order).OrderId;
         }        
     }

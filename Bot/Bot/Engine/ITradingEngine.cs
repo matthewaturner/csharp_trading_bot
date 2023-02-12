@@ -5,6 +5,7 @@ using Bot.Configuration;
 using Bot.Data;
 using Bot.Models;
 using Bot.Strategies;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,12 +14,6 @@ namespace Bot.Engine
     public interface ITradingEngine
     {
         /// <summary>
-        /// Sets up the trading engine.
-        /// </summary>
-        /// <param name="configFileName"></param>
-        public void Initialize(EngineConfig config, string outputPath);
-
-        /// <summary>
         /// Gets the symbols we are running for.
         /// </summary>
         public IList<string> Symbols { get; }
@@ -26,7 +21,7 @@ namespace Bot.Engine
         /// <summary>
         /// Get current ticks.
         /// </summary>
-        public IMultiBar Ticks { get; }
+        public IMultiTick Ticks { get; }
 
         /// <summary>
         /// Gets current data source.
@@ -44,21 +39,18 @@ namespace Bot.Engine
         public IStrategy Strategy { get; }
 
         /// <summary>
-        /// Gets all analyzers.
+        /// Runs the strategy.
         /// </summary>
-        public IList<IAnalyzer> Analyzers { get; }
-
-        /// <summary>
-        /// Gets the path for output data.
-        /// </summary>
-        public string OutputPath { get; }
-
-        /// <summary>
-        /// Runs the engine.
-        /// </summary>
-        /// <param name="engineConfig"></param>
+        /// <param name="runMode"></param>
+        /// <param name="interval"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
         /// <returns></returns>
-        public Task RunAsync();
+        Task RunAsync(
+            RunMode runMode,
+            TickInterval interval,
+            DateTime? start = null,
+            DateTime? end = null);
 
         /// <summary>
         /// Sends log events to listeners.

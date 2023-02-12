@@ -36,6 +36,6 @@ namespace Bot.Indicators.Interfaces
         /// Calculate new values.
         /// </summary>
         /// <param name="ticks"></param>
-        public abstract void OnTick(IMultiBar ticks);
+        public abstract void OnTick(IMultiTick ticks);
     }
 }

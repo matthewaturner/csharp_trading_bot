@@ -16,7 +16,7 @@ namespace Bot.Data
     {
         const string urlFormat = "v7/finance/download/{0}?period1={1}&period2={2}&interval=1d&events=history&includeAdjustedClose=true";
 
-        YahooDataConfiguration config;
+        YahooDataConfig config;
         HttpClient httpClient;
 
         /// <summary>
@@ -24,12 +24,10 @@ namespace Bot.Data
         /// </summary>
         /// <param name="config"></param>
         /// <param name="httpClient"></param>
-        public YahooDataSource(
-            IOptionsSnapshot<YahooDataConfiguration> config,
-            HttpClient httpClient)
+        public YahooDataSource(YahooDataConfig config = null)
         {
-            this.config = config.Value;
-            this.httpClient = httpClient;
+            this.config = config ?? new YahooDataConfig();
+            this.httpClient = new HttpClient();
         }
 
         /// <summary>
@@ -45,7 +43,7 @@ namespace Bot.Data
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        private string FormalRequestUrl(
+        private string FormRequestUrl(
             string symbol,
             DateTimeOffset start,
             DateTimeOffset end)
@@ -78,7 +76,7 @@ namespace Bot.Data
 
             try
             {
-                string requestUrl = FormalRequestUrl(symbol, start, end);
+                string requestUrl = FormRequestUrl(symbol, start, end);
 
                 Console.WriteLine($"Downloading from {requestUrl}");
 

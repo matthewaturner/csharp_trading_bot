@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 
-using static Bot.Program;
 using Bot.Data;
 using System.IO;
 using Bot.Brokers;
@@ -20,155 +19,96 @@ namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
-        private readonly DataSourceResolver dataSourceResolver;
-        private readonly BrokerResolver brokerResolver;
-        private readonly StrategyResolver strategyResolver;
-        private readonly AnalyzerResolver analyzerResolver;
-
-        private EngineConfig config;
         private MultiTick ticks;
-        private IList<string> symbols;
 
         private IList<ITickReceiver> tickReceivers;
         private IList<ITerminateReceiver> terminateReceivers;
         private IList<ILogReceiver> logReceivers;
 
-        private IBroker broker;
-        private IDataSource dataSource;
-        private IStrategy strategy;
-        private IList<IAnalyzer> analyzers;
+        public TradingEngine()
+        { }
+
+        public IMultiTick Ticks { get; private set; }
+
+        public IList<string> Symbols { get; set; }
+
+        public IBroker Broker { get; set; }
+
+        public IDataSource DataSource { get; set; }
+
+        public IStrategy Strategy { get; set; }
+
+        public string OutputFolder { get; set; }
 
         /// <summary>
-        /// Constructor
+        /// Validate that the engine is setup properly.
         /// </summary>
-        /// <param name="dataSourceResolver"></param>
-        /// <param name="brokerResolver"></param>
-        /// <param name="strategyResolver"></param>
-        /// <param name="analyzerResolver"></param>
-        public TradingEngine(
-            DataSourceResolver dataSourceResolver,
-            BrokerResolver brokerResolver,
-            StrategyResolver strategyResolver,
-            AnalyzerResolver analyzerResolver)
+        /// <exception cref="ArgumentNullException"></exception>
+        private void ValidateConfiguration()
         {
-            this.dataSourceResolver = dataSourceResolver;
-            this.brokerResolver = brokerResolver;
-            this.strategyResolver = strategyResolver;
-            this.analyzerResolver = analyzerResolver;
+            void ThrowIfNull(object o, string identifier)
+            { 
+                if (o == null)
+                {
+                    throw new ArgumentNullException(identifier);
+                }
+            }
 
-            tickReceivers = new List<ITickReceiver>();
-            terminateReceivers = new List<ITerminateReceiver>();
-            logReceivers = new List<ILogReceiver>();
+            ThrowIfNull(Broker, nameof(Broker));
+            ThrowIfNull(DataSource, nameof(DataSource));
+            ThrowIfNull(Strategy, nameof(Strategy));
+            ThrowIfNull(Symbols, nameof(Symbols));
+            ThrowIfNull(ticks, nameof(ticks));
         }
-
-        /// <summary>
-        /// Current symbols.
-        /// </summary>
-        public IList<string> Symbols => symbols;
-
-        /// <summary>
-        /// Current ticks.
-        /// </summary>
-        public IMultiBar Ticks => ticks;
-
-        /// <summary>
-        /// Current broker.
-        /// </summary>
-        public IBroker Broker => broker;
-
-        /// <summary>
-        /// Current datasource.
-        /// </summary>
-        public IDataSource DataSource => dataSource;
-
-        /// <summary>
-        /// Current strategy.
-        /// </summary>
-        public IStrategy Strategy => strategy;
-
-        /// <summary>
-        /// Current analyzers.
-        /// </summary>
-        public IList<IAnalyzer> Analyzers => analyzers;
-
-        /// <summary>
-        /// Output path for logging.
-        /// </summary>
-        public string OutputPath { get; private set; }
 
         /// <summary>
         /// Setup everything.
         /// </summary>
-        public void Initialize(
-            IStrategy strategy, 
-            EngineConfig config, 
-            IDataSource dataSource, 
-            IBroker broker, 
-            string outputPath)
+        private void Setup()
         {
-            this.config = config;
-            ClearReceiverLists();
-
-            // setup path for output
-            OutputPath = outputPath;
-
             // initialize stuff
-            ticks = new MultiTick(config.Symbols.ToArray());
-            symbols = config.Symbols;
+            ticks = new MultiTick(Symbols.ToArray());
 
-            // data source
-            dataSource = dataSourceResolver(config.DataSource.Name);
-            dataSource.Initialize(this, config.DataSource.Args);
-            AddToReceiverLists(dataSource);
+            Strategy.Initialize(this);
 
-            // broker - needs to come before strategy
-            broker = brokerResolver(config.Broker.Name);
-            broker.Initialize(this, config.RunMode, config.Broker.Args);
-            AddToReceiverLists(broker);
-
-            // strategy
-            strategy = strategyResolver(config.Strategy.Name);
-            strategy.Initialize(this, config.Strategy.Args);
-            AddToReceiverLists(strategy);
-
-            // analyzers
-            analyzers = new List<IAnalyzer>();
-            foreach (DependencyConfig analyzerConfig in config.Analyzers)
-            {
-                IAnalyzer analyzer = analyzerResolver(analyzerConfig.Name);
-                analyzer.Initialize(this, analyzerConfig.Args);
-
-                analyzers.Add(analyzer);
-                AddToReceiverLists(analyzer);
-            }
+            ClearReceiverLists();
+            AddToReceiverLists(DataSource);
+            AddToReceiverLists(Broker);
+            AddToReceiverLists(Strategy);
         }
 
         /// <summary>
         /// Sets up the trading engine.
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
-        /// <param name="tickInterval"></param>
-        public async Task RunAsync()
+        public async Task RunAsync(
+            RunMode runMode,
+            TickInterval interval,
+            DateTime? start = null,
+            DateTime? end = null)
         {
-            if (config.RunMode == RunMode.Live || config.RunMode == RunMode.Paper)
+            Setup();
+
+            if (runMode == RunMode.Live || runMode == RunMode.Paper)
             {
+                throw new NotImplementedException("Not tested.");
+
+                // hydrate indicators
                 await DataSource.StreamTicks(
-                    config.Symbols.ToArray(),
-                    config.Interval,
+                    Symbols.ToArray(),
+                    interval,
                     DateTime.UtcNow.GetNthPreviousTradingDay(Strategy.Lookback + 1),
                     null,
                     SendOnTickEvents);
 
                 // setup live streaming
             }
-            else if (config.RunMode == RunMode.BackTest)
+            else if (runMode == RunMode.BackTest)
             {
                 await DataSource.StreamTicks(
-                    config.Symbols.ToArray(),
-                    config.Interval,
-                    config.Start.Value,
-                    config.End.Value,
+                    Symbols.ToArray(),
+                    interval,
+                    start.Value,
+                    end.Value,
                     SendOnTickEvents);
 
                 SendTerminateEvents();

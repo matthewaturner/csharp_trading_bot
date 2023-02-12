@@ -17,57 +17,28 @@ namespace Bot.Strategies
             Indicators = new List<IIndicator>();
         }
 
-        /// <summary>
-        /// Returns the max lookback for any of the indicators.
-        /// </summary>
-        public int Lookback
-        {
-            get { return Indicators.Max(ind => ind.Lookback); }
-        }
+        public int Lookback => Indicators.Max(ind => ind.Lookback);
 
-        /// <summary>
-        /// Returns whether all indicators are hydrated for the strategy.
-        /// </summary>
-        public bool Hydrated
-        {
-            get { return Indicators.All(ind => ind.IsHydrated); }
-        }
+        public bool IsHydrated => Indicators.All(ind => ind.IsHydrated);
 
-        /// <summary>
-        /// List of indicators used to calculate lookback and hydrated values.
-        /// </summary>
         public IList<IIndicator> Indicators { get; set; }
 
-        /// <summary>
-        /// Get csv headers.
-        /// </summary>
-        /// <returns></returns>
-        public virtual string[] GetCsvHeaders()
-        {
-            return new string[] { };
-        }
+        protected ITradingEngine Engine { get; set; }
 
         /// <summary>
-        /// Get csv values.
-        /// </summary>
-        /// <returns></returns>
-        public virtual string[] GetCsvValues()
-        {
-            return new string[] { };
-        }
-
-        /// <summary>
-        /// Overridden in strategy.
+        /// Setup the strategy.
         /// </summary>
         /// <param name="engine"></param>
-        /// <param name="args"></param>
-        public abstract void Initialize(ITradingEngine engine, string[] args);
+        public void Initialize(ITradingEngine engine)
+        { 
+            Engine = engine;
+        }
 
         /// <summary>
         /// OnTick method which call the strategy on tick when indicators are hydrated.
         /// </summary>
         /// <param name="ticks"></param>
-        public void BaseOnTick(IMultiBar ticks)
+        public void BaseOnTick(IMultiTick ticks)
         {
             foreach (IIndicator ind in Indicators)
             {
@@ -84,6 +55,6 @@ namespace Bot.Strategies
         /// Strategy logic goes here.
         /// </summary>
         /// <param name="ticks"></param>
-        public abstract void OnTick(IMultiBar ticks);
+        public abstract void OnTick(IMultiTick ticks);
     }
 }

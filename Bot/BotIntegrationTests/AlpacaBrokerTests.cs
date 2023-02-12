@@ -21,14 +21,14 @@ namespace BotIntegrationTests
         [TestInitialize]
         public void Setup()
         {
-            var alpacaConfig = new AlpacaConfiguration
+            var alpacaConfig = new AlpacaConfig
             { 
                 PaperApiBaseUrl = "https://paper-api.alpaca.markets",
-                PaperApiKeyId = "AlpacaApiKeyId",
-                PaperApiKey = "AlpacaApiKeySecret"
+                ApiKeyId = "AlpacaApiKeyId",
+                ApiKey = "AlpacaApiKeySecret"
             };
 
-            Mock<IOptionsSnapshot<AlpacaConfiguration>> alpacaConfigSnapshot = new Mock<IOptionsSnapshot<AlpacaConfiguration>>();
+            Mock<IOptionsSnapshot<AlpacaConfig>> alpacaConfigSnapshot = new Mock<IOptionsSnapshot<AlpacaConfig>>();
             alpacaConfigSnapshot.Setup(m => m.Value).Returns(alpacaConfig);
 
             engine = new Mock<ITradingEngine>();

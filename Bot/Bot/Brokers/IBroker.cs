@@ -13,7 +13,7 @@ namespace Bot.Brokers
         /// Initializes the broker with custom arguments.
         /// </summary>
         /// <param name="args"></param>
-        void Initialize(ITradingEngine engine, RunMode runMode, string[] args);
+        void Initialize(ITradingEngine engine);
 
         /// <summary>
         /// Gets information for an asset like whether it is easy to borrow.

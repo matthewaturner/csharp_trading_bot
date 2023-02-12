@@ -13,7 +13,7 @@ namespace Bot.Brokers.BackTest
 {
     public class BackTestingBroker : IBroker, ITickReceiver
     {
-        private IMultiBar ticks;
+        private IMultiTick ticks;
         private ITradingEngine engine;
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
@@ -23,31 +23,22 @@ namespace Bot.Brokers.BackTest
         /// <summary>
         /// Dependency injection constructor.
         /// </summary>
-        public BackTestingBroker()
-        { }
+        public BackTestingBroker(
+            double initialFunds)
+        { 
+            this.account = new BackTestAccount(initialFunds);
+            this.positions = new List<BackTestPosition>();
+            this.openOrders = new List<BackTestOrder>();
+            this.allOrders = new List<BackTestOrder>();
+        }
 
         /// <summary>
-        /// Initialize with custom arguments.
+        /// Initialize.
         /// </summary>
-        /// <param name="args"></param>
-        /// <param name="args[0]">Initial funds.</param>
-        public void Initialize(ITradingEngine engine, RunMode runMode, string[] args)
+        public void Initialize(ITradingEngine engine)
         {
-            if (runMode != RunMode.BackTest)
-            {
-                throw new NotImplementedException();
-            }
-
-            double initialFunds = double.Parse(args[0]);
-
             this.engine = engine;
-            ticks = engine.Ticks;
-
-            account = new BackTestAccount(initialFunds);
-            positions = new List<BackTestPosition>();
-
-            openOrders = new List<BackTestOrder>();
-            allOrders = new List<BackTestOrder>();
+            this.ticks = engine.Ticks;
         }
 
         /// <summary>
@@ -133,7 +124,7 @@ namespace Bot.Brokers.BackTest
         /// Open orders execute at the open price of the next tick.
         /// </summary>
         /// <param name="_"></param>
-        public void BaseOnTick(IMultiBar ticks)
+        public void BaseOnTick(IMultiTick ticks)
         {
             BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)
@@ -249,7 +240,7 @@ namespace Bot.Brokers.BackTest
         /// Updates the total account value based on latest prices.
         /// </summary>
         /// <param name="tick"></param>
-        private void UpdateAccountValue(IMultiBar tick)
+        private void UpdateAccountValue(IMultiTick tick)
         {
             double total = account.Cash;
             foreach (IPosition pos in positions)

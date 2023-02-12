@@ -20,7 +20,7 @@ namespace Bot.Brokers
     {
         private readonly string apiKeyId;
         private readonly string apiKeySecret;
-        private readonly AlpacaConfiguration config;
+        private readonly AlpacaConfig config;
 
         private ITradingEngine engine;
         private RestClient restClient;
@@ -33,11 +33,19 @@ namespace Bot.Brokers
         /// <param name="keyVaultManager"></param>
         /// <param name="httpClient"></param>
         public AlpacaBroker(
-            IOptionsSnapshot<AlpacaConfiguration> config)
+            AlpacaConfig config)
         {
-            this.config = config.Value;
-            apiKeyId = config.Value.PaperApiKeyId;
-            apiKeySecret = config.Value.PaperApiKey;
+            this.config = config;
+            apiKeyId = config.ApiKeyId;
+            apiKeySecret = config.ApiKey;
+
+            baseUrl = config.RunMode switch
+            {
+                RunMode.BackTest => throw new NotImplementedException(),
+                RunMode.Live => config.ApiBaseUrl,
+                RunMode.Paper => config.PaperApiBaseUrl
+            };
+
             restClient = new RestClient();
             restClient.UseNewtonsoftJson();
         }
@@ -47,25 +55,9 @@ namespace Bot.Brokers
         /// </summary>
         /// <param name="engine"></param>
         /// <param name="args"></param>
-        public void Initialize(ITradingEngine engine, RunMode runMode, string[] args)
+        public void Initialize(ITradingEngine engine)
         {
             this.engine = engine;
-
-            if (runMode == RunMode.BackTest)
-            {
-                throw new NotImplementedException();
-            }
-
-            if (runMode == RunMode.Paper)
-            {
-                baseUrl = config.PaperApiBaseUrl;
-            }
-
-            if (runMode == RunMode.Live)
-            {
-                baseUrl = config.ApiBaseUrl;
-            }
-
             restClient.BaseUrl = new Uri(baseUrl);
         }
 
