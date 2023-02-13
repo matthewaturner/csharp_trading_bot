@@ -94,12 +94,12 @@ namespace Bot.Models
         /// <returns></returns>
         public override string ToString()
         {
-            string output = string.Empty;
+            string output = "{";
             foreach (var kv in ticks)
             {
-                output += kv.Value.ToString() + "\n";
+                output += kv.Value.ToString() + ", ";
             }
-            return output;
+            return output + "}";
         }
     }
 }

@@ -45,9 +45,16 @@ namespace Bot.Strategies
                 ind.OnTick(ticks);
             }
 
+            Engine.Logger.LogVerbose($"Got Ticks: {ticks}");
+            Engine.Logger.LogVerbose($"Current Indicators: {string.Join(", ", Indicators)}");
+
             if (Indicators.All(ind => ind.IsHydrated))
             {
                 OnTick(ticks);
+            }
+            else
+            {
+                Engine.Logger.LogVerbose($"Indicators not hydrated. Skipping strategy logic.");
             }
         }
 

@@ -1,15 +1,17 @@
 ﻿using Bot.Engine;
 using Bot.Models;
+using Bot.Logging;
 using Bot.Strategies;
 using Bot.Brokers.BackTest;
 using Bot.Data;
 
-var smaCrossStrat = new SMACrossoverStrategy("MSFT", 50, 200, true);
+var smaCrossStrat = new SMACrossoverStrategy("MSFT", 16, 64, true);
 var broker = new BackTestingBroker(10000);
 var dataSource = new YahooDataSource();
 
 var engine = new TradingEngine()
 {
+    Logger = new ConsoleLogger(LogLevel.Verbose),
     Broker = broker,
     DataSource = dataSource,
     Strategy = smaCrossStrat,
@@ -19,8 +21,7 @@ var engine = new TradingEngine()
 await engine.RunAsync(
     RunMode.BackTest,
     TickInterval.Day,
-    DateTime.Now.AddDays(-365),
+    DateTime.Now.AddYears(-5),
     DateTime.Now);
 
-// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Done.");

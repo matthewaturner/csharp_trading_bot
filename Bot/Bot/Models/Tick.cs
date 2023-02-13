@@ -67,9 +67,11 @@ namespace Bot.Models
 
         public override string ToString()
         {
+            string ToStr(double v) => v.ToString("0.00");
+
             return $"{Symbol} {DateTime.StandardToString()} " +
-                $"Open:{Open} High:{High} Low:{Low} " +
-                $"Close:{Close} Volume:{Volume}";
+                $"Open:{ToStr(Open)} High:{ToStr(High)} Low:{ToStr(Low)} " +
+                $"Close:{ToStr(Close)} Volume:{ToStr(Volume)}";
         }
     }
 }

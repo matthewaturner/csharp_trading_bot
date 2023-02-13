@@ -10,10 +10,8 @@ using Bot.Engine.Events;
 
 namespace Bot.Brokers.BackTest
 {
-    public class BackTestingBroker : IBroker, ITickReceiver
+    public class BackTestingBroker : BrokerBase, IBroker, ITickReceiver
     {
-        private IMultiTick ticks;
-        private ITradingEngine engine;
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
         private IList<BackTestOrder> openOrders;
@@ -31,14 +29,7 @@ namespace Bot.Brokers.BackTest
             this.allOrders = new List<BackTestOrder>();
         }
 
-        /// <summary>
-        /// Initialize.
-        /// </summary>
-        public void Initialize(ITradingEngine engine)
-        {
-            this.engine = engine;
-            this.ticks = engine.Ticks;
-        }
+        private IMultiTick Ticks => Engine.Ticks;
 
         /// <summary>
         /// Gets asset information.
@@ -149,6 +140,7 @@ namespace Bot.Brokers.BackTest
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
                     order.Fill(ticks[order.Symbol].Close, ticks[order.Symbol].DateTime);
+                    Engine.Logger.LogInformation($"Order filled. {order}");
                 }
 
                 openOrders.RemoveAt(0);
@@ -166,13 +158,13 @@ namespace Bot.Brokers.BackTest
         {
             BackTestOrder order = new BackTestOrder(request);
 
-            if (!ticks.HasSymbol(order.Symbol))
+            if (!Engine.Ticks.HasSymbol(order.Symbol))
             {
                 throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
             }
 
             order.OrderId = Guid.NewGuid().ToString();
-            order.PlacementTime = ticks[order.Symbol].DateTime;
+            order.PlacementTime = Ticks[order.Symbol].DateTime;
             openOrders.Add(order);
             allOrders.Add(order);
             return order;
@@ -201,7 +193,7 @@ namespace Bot.Brokers.BackTest
         /// <returns></returns>
         public OrderState PreviewOrder(BackTestOrder order)
         {
-            double currentPrice = ticks[order.Symbol].Open;
+            double currentPrice = Ticks[order.Symbol].Open;
             double orderPrice = currentPrice * order.Quantity;
 
             switch (order.Type)
@@ -326,7 +318,7 @@ namespace Bot.Brokers.BackTest
                 position.Quantity > 0 ? OrderType.MarketSell : OrderType.MarketBuy,
                 symbol,
                 Math.Abs(position.Quantity),
-                ticks[symbol].Close);
+                Ticks[symbol].Close);
             return PlaceOrder(order);
         }
     }

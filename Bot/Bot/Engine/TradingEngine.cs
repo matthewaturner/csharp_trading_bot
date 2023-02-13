@@ -1,13 +1,14 @@
-﻿using Bot.Engine.Events;
+﻿using Bot.Brokers;
+using Bot.Data.Interfaces;
+using Bot.Engine.Events;
+using Bot.Indicators;
+using Bot.Logging;
 using Bot.Models;
 using Bot.Strategies;
-using Bot.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using Bot.Brokers;
-using Bot.Data.Interfaces;
 
 namespace Bot.Engine
 {
@@ -31,7 +32,7 @@ namespace Bot.Engine
         /// <summary>
         /// Get or set current ticks.
         /// </summary>
-        public IMultiTick Ticks { get; private set; }
+        public IMultiTick Ticks => ticks;
 
         /// <summary>
         /// Get or set all symbols in the universe.
@@ -165,14 +166,17 @@ namespace Bot.Engine
         /// <param name="ticks"></param>
         private void SendOnTickEvents(Tick newTick)
         {
+            Logger.LogInformation("-----");
+
             // update only the tick we received
             ticks.Update(newTick);
 
             foreach (ITickReceiver receiver in tickReceivers)
             {
-                // send all latest ticks to listeners
                 receiver.BaseOnTick(ticks);
             }
+
+            Logger.LogVerbose($"Account: {Broker.GetAccount()}");
         }
     }
 }

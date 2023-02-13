@@ -47,5 +47,10 @@ namespace Bot.Brokers.BackTest.Models
         /// Total value of the account.
         /// </summary>
         public double TotalValue { get; set; }
+
+        public override string ToString()
+        {
+            return $"AccountId: {AccountId}, Cash: {Cash}, BuyingPower: {BuyingPower}, TotalValue: {TotalValue}";
+        }
     }
 }

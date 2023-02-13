@@ -16,7 +16,7 @@ namespace Bot.Logging
         {
             if (msgLevel >= configured)
             {
-                System.Console.WriteLine($"{configured.ToString().ToUpper()}:: {msg}");
+                System.Console.WriteLine($"{msgLevel.ToString().ToUpper()}:: {msg}");
             }
         }
 

@@ -13,7 +13,6 @@ namespace Bot.Strategies
         private IMovingAverageCrossover mac;
         private IPosition currentPosition;
         private bool longOnly;
-        private int maxUnits = 10;
         private string orderId;
         private string symbol;
 
@@ -61,23 +60,24 @@ namespace Bot.Strategies
 
                 if (macVal == 0 && currentPosition != null)
                 {
-                    //Exit any position
+                    Engine.Logger.LogInformation("Exiting positions!");
                     ExitPosition(tick);
                 }
                 else if (macVal > 0 && (currentPosition == null || currentPosition.Type != PositionType.Long))
                 {
-                    //Enter long position
+                    Engine.Logger.LogInformation("Going long!");
                     EnterLongPosition(tick);
                 }
                 else if (macVal < 0 && (currentPosition == null || currentPosition.Type != PositionType.Short))
                 {
                     if (!longOnly)
                     {
-                        //Enter short position
+                        Engine.Logger.LogInformation("Going short!");
                         EnterShortPosition(tick);
                     }
                     else if (currentPosition != null)
                     {
+                        Engine.Logger.LogInformation("Exiting positions!");
                         ExitPosition(tick);
                     }
                 }
@@ -100,23 +100,7 @@ namespace Bot.Strategies
 
         private void EnterLongPosition(Tick tick)
         {
-            double quantity;
-            if (currentPosition != null)
-            {
-                if (longOnly)
-                {
-                    quantity = maxUnits;
-                }
-                else
-                {
-                    quantity = 2 * currentPosition.Quantity * -1;
-                }
-            }
-            else
-            {
-                quantity = maxUnits;
-            }
-
+            double quantity = broker.GetAccount().TotalValue / tick.Close - 1;
             var targetPrice = tick.Close;
             var order = new OrderRequest(
                 OrderType.MarketBuy,
@@ -128,7 +112,7 @@ namespace Bot.Strategies
 
         private void EnterShortPosition(Tick tick)
         {
-            var quantity = currentPosition != null ? 2 * currentPosition.Quantity * -1 : maxUnits;
+            var quantity = broker.GetAccount().TotalValue / tick.Close - 1;
             var targetPrice = tick.Close;
             var order = new OrderRequest(
                 OrderType.MarketSell,

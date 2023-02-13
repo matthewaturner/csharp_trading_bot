@@ -38,6 +38,10 @@ namespace Bot.Indicators
 
         public PositionType Value => position;
 
+        public double ShortMa => shortMA.Value;
+
+        public double LongMa => longMA.Value;
+
         /// <summary>
         /// Calculate new values.
         /// </summary>

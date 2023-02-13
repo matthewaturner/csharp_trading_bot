@@ -3,8 +3,8 @@ namespace Bot.Models
 {
     public enum PositionType
     {
-        Long,
-        Short,
-        Neutral,
+        Long = 1,
+        Short = -1,
+        Neutral = 0,
     }
 }
