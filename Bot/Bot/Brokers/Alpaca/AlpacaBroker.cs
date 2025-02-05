@@ -42,11 +42,11 @@ namespace Bot.Brokers
             {
                 RunMode.BackTest => throw new NotImplementedException(),
                 RunMode.Live => config.ApiBaseUrl,
-                RunMode.Paper => config.PaperApiBaseUrl
+                RunMode.Paper => config.PaperApiBaseUrl,
+                _ => throw new NotImplementedException(),
             };
 
-            restClient = new RestClient();
-            restClient.UseNewtonsoftJson();
+            restClient = new RestClient(baseUrl);
         }
 
         /// <summary>
@@ -57,19 +57,18 @@ namespace Bot.Brokers
         public void Initialize(ITradingEngine engine)
         {
             this.engine = engine;
-            restClient.BaseUrl = new Uri(baseUrl);
         }
 
         /// <summary>
         /// Sends an authenticated http request to the alpaca api.
         /// </summary>
         /// <param name="request"></param>
-        private IRestResponse SendAuthenticatedHttpRequest(IRestRequest request, bool validate = true)
+        private RestResponse SendAuthenticatedHttpRequest(RestRequest request, bool validate = true)
         {
             request.AddHeader("APCA-API-KEY-ID", apiKeyId);
             request.AddHeader("APCA-API-SECRET-KEY", apiKeySecret);
 
-            IRestResponse response = restClient.Execute(request);
+            RestResponse response = restClient.Execute(request);
 
             if (!response.IsSuccessful && validate)
             {
@@ -93,8 +92,8 @@ namespace Bot.Brokers
                 throw new ArgumentNullException(nameof(symbol));
             }
 
-            IRestRequest request = new RestRequest($"/v2/assets/{symbol}", Method.GET);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest($"/v2/assets/{symbol}", Method.Get);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaAssetInformation>(response.Content);
         }
 
@@ -104,8 +103,8 @@ namespace Bot.Brokers
         /// <returns></returns>
         public IAccount GetAccount()
         {
-            IRestRequest request = new RestRequest("/v2/account", Method.GET);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest("/v2/account", Method.Get);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaAccount>(response.Content);
         }
 
@@ -115,8 +114,8 @@ namespace Bot.Brokers
         /// <returns></returns>
         public IList<IPosition> GetPositions()
         {
-            IRestRequest request = new RestRequest("/v2/positions", Method.GET);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest("/v2/positions", Method.Get);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             var positions = JsonConvert.DeserializeObject<IList<AlpacaPosition>>(response.Content);
             return positions.ToList<IPosition>();
         }
@@ -133,8 +132,8 @@ namespace Bot.Brokers
                 throw new ArgumentNullException(nameof(symbol));
             }
 
-            IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.GET);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.Get);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaPosition>(response.Content);
         }
 
@@ -150,8 +149,8 @@ namespace Bot.Brokers
                 throw new ArgumentNullException(nameof(orderId));
             }
             
-            IRestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.GET);
-            IRestResponse response = SendAuthenticatedHttpRequest(request, validate:false);
+            RestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.Get);
+            RestResponse response = SendAuthenticatedHttpRequest(request, validate:false);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -177,7 +176,7 @@ namespace Bot.Brokers
             DateTime until,
             int limit = 50)
         {
-            IRestRequest request = new RestRequest($"/v2/orders", Method.GET);
+            RestRequest request = new RestRequest($"/v2/orders", Method.Get);
 
             if (symbols != null && symbols.Any())
             {
@@ -199,7 +198,7 @@ namespace Bot.Brokers
             request.AddQueryParameter("until", until.ToString("O"));
             request.AddQueryParameter("limit", limit.ToString());
 
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<IList<AlpacaOrder>>(response.Content).ToList<IOrder>();
         }
 
@@ -232,9 +231,9 @@ namespace Bot.Brokers
 
             string request_string = JsonConvert.SerializeObject(alpacaRequest);
 
-            IRestRequest request = new RestRequest($"/v2/orders", Method.POST);
+            RestRequest request = new RestRequest($"/v2/orders", Method.Post);
             request.AddJsonBody(alpacaRequest);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
         }
 
@@ -249,8 +248,8 @@ namespace Bot.Brokers
                 throw new ArgumentNullException(nameof(orderId));
             }
 
-            IRestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.DELETE);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.Delete);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             IOrder order = JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
             return;
         }
@@ -262,8 +261,8 @@ namespace Bot.Brokers
         /// <returns></returns>
         public IOrder ClosePosition(string symbol)
         {
-            IRestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.DELETE);
-            IRestResponse response = SendAuthenticatedHttpRequest(request);
+            RestRequest request = new RestRequest($"/v2/positions/{symbol}", Method.Delete);
+            RestResponse response = SendAuthenticatedHttpRequest(request);
             return JsonConvert.DeserializeObject<AlpacaOrder>(response.Content);
         }
 
