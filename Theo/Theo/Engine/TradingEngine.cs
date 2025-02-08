@@ -66,27 +66,6 @@ namespace Theo.Engine
         public string OutputFolder { get; set; }
 
         /// <summary>
-        /// Validate that the engine is setup properly.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
-        private void ValidateConfiguration()
-        {
-            void ThrowIfNull(object o, string identifier)
-            { 
-                if (o == null)
-                {
-                    throw new ArgumentNullException(identifier);
-                }
-            }
-
-            ThrowIfNull(Broker, nameof(Broker));
-            ThrowIfNull(DataSource, nameof(DataSource));
-            ThrowIfNull(Strategy, nameof(Strategy));
-            ThrowIfNull(Symbols, nameof(Symbols));
-            ThrowIfNull(bars, nameof(bars));
-        }
-
-        /// <summary>
         /// Setup everything.
         /// </summary>
         private void Setup()
@@ -134,7 +113,7 @@ namespace Theo.Engine
             else if (runMode == RunMode.BackTest)
             {
                 await DataSource.StreamBars(
-                    Symbols.ToArray(),
+                    [.. Symbols],
                     interval,
                     start.Value,
                     end.Value,
@@ -159,7 +138,7 @@ namespace Theo.Engine
         /// </summary>
         private void ClearReceivers()
         {
-            barReceivers = new List<IBarReceiver>();
+            barReceivers = [];
         }
 
         /// <summary>
