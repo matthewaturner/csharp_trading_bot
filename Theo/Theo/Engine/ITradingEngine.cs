@@ -17,9 +17,9 @@ namespace Theo.Engine
         public IList<string> Symbols { get; }
 
         /// <summary>
-        /// Get current ticks.
+        /// Get current bars.
         /// </summary>
-        public IMultiTick Ticks { get; }
+        public MultiBar Bars { get; }
 
         /// <summary>
         /// Gets current data source.
@@ -51,7 +51,7 @@ namespace Theo.Engine
         /// <returns></returns>
         Task RunAsync(
             RunMode runMode,
-            TickInterval interval,
+            BarInterval interval,
             DateTime? start = null,
             DateTime? end = null);
     }

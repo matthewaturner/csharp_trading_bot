@@ -35,22 +35,22 @@ namespace Theo.Strategies
         }
 
         /// <summary>
-        /// OnTick method which call the strategy on tick when indicators are hydrated.
+        /// OnBar method which call the strategy on bar when indicators are hydrated.
         /// </summary>
-        /// <param name="ticks"></param>
-        public void BaseOnTick(IMultiTick ticks)
+        /// <param name="bars"></param>
+        public void BaseOnBar(MultiBar bars)
         {
             foreach (IIndicator ind in Indicators)
             {
-                ind.OnTick(ticks);
+                ind.OnBar(bars);
             }
 
-            Engine.Logger.LogVerbose($"Got Ticks: {ticks}");
+            Engine.Logger.LogVerbose($"Got Bars: {bars}");
             Engine.Logger.LogVerbose($"Current Indicators: {string.Join(", ", Indicators)}");
 
             if (Indicators.All(ind => ind.IsHydrated))
             {
-                OnTick(ticks);
+                OnBar(bars);
             }
             else
             {
@@ -61,7 +61,7 @@ namespace Theo.Strategies
         /// <summary>
         /// Strategy logic goes here.
         /// </summary>
-        /// <param name="ticks"></param>
-        public abstract void OnTick(IMultiTick ticks);
+        /// <param name="bars"></param>
+        public abstract void OnBar(MultiBar bars);
     }
 }

@@ -7,7 +7,7 @@ namespace Theo.Indicators
 {
     public class SimpleMovingAverage : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
-        private readonly Func<IMultiTick, double> transform;
+        private readonly Func<MultiBar, double> transform;
         private double[] data;
         private double average;
         private int index;
@@ -17,7 +17,7 @@ namespace Theo.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public SimpleMovingAverage(int lookback, Func<IMultiTick, double> transform)
+        public SimpleMovingAverage(int lookback, Func<MultiBar, double> transform)
             : base(lookback)
         {
             if (lookback < 1)
@@ -38,11 +38,11 @@ namespace Theo.Indicators
         /// <summary>
         /// Calculates new values.
         /// </summary>
-        /// <param name="ticks"></param>
-        public override void OnTick(IMultiTick ticks)
+        /// <param name="bars"></param>
+        public override void OnBar(MultiBar bars)
         {
             average = average - (data[index] / Lookback);
-            data[index] = transform(ticks);
+            data[index] = transform(bars);
             average = average + (data[index] / Lookback);
 
             index = (index + 1) % Lookback;

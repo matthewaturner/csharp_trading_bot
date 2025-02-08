@@ -15,12 +15,12 @@ namespace StrategyTests
     [TestClass]
     public class StrategyTests
     {
-        private IList<Tick> amcData;    
+        private IList<Bar> amcData;    
 
         [TestInitialize]
         public void Setup()
         {
-            amcData = LoadData("./StrategyTests/AMC.csv", "AMC", TickInterval.Day);
+            amcData = LoadData("./StrategyTests/AMC.csv", "AMC", BarInterval.Day);
         }
 
         /*
@@ -28,12 +28,12 @@ namespace StrategyTests
         public void SMACrossoverStrategy_LongOnly()
         {
             var symbol = "AMC";
-            Ticks ticks = new Ticks(new string[] { symbol });
+            Bars bars = new Bars(new string[] { symbol });
             var strat = new SMACrossoverStrategy();
             BackTestingBroker broker = new BackTestingBroker();
 
             Mock<ITradingEngine> engine = new Mock<ITradingEngine>();
-            engine.Setup(m => m.Ticks).Returns(ticks);
+            engine.Setup(m => m.Bars).Returns(bars);
             engine.Setup(m => m.Broker).Returns(broker);
             engine.Setup(m => m.Strategy).Returns(strat);
 
@@ -49,11 +49,11 @@ namespace StrategyTests
 
             amcData = amcData.Select(x => x).OrderBy(x => x.DateTime).ToList();
 
-            foreach (var tick in amcData)
+            foreach (var bar in amcData)
             {
-                ticks.Update(new Tick[] { tick });
-                broker.OnTick(ticks);
-                strat.OnTick(ticks);
+                bars.Update(new Bar[] { bar });
+                broker.OnBar(bars);
+                strat.OnBar(bars);
             }
 
             var expectedNumTrades = 10;
@@ -99,13 +99,13 @@ namespace StrategyTests
         */
 
 
-        public IList<Tick> LoadData(
+        public IList<Bar> LoadData(
            string fileName,
            string symbol,
-           TickInterval interval)
+           BarInterval interval)
         {
             Path.GetFullPath(fileName);
-            List<Tick> tickList = new List<Tick>();
+            List<Bar> barList = new List<Bar>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -128,14 +128,14 @@ namespace StrategyTests
                     double adjClose = double.Parse(fields[5]);
                     int volume = int.Parse(fields[6]);
 
-                    Tick tick = new Tick(
+                    Bar bar = new Bar(
                         symbol, interval, dateTime, open, high, low, close, volume);
 
-                    tickList.Add(tick);
+                    barList.Add(bar);
                 }
             }
 
-            return tickList;
+            return barList;
         }
     }
 }

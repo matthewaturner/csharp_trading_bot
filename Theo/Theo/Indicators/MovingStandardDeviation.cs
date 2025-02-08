@@ -7,7 +7,7 @@ namespace Theo.Indicators
 {
     public class MovingStandardDeviation : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
-        private readonly Func<IMultiTick, double> transform;
+        private readonly Func<MultiBar, double> transform;
         private double[] data;
         private int index;
 
@@ -16,7 +16,7 @@ namespace Theo.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public MovingStandardDeviation(int lookback, Func<IMultiTick, double> transform)
+        public MovingStandardDeviation(int lookback, Func<MultiBar, double> transform)
             : base(lookback)
         {
             if (lookback < 1)
@@ -35,10 +35,10 @@ namespace Theo.Indicators
         /// <summary>
         /// Calculate new values.
         /// </summary>
-        /// <param name="ticks"></param>
-        public override void OnTick(IMultiTick ticks)
+        /// <param name="bars"></param>
+        public override void OnBar(MultiBar bars)
         {
-            data[index] = transform(ticks);
+            data[index] = transform(bars);
             index = (index + 1) % this.Lookback;
 
             if (!this.IsHydrated && index == 0)

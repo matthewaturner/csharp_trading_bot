@@ -4,30 +4,30 @@ using System.Linq;
 
 namespace Theo.Models
 {
-    public class MultiTick : IMultiTick
+    public class MultiBar
     {
-        private IDictionary<string, Tick> ticks;
+        private IDictionary<string, Bar> bars;
         private IList<string> symbols;
 
         /// <summary>
-        /// Initializes ticks with no data.
+        /// Initializes bars with no data.
         /// </summary>
         /// <param name="symbols"></param>
-        public MultiTick(IList<string> symbols)
+        public MultiBar(IList<string> symbols)
         {
             this.symbols = symbols;
-            ticks = symbols.ToDictionary(keySelector: s => s, elementSelector: s => new Tick(s));
+            bars = symbols.ToDictionary(keySelector: s => s, elementSelector: s => new Bar(s));
         }
 
         /// <summary>
-        /// Initialize the ticks object.
+        /// Initialize the bars object.
         /// </summary>
         /// <param name="bars"></param>
-        public MultiTick(Tick[] tickData)
+        public MultiBar(Bar[] barData)
         {
-            this.ticks = new Dictionary<string, Tick>(tickData.Length);
-            this.symbols = tickData.Select(t => t.Symbol).ToList();
-            foreach (Tick t in tickData)
+            this.bars = new Dictionary<string, Bar>(barData.Length);
+            this.symbols = barData.Select(t => t.Symbol).ToList();
+            foreach (Bar t in barData)
             {
                 this.Update(t);
             }
@@ -36,43 +36,43 @@ namespace Theo.Models
         /// <summary>
         /// Returns the number of symbols in the symbol map.
         /// </summary>
-        public int NumSymbols => ticks.Keys.Count;
+        public int NumSymbols => bars.Keys.Count;
 
         /// <summary>
-        /// Gets the latest tick data for a symbol.
+        /// Gets the latest bar data for a symbol.
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public Tick this[string symbol]
+        public Bar this[string symbol]
         {
-            get => ticks[symbol];
+            get => bars[symbol];
         }
 
         /// <summary>
-        /// Updates current tick for just one symbol.
+        /// Updates current bar for just one symbol.
         /// </summary>
         /// <param name="newBars"></param>
-        public void Update(Tick newTick)
+        public void Update(Bar newBar)
         {
             // todo locking
-            if (ticks.ContainsKey(newTick.Symbol))
+            if (bars.ContainsKey(newBar.Symbol))
             {
-                ticks[newTick.Symbol] = newTick;
+                bars[newBar.Symbol] = newBar;
             }
             else
             {
-                throw new Exception($"Got tick for symbol which was not in the original universe. " +
-                    $"symbol={newTick.Symbol} universe={string.Join(",", this.symbols)}");
+                throw new Exception($"Got bar for symbol which was not in the original universe. " +
+                    $"symbol={newBar.Symbol} universe={string.Join(",", this.symbols)}");
             }
         }
 
         /// <summary>
-        /// Updates current ticks for multiple symbols.
+        /// Updates current bars for multiple symbols.
         /// </summary>
-        /// <param name="newTicks"></param>
-        public void Update(IEnumerable<Tick> newTicks)
+        /// <param name="newBars"></param>
+        public void Update(IEnumerable<Bar> newBars)
         {
-            foreach (Tick t in newTicks)
+            foreach (Bar t in newBars)
             {
                 this.Update(t);
             }
@@ -85,7 +85,7 @@ namespace Theo.Models
         /// <returns></returns>
         public bool HasSymbol(string symbol)
         {
-            return ticks.ContainsKey(symbol);
+            return bars.ContainsKey(symbol);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Theo.Models
         public override string ToString()
         {
             string output = "{";
-            foreach (var kv in ticks)
+            foreach (var kv in bars)
             {
                 output += kv.Value.ToString() + ", ";
             }

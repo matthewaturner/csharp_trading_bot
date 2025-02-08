@@ -5,19 +5,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Theo.Models
 {
-    public class Tick
+    public class Bar
     {
-        public Tick()
+        public Bar()
         { }
 
-        public Tick(string symbol)
+        public Bar(string symbol)
         {
             Symbol = symbol;
         }
 
-        public Tick(
+        public Bar(
             string symbol,
-            TickInterval interval,
+            BarInterval interval,
             DateTime dateTime,
             double open,
             double high,
@@ -26,8 +26,8 @@ namespace Theo.Models
             int volume)
         {
             Symbol = symbol;
-            DateTime = dateTime.NormalizeToTickInterval(interval);
-            TickInterval = interval;
+            DateTime = dateTime.NormalizeToBarInterval(interval);
+            BarInterval = interval;
             Open = open;
             High = high;
             Low = low;
@@ -48,7 +48,7 @@ namespace Theo.Models
         [Key]
         [Column(Order = 3)]
         [Required]
-        public TickInterval TickInterval { get; set; }
+        public BarInterval BarInterval { get; set; }
 
         [Required]
         public double Open { get; set; }

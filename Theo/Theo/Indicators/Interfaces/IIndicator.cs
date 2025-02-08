@@ -25,7 +25,7 @@ namespace Theo.Indicators
         /// <summary>
         /// Updates the indicator with a new row of data.
         /// </summary>
-        /// <param name="tick"></param>
-        void OnTick(IMultiTick ticks);
+        /// <param name="bar"></param>
+        void OnBar(MultiBar bars);
     }
 }

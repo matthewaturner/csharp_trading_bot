@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Theo.Strategies
 {
-    public interface IStrategy : ITickReceiver
+    public interface IStrategy : IBarReceiver
     {
         int Lookback { get; }
 
@@ -17,6 +17,6 @@ namespace Theo.Strategies
 
         void Initialize(ITradingEngine engine);
 
-        void OnTick(IMultiTick ticks);
+        void OnBar(MultiBar bars);
     }
 }

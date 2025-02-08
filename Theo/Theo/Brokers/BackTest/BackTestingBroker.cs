@@ -10,7 +10,7 @@ using Theo.Engine.Events;
 
 namespace Theo.Brokers.BackTest
 {
-    public class BackTestingBroker : BrokerBase, IBroker, ITickReceiver
+    public class BackTestingBroker : BrokerBase, IBroker, IBarReceiver
     {
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
@@ -29,7 +29,7 @@ namespace Theo.Brokers.BackTest
             this.allOrders = new List<BackTestOrder>();
         }
 
-        private IMultiTick Ticks => Engine.Ticks;
+        private MultiBar Bars => Engine.Bars;
 
         /// <summary>
         /// Gets asset information.
@@ -111,10 +111,10 @@ namespace Theo.Brokers.BackTest
         }
 
         /// <summary>
-        /// Open orders execute at the open price of the next tick.
+        /// Open orders execute at the open price of the next bar.
         /// </summary>
         /// <param name="_"></param>
-        public void BaseOnTick(IMultiTick ticks)
+        public void BaseOnBar(MultiBar bars)
         {
             BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)
@@ -129,17 +129,17 @@ namespace Theo.Brokers.BackTest
                     switch (order.Type)
                     {
                         case OrderType.MarketBuy:
-                            Buy(order.Symbol, order.Quantity, ticks[order.Symbol].Close);
+                            Buy(order.Symbol, order.Quantity, bars[order.Symbol].Close);
                             break;
 
                         case OrderType.MarketSell:
-                            Sell(order.Symbol, order.Quantity, ticks[order.Symbol].Close);
+                            Sell(order.Symbol, order.Quantity, bars[order.Symbol].Close);
                             break;
                     }
 
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
-                    order.Fill(ticks[order.Symbol].Close, ticks[order.Symbol].DateTime);
+                    order.Fill(bars[order.Symbol].Close, bars[order.Symbol].DateTime);
                     Engine.Logger.LogInformation($"Order filled. {order}");
                 }
 
@@ -147,7 +147,7 @@ namespace Theo.Brokers.BackTest
                 order = openOrders.FirstOrDefault();
             }
 
-            UpdateAccountValue(ticks);
+            UpdateAccountValue(bars);
         }
 
         /// <summary>
@@ -158,13 +158,13 @@ namespace Theo.Brokers.BackTest
         {
             BackTestOrder order = new BackTestOrder(request);
 
-            if (!Engine.Ticks.HasSymbol(order.Symbol))
+            if (!Engine.Bars.HasSymbol(order.Symbol))
             {
                 throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
             }
 
             order.OrderId = Guid.NewGuid().ToString();
-            order.PlacementTime = Ticks[order.Symbol].DateTime;
+            order.PlacementTime = Bars[order.Symbol].DateTime;
             openOrders.Add(order);
             allOrders.Add(order);
             return order;
@@ -193,7 +193,7 @@ namespace Theo.Brokers.BackTest
         /// <returns></returns>
         public OrderState PreviewOrder(BackTestOrder order)
         {
-            double currentPrice = Ticks[order.Symbol].Open;
+            double currentPrice = Bars[order.Symbol].Open;
             double orderPrice = currentPrice * order.Quantity;
 
             switch (order.Type)
@@ -230,13 +230,13 @@ namespace Theo.Brokers.BackTest
         /// <summary>
         /// Updates the total account value based on latest prices.
         /// </summary>
-        /// <param name="tick"></param>
-        private void UpdateAccountValue(IMultiTick tick)
+        /// <param name="bar"></param>
+        private void UpdateAccountValue(MultiBar bar)
         {
             double total = account.Cash;
             foreach (IPosition pos in positions)
             {
-                total += pos.Quantity * tick[pos.Symbol].Close;
+                total += pos.Quantity * bar[pos.Symbol].Close;
             }
 
             account.TotalValue = total;
@@ -318,7 +318,7 @@ namespace Theo.Brokers.BackTest
                 position.Quantity > 0 ? OrderType.MarketSell : OrderType.MarketBuy,
                 symbol,
                 Math.Abs(position.Quantity),
-                Ticks[symbol].Close);
+                Bars[symbol].Close);
             return PlaceOrder(order);
         }
     }

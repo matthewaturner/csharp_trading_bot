@@ -20,7 +20,7 @@ namespace Theo.Indicators
         public MovingAverageCrossover(
             int shortLookback,
             int longLookback,
-            Func<IMultiTick, double> transform)
+            Func<MultiBar, double> transform)
             : base(longLookback)
         {
             if (shortLookback >= longLookback)
@@ -45,11 +45,11 @@ namespace Theo.Indicators
         /// <summary>
         /// Calculate new values.
         /// </summary>
-        /// <param name="ticks"></param>
-        public override void OnTick(IMultiTick ticks)
+        /// <param name="bars"></param>
+        public override void OnBar(MultiBar bars)
         {
-            shortMA.OnTick(ticks);
-            longMA.OnTick(ticks);
+            shortMA.OnBar(bars);
+            longMA.OnBar(bars);
             IsHydrated = shortMA.IsHydrated && longMA.IsHydrated;
 
             if (IsHydrated)

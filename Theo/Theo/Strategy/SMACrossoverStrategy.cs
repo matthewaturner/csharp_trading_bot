@@ -26,7 +26,7 @@ namespace Theo.Strategies
             mac = new MovingAverageCrossover(
                 shortLookback,
                 longLookback,
-                (IMultiTick t) => t[symbol].Close);
+                (MultiBar t) => t[symbol].Close);
             Indicators.Add(mac);
 
             this.symbol = symbol;
@@ -41,9 +41,9 @@ namespace Theo.Strategies
         /// Exit any position if the Moving average crossover value is 0
         /// </summary>
         /// <param name="_"></param>
-        public override void OnTick(IMultiTick ticks)
+        public override void OnBar(MultiBar bars)
         {
-            Tick tick = ticks[symbol];
+            Bar bar = bars[symbol];
             if (IsHydrated)
             {
                 foreach (var order in broker.GetOpenOrders())
@@ -55,40 +55,40 @@ namespace Theo.Strategies
                     }
                 }
 
-                currentPosition = broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(tick.Symbol));
+                currentPosition = broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(bar.Symbol));
                 int macVal = (int)mac.Value;
 
                 if (macVal == 0 && currentPosition != null)
                 {
                     Engine.Logger.LogInformation("Exiting positions!");
-                    ExitPosition(tick);
+                    ExitPosition(bar);
                 }
                 else if (macVal > 0 && (currentPosition == null || currentPosition.Type != PositionType.Long))
                 {
                     Engine.Logger.LogInformation("Going long!");
-                    EnterLongPosition(tick);
+                    EnterLongPosition(bar);
                 }
                 else if (macVal < 0 && (currentPosition == null || currentPosition.Type != PositionType.Short))
                 {
                     if (!longOnly)
                     {
                         Engine.Logger.LogInformation("Going short!");
-                        EnterShortPosition(tick);
+                        EnterShortPosition(bar);
                     }
                     else if (currentPosition != null)
                     {
                         Engine.Logger.LogInformation("Exiting positions!");
-                        ExitPosition(tick);
+                        ExitPosition(bar);
                     }
                 }
             }            
         }
 
-        private void ExitPosition(Tick tick)
+        private void ExitPosition(Bar bar)
         {
             var orderType = currentPosition.Type == PositionType.Long ? OrderType.MarketSell : OrderType.MarketBuy;
             var quantity = currentPosition.Quantity;
-            var targetPrice = tick.Close;
+            var targetPrice = bar.Close;
             var order = new OrderRequest(
                 orderType,
                 currentPosition.Symbol,
@@ -98,25 +98,25 @@ namespace Theo.Strategies
             broker.PlaceOrder(order);
         }
 
-        private void EnterLongPosition(Tick tick)
+        private void EnterLongPosition(Bar bar)
         {
-            double quantity = broker.GetAccount().TotalValue / tick.Close - 1;
-            var targetPrice = tick.Close;
+            double quantity = broker.GetAccount().TotalValue / bar.Close - 1;
+            var targetPrice = bar.Close;
             var order = new OrderRequest(
                 OrderType.MarketBuy,
-                tick.Symbol,
+                bar.Symbol,
                 quantity,
                 targetPrice);
             orderId = broker.PlaceOrder(order).OrderId;
         }
 
-        private void EnterShortPosition(Tick tick)
+        private void EnterShortPosition(Bar bar)
         {
-            var quantity = broker.GetAccount().TotalValue / tick.Close - 1;
-            var targetPrice = tick.Close;
+            var quantity = broker.GetAccount().TotalValue / bar.Close - 1;
+            var targetPrice = bar.Close;
             var order = new OrderRequest(
                 OrderType.MarketSell,
-                tick.Symbol,
+                bar.Symbol,
                 quantity,
                 targetPrice);
             orderId = broker.PlaceOrder(order).OrderId;

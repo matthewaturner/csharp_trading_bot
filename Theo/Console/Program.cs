@@ -20,7 +20,7 @@ var engine = new TradingEngine()
 
 await engine.RunAsync(
     RunMode.BackTest,
-    TickInterval.Day,
+    BarInterval.Day,
     DateTime.Now.AddYears(-5),
     DateTime.Now);
 

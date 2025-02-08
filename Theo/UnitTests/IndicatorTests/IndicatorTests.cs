@@ -16,39 +16,39 @@ namespace IndicatorTests
     [TestClass]
     public class IndicatorTests
     {
-        private IList<IMultiTick> msftData;
+        private IList<MultiBar> msftData;
         private IDictionary<string, IList<double>> msftResults;
 
         [TestInitialize]
         public void Setup()
         {
-            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", TickInterval.Day);
+            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", BarInterval.Day);
             msftResults = LoadResults("./IndicatorTests/MSFT.csv");
         }
 
         [TestMethod]
         public void SMA_Hydration()
         {
-            var sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            var sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             Assert.IsFalse(sma.IsHydrated);
 
-            sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(29).ToList());
             Assert.IsFalse(sma.IsHydrated);
 
-            sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(30).ToList());
             Assert.IsTrue(sma.IsHydrated);
 
-            sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(60).ToList());
             Assert.IsTrue(sma.IsHydrated);
 
-            sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(61).ToList());
             Assert.IsTrue(sma.IsHydrated);
 
-            sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             ReplayData(sma, msftData.Take(62).ToList());
             Assert.IsTrue(sma.IsHydrated);
         }
@@ -56,7 +56,7 @@ namespace IndicatorTests
         [TestMethod]
         public void SMA_Values()
         {
-            var sma = new SimpleMovingAverage(30, (IMultiTick t) => t["MSFT"].Close);
+            var sma = new SimpleMovingAverage(30, (MultiBar t) => t["MSFT"].Close);
             IList<double> smaResults = msftResults[nameof(SimpleMovingAverage)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -71,7 +71,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Hydration()
         {
-            var mac = new MovingAverageCrossover(16, 64, (IMultiTick t) => t["MSFT"].Close);
+            var mac = new MovingAverageCrossover(16, 64, (MultiBar t) => t["MSFT"].Close);
             Assert.IsFalse(mac.IsHydrated);
 
             ReplayData(mac, msftData.Take(15).ToList());
@@ -87,7 +87,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MAC_Values()
         {
-            var mac = new MovingAverageCrossover(10, 30, (IMultiTick t) => t["MSFT"].Close);
+            var mac = new MovingAverageCrossover(10, 30, (MultiBar t) => t["MSFT"].Close);
             IList<double> macResults = msftResults[nameof(MovingAverageCrossover)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -102,7 +102,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MovStdDev_Hydration()
         {
-            var stdDev = new MovingStandardDeviation(30, (IMultiTick t) => t["MSFT"].Close);
+            var stdDev = new MovingStandardDeviation(30, (MultiBar t) => t["MSFT"].Close);
             Assert.IsFalse(stdDev.IsHydrated);
 
             ReplayData(stdDev, msftData.Take(15).ToList());
@@ -118,7 +118,7 @@ namespace IndicatorTests
         [TestMethod]
         public void MovStdDev_Values()
         {
-            var stdDev = new MovingStandardDeviation(10, (IMultiTick t) => t["MSFT"].Close);
+            var stdDev = new MovingStandardDeviation(10, (MultiBar t) => t["MSFT"].Close);
             IList<double> stdDevResults = msftResults[nameof(MovingStandardDeviation)]
                 .Select(obj => (double)obj)
                 .ToList();
@@ -132,13 +132,13 @@ namespace IndicatorTests
 
         public void ReplayAndCompare(
             ISimpleValueIndicator<double> indicator, 
-            IList<IMultiTick> data, 
+            IList<MultiBar> data, 
             IList<double> results)
         {
             IList<double> values = new List<double>();
             for (int i=0; i<data.Count; i++)
             {
-                indicator.OnTick(data[i]);
+                indicator.OnBar(data[i]);
                 values.Add(indicator.Value);
                 if (Helpers.CompareDoubles(indicator.Value, results[i]) != 0)
                 {
@@ -150,13 +150,13 @@ namespace IndicatorTests
 
         public void ReplayAndCompare(
             ISimpleValueIndicator<PositionType> indicator, 
-            IList<IMultiTick> data, 
+            IList<MultiBar> data, 
             IList<double> results)
         {
             IList<double> values = new List<double>();
             for (int i=0; i<data.Count; i++)
             {
-                indicator.OnTick(data[i]);
+                indicator.OnBar(data[i]);
                 values.Add((double)indicator.Value);
                 if (Helpers.CompareDoubles((double)indicator.Value, results[i]) != 0)
                 {
@@ -166,11 +166,11 @@ namespace IndicatorTests
             }
         }
 
-        public void ReplayData(IIndicator indicator, IList<IMultiTick> data)
+        public void ReplayData(IIndicator indicator, IList<MultiBar> data)
         {
-            foreach (IMultiTick t in data)
+            foreach (MultiBar t in data)
             {
-                indicator.OnTick(t);
+                indicator.OnBar(t);
             }
         }
 
@@ -216,13 +216,13 @@ namespace IndicatorTests
             return results;
         }
 
-        public IList<IMultiTick> LoadData(
+        public IList<MultiBar> LoadData(
             string fileName, 
             string symbol, 
-            TickInterval interval)
+            BarInterval interval)
         {
             Path.GetFullPath(fileName);
-            List<IMultiTick> tickList = new List<IMultiTick>();
+            List<MultiBar> barList = new List<MultiBar>();
 
             using (TextFieldParser parser = new TextFieldParser(fileName))
             {
@@ -245,18 +245,18 @@ namespace IndicatorTests
                     double adjClose = double.Parse(fields[5]);
                     int volume = int.Parse(fields[6]);
 
-                    // passing adjClose field into the close field for the tick to keep excel unit tests consistent
-                    Tick tick = new Tick(
+                    // passing adjClose field into the close field for the bar to keep excel unit tests consistent
+                    Bar bar = new Bar(
                         symbol, interval, dateTime, open, high, low, adjClose, volume);
 
-                    Mock<IMultiTick> mockTicks = new Mock<IMultiTick>();
-                    mockTicks.Setup(m => m[It.IsAny<string>()]).Returns(tick);
+                    Mock<MultiBar> mockBars = new Mock<MultiBar>();
+                    mockBars.Setup(m => m[It.IsAny<string>()]).Returns(bar);
 
-                    tickList.Add(mockTicks.Object);
+                    barList.Add(mockBars.Object);
                 }
             }
 
-            return tickList;
+            return barList;
         }
     }
 }

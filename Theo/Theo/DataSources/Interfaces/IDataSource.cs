@@ -9,19 +9,19 @@ namespace Theo.Data.Interfaces
     public interface IDataSource : IInitialize
     {
         /// <summary>
-        /// Stream ticks to the engine.
+        /// Stream bars to the engine.
         /// </summary>
         /// <param name="symbols"></param>
         /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="callback"></param>
-        /// <returns>Calls some callback for all ticks.</returns>
-        Task StreamTicks(
+        /// <returns>Calls some callback for all bars.</returns>
+        Task StreamBars(
             string[] symbols,
-            TickInterval interval,
+            BarInterval interval,
             DateTime start,
             DateTime? end,
-            Action<Tick> callback);
+            Action<Bar> callback);
     }
 }

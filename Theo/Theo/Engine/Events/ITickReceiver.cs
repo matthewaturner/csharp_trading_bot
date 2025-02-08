@@ -2,11 +2,11 @@
 
 namespace Theo.Engine.Events
 {
-    public interface ITickReceiver
+    public interface IBarReceiver
     {
         /// <summary>
-        /// Function to execute when new ticks come in.
+        /// Function to execute when new bars come in.
         /// </summary>
-        public void BaseOnTick(IMultiTick ticks);
+        public void BaseOnBar(MultiBar bars);
     }
 }

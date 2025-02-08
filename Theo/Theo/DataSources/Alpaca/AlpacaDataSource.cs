@@ -25,7 +25,7 @@ public class AlpacaDataSource
         _httpClient.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", apiKeySecret);
     }
 
-    public async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, string start, string end)
+    public async Task<List<Models.Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, string start, string end)
     {
         var response = await _httpClient.GetAsync($"stocks/{symbol}/bars?timeframe={timeframe}&start={start}&end={end}");
         
@@ -33,7 +33,7 @@ public class AlpacaDataSource
         {
             var json = await response.Content.ReadAsStringAsync();
             var bars = JsonSerializer.Deserialize<BarsResponse>(json);
-            return bars?.Bars ?? new List<Bar>();
+            return bars?.Bars ?? new List<Models.Bar>();
         }
 
         throw new Exception($"API call failed: {response.StatusCode}");

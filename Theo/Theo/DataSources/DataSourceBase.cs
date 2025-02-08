@@ -28,7 +28,7 @@ namespace Theo.Data
         }
 
         /// <summary>
-        /// Stream ticks to the engine.
+        /// Stream bars to the engine.
         /// </summary>
         /// <param name="symbols"></param>
         /// <param name="interval"></param>
@@ -36,28 +36,28 @@ namespace Theo.Data
         /// <param name="end"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public async Task StreamTicks(
+        public async Task StreamBars(
             string[] symbols, 
-            TickInterval interval, 
+            BarInterval interval, 
             DateTime start, 
             DateTime? end, 
-            Action<Tick> callback)
+            Action<Bar> callback)
         {
-            IDictionary<string, IList<Tick>> allTicks = new Dictionary<string, IList<Tick>>(symbols.Length);
+            IDictionary<string, IList<Bar>> allBars = new Dictionary<string, IList<Bar>>(symbols.Length);
             end = end.HasValue ? end.Value : DateTime.UtcNow;
 
             foreach (string s in symbols)
             {
-                allTicks[s] = await GetHistoricalTicksAsync(s, interval, start, end.Value);
+                allBars[s] = await GetHistoricalBarsAsync(s, interval, start, end.Value);
             }
 
-            int tickCount = allTicks.Values.First().Count();
-            if (!allTicks.Values.All(ticks => ticks.Count() == tickCount))
+            int barCount = allBars.Values.First().Count();
+            if (!allBars.Values.All(bars => bars.Count() == barCount))
             {
-                throw new DataMisalignedException("Got a different number of ticks for each symbol.");
+                throw new DataMisalignedException("Got a different number of bars for each symbol.");
             }
 
-            IList<IEnumerator<Tick>> enumerators = allTicks.Values.Select(ticks => ticks.GetEnumerator()).ToList();
+            IList<IEnumerator<Bar>> enumerators = allBars.Values.Select(bars => bars.GetEnumerator()).ToList();
             while (enumerators.All(e => e.MoveNext())
                 && enumerators[0].Current.DateTime < end.Value)
             {
@@ -76,16 +76,16 @@ namespace Theo.Data
         }
 
         /// <summary>
-        /// Gets a list of ticks for a certain interval over a period of time.
+        /// Gets a list of bars for a certain interval over a period of time.
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="interval"></param>
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <returns></returns>
-        public abstract Task<IList<Tick>> GetHistoricalTicksAsync(
+        public abstract Task<IList<Bar>> GetHistoricalBarsAsync(
             string symbol,
-            TickInterval interval,
+            BarInterval interval,
             DateTime start,
             DateTime end);
     }

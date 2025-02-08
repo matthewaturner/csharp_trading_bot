@@ -15,14 +15,14 @@ namespace Theo.Engine
     public class TradingEngine : ITradingEngine
     {
         /// <summary>
-        /// Holds the current ticks.
+        /// Holds the current bars.
         /// </summary>
-        private MultiTick ticks;
+        private MultiBar bars;
 
         /// <summary>
-        /// Objects that receive new ticks as they come in.
+        /// Objects that receive new bars as they come in.
         /// </summary>
-        private IList<ITickReceiver> tickReceivers;
+        private IList<IBarReceiver> barReceivers;
 
         public TradingEngine()
         { 
@@ -30,9 +30,9 @@ namespace Theo.Engine
         }
 
         /// <summary>
-        /// Get or set current ticks.
+        /// Get or set current bars.
         /// </summary>
-        public IMultiTick Ticks => ticks;
+        public MultiBar Bars => bars;
 
         /// <summary>
         /// Get or set all symbols in the universe.
@@ -83,7 +83,7 @@ namespace Theo.Engine
             ThrowIfNull(DataSource, nameof(DataSource));
             ThrowIfNull(Strategy, nameof(Strategy));
             ThrowIfNull(Symbols, nameof(Symbols));
-            ThrowIfNull(ticks, nameof(ticks));
+            ThrowIfNull(bars, nameof(bars));
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Theo.Engine
         private void Setup()
         {
             // initialize stuff
-            ticks = new MultiTick(Symbols.ToArray());
+            bars = new MultiBar(Symbols.ToArray());
 
             Strategy.Initialize(this);
             Broker.Initialize(this);
@@ -109,7 +109,7 @@ namespace Theo.Engine
         /// </summary>
         public async Task RunAsync(
             RunMode runMode,
-            TickInterval interval,
+            BarInterval interval,
             DateTime? start = null,
             DateTime? end = null)
         {
@@ -121,24 +121,24 @@ namespace Theo.Engine
 
                 // hydrate indicators
                 /*
-                await DataSource.StreamTicks(
+                await DataSource.StreamBars(
                     Symbols.ToArray(),
                     interval,
                     DateTime.UtcNow.GetNthPreviousTradingDay(Strategy.Lookback + 1),
                     null,
-                    SendOnTickEvents);
+                    SendOnBarEvents);
                 */
 
                 // setup live streaming
             }
             else if (runMode == RunMode.BackTest)
             {
-                await DataSource.StreamTicks(
+                await DataSource.StreamBars(
                     Symbols.ToArray(),
                     interval,
                     start.Value,
                     end.Value,
-                    SendOnTickEvents);
+                    SendOnBarEvents);
             }
         }
 
@@ -148,9 +148,9 @@ namespace Theo.Engine
         /// <param name="obj"></param>
         private void RegisterReceiver(object obj)
         {
-            if (obj is ITickReceiver tickReceiver)
+            if (obj is IBarReceiver barReceiver)
             {
-                tickReceivers.Add(tickReceiver);
+                barReceivers.Add(barReceiver);
             }
         }
 
@@ -159,23 +159,23 @@ namespace Theo.Engine
         /// </summary>
         private void ClearReceivers()
         {
-            tickReceivers = new List<ITickReceiver>();
+            barReceivers = new List<IBarReceiver>();
         }
 
         /// <summary>
-        /// Sends on tick events to all interested parties.
+        /// Sends on bar events to all interested parties.
         /// </summary>
-        /// <param name="ticks"></param>
-        private void SendOnTickEvents(Tick newTick)
+        /// <param name="bars"></param>
+        private void SendOnBarEvents(Bar newBar)
         {
             Logger.LogInformation("-----");
 
-            // update only the tick we received
-            ticks.Update(newTick);
+            // update only the bar we received
+            bars.Update(newBar);
 
-            foreach (ITickReceiver receiver in tickReceivers)
+            foreach (IBarReceiver receiver in barReceivers)
             {
-                receiver.BaseOnTick(ticks);
+                receiver.BaseOnBar(bars);
             }
 
             Logger.LogVerbose($"Account: {Broker.GetAccount()}");

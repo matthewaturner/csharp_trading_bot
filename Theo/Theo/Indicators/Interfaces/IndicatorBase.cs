@@ -35,7 +35,7 @@ namespace Theo.Indicators.Interfaces
         /// <summary>
         /// Calculate new values.
         /// </summary>
-        /// <param name="ticks"></param>
-        public abstract void OnTick(IMultiTick ticks);
+        /// <param name="bars"></param>
+        public abstract void OnBar(MultiBar bars);
     }
 }

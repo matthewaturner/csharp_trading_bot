@@ -55,11 +55,11 @@ namespace Theo.Data
         /// <returns></returns>
         public async Task<Stream> GetDataStream(
             string symbol,
-            TickInterval interval,
+            BarInterval interval,
             DateTimeOffset start,
             DateTimeOffset end)
         {
-            if (interval != TickInterval.Day)
+            if (interval != BarInterval.Day)
             {
                 throw new NotImplementedException();
             }
@@ -83,38 +83,38 @@ namespace Theo.Data
         }
 
         /// <summary>
-        /// Gets a list of ticks.
+        /// Gets a list of bars.
         /// </summary>
-        /// <param name="symbol">Symbol to get ticks for.</param>
+        /// <param name="symbol">Symbol to get bars for.</param>
         /// <param name="interval">Interval we are interested in.</param>
         /// <param name="start">Start.</param>
         /// <param name="end">End.</param>
-        /// <returns>List of tick objects.</returns>
-        public override async Task<IList<Tick>> GetHistoricalTicksAsync(
+        /// <returns>List of bar objects.</returns>
+        public override async Task<IList<Bar>> GetHistoricalBarsAsync(
             string symbol, 
-            TickInterval interval, 
+            BarInterval interval, 
             DateTime start, 
             DateTime end)
         {
             Stream dataStream = await GetDataStream(symbol, interval, start, end);
             StreamReader reader = new StreamReader(dataStream);
-            IList<Tick> tickList = new List<Tick>();
+            IList<Bar> barList = new List<Bar>();
 
             // the first line is just headers
             string data = reader.ReadLine();
 
             while ((data = await reader.ReadLineAsync()) != null)
             {
-                string[] tickStrings = data.Split(',', StringSplitOptions.None).Select(str => str.Trim()).ToArray();
-                Tick tick;
+                string[] barStrings = data.Split(',', StringSplitOptions.None).Select(str => str.Trim()).ToArray();
+                Bar bar;
 
-                DateTime dateTime = DateTime.ParseExact(tickStrings[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                double open = Math.Round(double.Parse(tickStrings[1]), 4);
-                double high = Math.Round(double.Parse(tickStrings[2]), 4);
-                double low = Math.Round(double.Parse(tickStrings[3]), 4);
-                double close = Math.Round(double.Parse(tickStrings[4]), 4);
-                double adjClose = Math.Round(double.Parse(tickStrings[5]), 4);
-                int volume = int.Parse(tickStrings[6]);
+                DateTime dateTime = DateTime.ParseExact(barStrings[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                double open = Math.Round(double.Parse(barStrings[1]), 4);
+                double high = Math.Round(double.Parse(barStrings[2]), 4);
+                double low = Math.Round(double.Parse(barStrings[3]), 4);
+                double close = Math.Round(double.Parse(barStrings[4]), 4);
+                double adjClose = Math.Round(double.Parse(barStrings[5]), 4);
+                int volume = int.Parse(barStrings[6]);
 
                 double adjustmentRatio = adjClose / close;
                 double adjOpen = adjustmentRatio * open;
@@ -122,11 +122,11 @@ namespace Theo.Data
                 double adjLow = adjustmentRatio * low;
 
                 // volume can't be adjusted properly with current information
-                tick = new Tick(symbol, interval, dateTime, adjOpen, adjHigh, adjLow, adjClose, volume);
-                tickList.Add(tick);
+                bar = new Bar(symbol, interval, dateTime, adjOpen, adjHigh, adjLow, adjClose, volume);
+                barList.Add(bar);
             }
 
-            return tickList;
+            return barList;
         }
     }
 }

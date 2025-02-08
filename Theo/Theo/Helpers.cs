@@ -16,11 +16,11 @@ namespace Theo
         /// <param name="t2"></param>
         /// <param name="interval">daily, hourly, monthly, etc.</param>
         /// <returns></returns>
-        public static int Compare(DateTime t1, DateTime t2, TickInterval interval)
+        public static int Compare(DateTime t1, DateTime t2, BarInterval interval)
         {
             return DateTime.Compare(
-                t1.NormalizeToTickInterval(interval),
-                t2.NormalizeToTickInterval(interval));
+                t1.NormalizeToBarInterval(interval),
+                t2.NormalizeToBarInterval(interval));
         }
 
         /// <summary>
@@ -34,14 +34,14 @@ namespace Theo
         }
 
         /// <summary>
-        /// Returns a datetime with anything more specific than the tick interval stripped.
+        /// Returns a datetime with anything more specific than the bar interval stripped.
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="interval"></param>
         /// <returns></returns>
-        public static DateTime NormalizeToTickInterval(this DateTime dt, TickInterval interval)
+        public static DateTime NormalizeToBarInterval(this DateTime dt, BarInterval interval)
         {
-            if (interval != TickInterval.Day)
+            if (interval != BarInterval.Day)
             {
                 throw new NotImplementedException();
             }

@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 namespace Theo.Models
 {
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum TickInterval
+    public enum BarInterval
     {
         Day = 0,
 
