@@ -4,6 +4,8 @@ namespace Runner;
 
 /// <summary>
 /// Entry point for running different configurations of the trading engine.
+/// Usage: dotnet run -- --fileName <ClassName/>
+///  - ClassName is the name of the class to use as an entry point. It must have a static Run() method.
 /// </summary>
 class Program
 {
@@ -15,7 +17,7 @@ class Program
             return;
         }
 
-        string className = args[1]; // Example: "MomentumRun"
+        string className = args[1];
         var types = Assembly.GetExecutingAssembly().GetTypes();
         Type? runType = Assembly.GetExecutingAssembly().GetTypes()
             .FirstOrDefault(t => t.Name.Equals(className, StringComparison.OrdinalIgnoreCase));
@@ -33,7 +35,7 @@ class Program
             return;
         }
 
-        // Run the found method
+        // Run()
         executeMethod.Invoke(null, null);
     }
 }
