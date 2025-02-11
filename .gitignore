@@ -343,3 +343,4 @@ healthchecksdb
 
 .DS_Store
 *.DS_Store
+/Theo/Theo/appsettings.json
