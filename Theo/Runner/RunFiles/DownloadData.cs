@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Theo.DataSources.Alpaca;
+﻿using Theo.DataSources.Alpaca;
 
 namespace Runner.RunFiles;
 
 public class DownloadData
 {
-    public static void Run()
+    public void Run()
     {
         AlpacaDataSource source = new AlpacaDataSource();
 
