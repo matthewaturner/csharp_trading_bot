@@ -28,7 +28,7 @@ namespace TheoIntegrationTests
             };
 
             engine = new Mock<ITradingEngine>();
-            alpaca = new AlpacaBroker(alpacaConfig);
+            alpaca = new AlpacaBroker();
 
             alpaca.Initialize(engine.Object);
         }

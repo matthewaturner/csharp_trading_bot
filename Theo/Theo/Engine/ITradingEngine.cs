@@ -51,7 +51,7 @@ namespace Theo.Engine
         /// <returns></returns>
         Task RunAsync(
             RunMode runMode,
-            BarInterval interval,
+            DataInterval interval,
             DateTime? start = null,
             DateTime? end = null);
     }

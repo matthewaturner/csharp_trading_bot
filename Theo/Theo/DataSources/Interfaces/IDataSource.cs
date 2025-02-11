@@ -19,7 +19,7 @@ namespace Theo.Data.Interfaces
         /// <returns>Calls some callback for all bars.</returns>
         Task StreamBars(
             string[] symbols,
-            BarInterval interval,
+            DataInterval interval,
             DateTime start,
             DateTime? end,
             Action<Bar> callback);

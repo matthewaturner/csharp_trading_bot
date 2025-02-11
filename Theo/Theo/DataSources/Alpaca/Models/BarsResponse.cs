@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Theo.DataSources.Alpaca.Models;
 
 public class BarsResponse
 {
-    public List<Bar> Bars { get; set; } = new();
+    [JsonPropertyName("bars")]
+    public List<Bar> Bars { get; set; }
 }

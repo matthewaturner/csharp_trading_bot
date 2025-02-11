@@ -38,7 +38,7 @@ namespace Theo.Data
         /// <returns></returns>
         public async Task StreamBars(
             string[] symbols, 
-            BarInterval interval, 
+            DataInterval interval, 
             DateTime start, 
             DateTime? end, 
             Action<Bar> callback)
@@ -85,7 +85,7 @@ namespace Theo.Data
         /// <returns></returns>
         public abstract Task<IList<Bar>> GetHistoricalBarsAsync(
             string symbol,
-            BarInterval interval,
+            DataInterval interval,
             DateTime start,
             DateTime end);
     }

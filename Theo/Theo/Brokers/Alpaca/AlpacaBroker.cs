@@ -7,7 +7,6 @@ using Theo.Models;
 using Theo.Models.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
-using RestSharp.Serializers.NewtonsoftJson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,12 +30,10 @@ namespace Theo.Brokers
         /// <param name="config"></param>
         /// <param name="keyVaultManager"></param>
         /// <param name="httpClient"></param>
-        public AlpacaBroker(
-            AlpacaConfig config)
+        public AlpacaBroker()
         {
-            this.config = config;
-            apiKeyId = config.ApiKeyId;
-            apiKeySecret = config.ApiKey;
+            apiKeyId = GlobalConfig.GetValue("Alpaca:ApiKey");
+            apiKeySecret = GlobalConfig.GetValue("Alpaca:ApiKeySecret");
 
             baseUrl = config.RunMode switch
             {

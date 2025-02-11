@@ -16,7 +16,7 @@ namespace Theo
         /// <param name="t2"></param>
         /// <param name="interval">daily, hourly, monthly, etc.</param>
         /// <returns></returns>
-        public static int Compare(DateTime t1, DateTime t2, BarInterval interval)
+        public static int Compare(DateTime t1, DateTime t2, DataInterval interval)
         {
             return DateTime.Compare(
                 t1.NormalizeToBarInterval(interval),
@@ -39,9 +39,9 @@ namespace Theo
         /// <param name="dt"></param>
         /// <param name="interval"></param>
         /// <returns></returns>
-        public static DateTime NormalizeToBarInterval(this DateTime dt, BarInterval interval)
+        public static DateTime NormalizeToBarInterval(this DateTime dt, DataInterval interval)
         {
-            if (interval != BarInterval.Day)
+            if (interval != DataInterval.Day)
             {
                 throw new NotImplementedException();
             }

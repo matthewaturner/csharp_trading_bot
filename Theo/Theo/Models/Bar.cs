@@ -17,7 +17,7 @@ namespace Theo.Models
 
         public Bar(
             string symbol,
-            BarInterval interval,
+            DataInterval interval,
             DateTime dateTime,
             double open,
             double high,
@@ -48,7 +48,7 @@ namespace Theo.Models
         [Key]
         [Column(Order = 3)]
         [Required]
-        public BarInterval BarInterval { get; set; }
+        public DataInterval BarInterval { get; set; }
 
         [Required]
         public double Open { get; set; }

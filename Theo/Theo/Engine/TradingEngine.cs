@@ -88,7 +88,7 @@ namespace Theo.Engine
         /// </summary>
         public async Task RunAsync(
             RunMode runMode,
-            BarInterval interval,
+            DataInterval interval,
             DateTime? start = null,
             DateTime? end = null)
         {

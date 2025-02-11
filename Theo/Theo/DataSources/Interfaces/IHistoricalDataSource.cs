@@ -17,7 +17,7 @@ namespace Theo.Data.Interfaces
         /// <returns></returns>
         Task<IList<Bar>> GetHistoricalBarsAsync(
             string symbol,
-            BarInterval interval,
+            DataInterval interval,
             DateTime start,
             DateTime end);
     }

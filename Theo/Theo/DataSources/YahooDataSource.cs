@@ -55,11 +55,11 @@ namespace Theo.Data
         /// <returns></returns>
         public async Task<Stream> GetDataStream(
             string symbol,
-            BarInterval interval,
+            DataInterval interval,
             DateTimeOffset start,
             DateTimeOffset end)
         {
-            if (interval != BarInterval.Day)
+            if (interval != DataInterval.Day)
             {
                 throw new NotImplementedException();
             }
@@ -92,7 +92,7 @@ namespace Theo.Data
         /// <returns>List of bar objects.</returns>
         public override async Task<IList<Bar>> GetHistoricalBarsAsync(
             string symbol, 
-            BarInterval interval, 
+            DataInterval interval, 
             DateTime start, 
             DateTime end)
         {

@@ -22,7 +22,7 @@ namespace IndicatorTests
         [TestInitialize]
         public void Setup()
         {
-            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", BarInterval.Day);
+            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", DataInterval.Day);
             msftResults = LoadResults("./IndicatorTests/MSFT.csv");
         }
 
@@ -219,7 +219,7 @@ namespace IndicatorTests
         public IList<MultiBar> LoadData(
             string fileName, 
             string symbol, 
-            BarInterval interval)
+            DataInterval interval)
         {
             Path.GetFullPath(fileName);
             List<MultiBar> barList = new List<MultiBar>();
