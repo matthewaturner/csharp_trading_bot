@@ -1,6 +1,6 @@
 ﻿
 using Bot.Brokers.BackTest;
-using Bot.Data;
+using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Logging;
 using Bot.Models;
@@ -14,7 +14,7 @@ public class SmaCrossover_Example
     {
         var smaCrossStrat = new SMACrossoverStrategy("MSFT", 16, 64, true);
         var broker = new BackTestingBroker(10000);
-        var dataSource = new YahooDataSource();
+        var dataSource = new AlpacaDataSource();
 
         var engine = new TradingEngine()
         {
@@ -27,7 +27,7 @@ public class SmaCrossover_Example
 
         engine.RunAsync(
             RunMode.BackTest,
-            DataInterval.Day,
+            Interval.OneDay,
             DateTime.Now.AddYears(-5),
             DateTime.Now).RunSynchronously();
 

@@ -1,4 +1,5 @@
 ﻿using Bot.DataSources.Alpaca;
+using Bot.Models;
 
 namespace Runner.RunFiles;
 
@@ -8,11 +9,13 @@ public class DownloadData
     {
         AlpacaDataSource source = new AlpacaDataSource();
 
-        var bars = source.GetHistoricalBarsAsync("MSFT", "1D", "2024-01-01", "2025-01-01").Result;
+        var start = new DateTime(2024, 1, 1);
+        var end = new DateTime(2025, 1, 1);
+        var bars = source.GetHistoricalBarsAsync("MSFT", Interval.OneDay, start, end).Result;
 
         foreach (var bar in bars)
         {
-            Console.WriteLine($"{bar.T} {bar.O} {bar.H} {bar.L} {bar.C} {bar.V}");
+            Console.WriteLine(bar.ToString());
         }
     }
 }

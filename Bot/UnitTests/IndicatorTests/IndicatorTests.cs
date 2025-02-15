@@ -22,7 +22,7 @@ namespace IndicatorTests
         [TestInitialize]
         public void Setup()
         {
-            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", DataInterval.Day);
+            msftData = LoadData("./IndicatorTests/MSFT.csv", "MSFT", Interval.Day);
             msftResults = LoadResults("./IndicatorTests/MSFT.csv");
         }
 
@@ -140,7 +140,7 @@ namespace IndicatorTests
             {
                 indicator.OnBar(data[i]);
                 values.Add(indicator.Value);
-                if (Helpers.CompareDoubles(indicator.Value, results[i]) != 0)
+                if (MathHelpers.CompareDoubles(indicator.Value, results[i]) != 0)
                 {
                     Assert.Fail($"Values {indicator.Value} and {results[i]} " +
                         $"are unequal at line {i}.");
@@ -158,7 +158,7 @@ namespace IndicatorTests
             {
                 indicator.OnBar(data[i]);
                 values.Add((double)indicator.Value);
-                if (Helpers.CompareDoubles((double)indicator.Value, results[i]) != 0)
+                if (MathHelpers.CompareDoubles((double)indicator.Value, results[i]) != 0)
                 {
                     Assert.Fail($"Values {indicator.Value} and {results[i]} " +
                         $"are unequal at line {i}.");
@@ -219,7 +219,7 @@ namespace IndicatorTests
         public IList<MultiBar> LoadData(
             string fileName, 
             string symbol, 
-            DataInterval interval)
+            Interval interval)
         {
             Path.GetFullPath(fileName);
             List<MultiBar> barList = new List<MultiBar>();

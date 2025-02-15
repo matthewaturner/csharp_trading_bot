@@ -139,7 +139,7 @@ namespace Bot.Brokers.BackTest
 
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
-                    order.Fill(bars[order.Symbol].Close, bars[order.Symbol].DateTime);
+                    order.Fill(bars[order.Symbol].Close, bars[order.Symbol].Timestamp);
                     Engine.Logger.LogInformation($"Order filled. {order}");
                 }
 
@@ -164,7 +164,7 @@ namespace Bot.Brokers.BackTest
             }
 
             order.OrderId = Guid.NewGuid().ToString();
-            order.PlacementTime = Bars[order.Symbol].DateTime;
+            order.PlacementTime = Bars[order.Symbol].Timestamp;
             openOrders.Add(order);
             allOrders.Add(order);
             return order;

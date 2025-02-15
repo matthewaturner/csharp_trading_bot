@@ -1,5 +1,5 @@
 ﻿using Bot.Brokers;
-using Bot.Data.Interfaces;
+using Bot.DataSources.Interfaces;
 using Bot.Models;
 using Bot.Strategies;
 using Bot.Logging;
@@ -51,7 +51,7 @@ namespace Bot.Engine
         /// <returns></returns>
         Task RunAsync(
             RunMode runMode,
-            DataInterval interval,
+            Interval interval,
             DateTime? start = null,
             DateTime? end = null);
     }

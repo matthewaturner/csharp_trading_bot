@@ -1,7 +1,8 @@
 ﻿
+using Bot.Helpers;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Bot.Models
 {
@@ -10,24 +11,16 @@ namespace Bot.Models
         public Bar()
         { }
 
-        public Bar(string symbol)
-        {
-            Symbol = symbol;
-        }
-
         public Bar(
-            string symbol,
-            DataInterval interval,
             DateTime dateTime,
+            string symbol,
             double open,
             double high,
             double low,
             double close,
-            int volume)
+            long volume)
         {
-            Symbol = symbol;
-            DateTime = dateTime.NormalizeToBarInterval(interval);
-            BarInterval = interval;
+            Timestamp = dateTime;
             Open = open;
             High = high;
             Low = low;
@@ -35,43 +28,39 @@ namespace Bot.Models
             Volume = volume;
         }
 
-        [Key]
-        [Column(Order = 1)]
         [Required]
+        [JsonPropertyName("Timestamp")]
+        public DateTime Timestamp { get; set; }
+
+        [Required]
+        [JsonPropertyName("Symbol")]
         public string Symbol { get; set; }
 
-        [Key]
-        [Column(Order = 2)]
         [Required]
-        public DateTime DateTime { get; set; }
-
-        [Key]
-        [Column(Order = 3)]
-        [Required]
-        public DataInterval BarInterval { get; set; }
-
-        [Required]
+        [JsonPropertyName("Open")]
         public double Open { get; set; }
 
         [Required]
+        [JsonPropertyName("High")]
         public double High { get; set; }
 
         [Required]
+        [JsonPropertyName("Low")]
         public double Low { get; set; }
 
         [Required]
+        [JsonPropertyName("Close")]
         public double Close { get; set; }
 
         [Required]
-        public int Volume { get; set; }
+        [JsonPropertyName("Volume")]
+        public long Volume { get; set; }
 
         public override string ToString()
         {
-            string ToStr(double v) => v.ToString("0.00");
+            string ToStr(double v) => v.ToString("0.000");
 
-            return $"{Symbol} {DateTime.StandardToString()} " +
-                $"Open:{ToStr(Open)} High:{ToStr(High)} Low:{ToStr(Low)} " +
-                $"Close:{ToStr(Close)} Volume:{ToStr(Volume)}";
+            return $"{Timestamp.StdToString()}:: O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume}";
         }
     }
 }

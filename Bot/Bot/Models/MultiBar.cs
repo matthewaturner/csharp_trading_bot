@@ -16,7 +16,9 @@ namespace Bot.Models
         public MultiBar(IList<string> symbols)
         {
             this.symbols = symbols;
-            bars = symbols.ToDictionary(keySelector: s => s, elementSelector: s => new Bar(s));
+            bars = symbols.ToDictionary(
+                keySelector: s => s, 
+                elementSelector: s => new Bar(DateTime.MinValue, s, 0, 0, 0, 0, 0));
         }
 
         /// <summary>

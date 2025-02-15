@@ -2,6 +2,7 @@
 using Bot.Models;
 using Bot.Indicators.Interfaces;
 using System;
+using Bot.Helpers;
 
 namespace Bot.Indicators
 {
@@ -46,7 +47,7 @@ namespace Bot.Indicators
                 this.IsHydrated = true;
             }
 
-            Value = Helpers.StandardDeviation(data);
+            Value = MathHelpers.StandardDeviation(data);
         }
 
         /// <summary>

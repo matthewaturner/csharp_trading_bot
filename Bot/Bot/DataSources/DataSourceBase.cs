@@ -1,15 +1,14 @@
-﻿using Bot.Data.Interfaces;
+﻿using Bot.DataSources.Interfaces;
 using Bot.Engine;
-using Bot.Exceptions;
 using Bot.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Bot.Data
+namespace Bot.DataSources
 {
-    public abstract class DataSourceBase : IDataSource, IHistoricalDataSource
+    public abstract class DataSourceBase : IDataSource
     {
         /// <summary>
         /// Gets or sets engine object.
@@ -38,7 +37,7 @@ namespace Bot.Data
         /// <returns></returns>
         public async Task StreamBars(
             string[] symbols, 
-            DataInterval interval, 
+            Interval interval, 
             DateTime start, 
             DateTime? end, 
             Action<Bar> callback)
@@ -58,8 +57,7 @@ namespace Bot.Data
             }
 
             IList<IEnumerator<Bar>> enumerators = allBars.Values.Select(bars => bars.GetEnumerator()).ToList();
-            while (enumerators.All(e => e.MoveNext())
-                && enumerators[0].Current.DateTime < end.Value)
+            while (enumerators.All(e => e.MoveNext()) && enumerators[0].Current.Timestamp < end.Value)
             {
                 foreach (var e in enumerators)
                 {
@@ -76,17 +74,12 @@ namespace Bot.Data
         }
 
         /// <summary>
-        /// Gets a list of bars for a certain interval over a period of time.
+        /// Gets a list of bars for a symbol, interval, and period of time.
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="interval"></param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public abstract Task<IList<Bar>> GetHistoricalBarsAsync(
-            string symbol,
-            DataInterval interval,
-            DateTime start,
+        public abstract Task<List<Bar>> GetHistoricalBarsAsync(
+            string symbol, 
+            Interval interval, 
+            DateTime start, 
             DateTime end);
     }
 }

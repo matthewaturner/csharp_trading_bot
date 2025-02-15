@@ -1,10 +1,9 @@
 ﻿using Bot.Engine.Events;
-using Bot.Engine;
 using Bot.Models;
 using System.Threading.Tasks;
 using System;
 
-namespace Bot.Data.Interfaces
+namespace Bot.DataSources.Interfaces
 {
     public interface IDataSource : IInitialize
     {
@@ -19,7 +18,7 @@ namespace Bot.Data.Interfaces
         /// <returns>Calls some callback for all bars.</returns>
         Task StreamBars(
             string[] symbols,
-            DataInterval interval,
+            Interval interval,
             DateTime start,
             DateTime? end,
             Action<Bar> callback);

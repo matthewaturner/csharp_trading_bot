@@ -1,15 +1,18 @@
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
+using System;
+using Bot.Helpers;
+using Bot.Models;
 
 using Ap = Bot.DataSources.Alpaca.Models;
 
 namespace Bot.DataSources.Alpaca;
 
-public class AlpacaDataSource
+public class AlpacaDataSource : DataSourceBase
 {
     private readonly HttpClient _httpClient;
 
@@ -23,15 +26,18 @@ public class AlpacaDataSource
         _httpClient.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", apiKeySecret);
     }
 
-    public async Task<List<Ap.Bar>> GetHistoricalBarsAsync(string symbol, string timeframe, string start, string end)
+    /// <summary>
+    /// Get historical bar data.
+    /// </summary>
+    public override async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, Interval interval, DateTime start, DateTime end)
     {
-        var response = await _httpClient.GetAsync($"stocks/{symbol}/bars?timeframe={timeframe}&start={start}&end={end}");
+        var response = await _httpClient.GetAsync($"stocks/{symbol}/bars?timeframe={interval}&start={start.StdToString()}&end={end.StdToString()}");
 
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
             var bars = JsonSerializer.Deserialize<Ap.BarsResponse>(json);
-            return bars?.Bars ?? [];
+            return bars?.Bars.Select(b => b.ToBotModel(symbol)).ToList() ?? [];
         }
         else
         {

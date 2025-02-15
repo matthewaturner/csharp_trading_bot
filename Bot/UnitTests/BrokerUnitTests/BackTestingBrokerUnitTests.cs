@@ -22,9 +22,9 @@ namespace BrokerUnitTests
 
             bars = new MultiBar(new string[] { "MSFT", "GME", "AMC" });
 
-            var msftBar = new Bar("MSFT", DataInterval.Day, DateTime.Now, 245.03, 246.13, 242.92, 243.70, 26708200);
-            var gmeBar = new Bar("GME", DataInterval.Day, DateTime.Now, 50.0, 50.0, 50.0, 50.0, 8140700); // same open and close
-            var amcBar = new Bar("AMC", DataInterval.Day, DateTime.Now, 6.0, 6.0, 6.0, 7.0, 60690200); // open and close off by $1
+            var msftBar = new Bar("MSFT", DateTime.Now, 245.03, 246.13, 242.92, 243.70, 26708200);
+            var gmeBar = new Bar("GME", Interval.Day, DateTime.Now, 50.0, 50.0, 50.0, 50.0, 8140700); // same open and close
+            var amcBar = new Bar("AMC", Interval.Day, DateTime.Now, 6.0, 6.0, 6.0, 7.0, 60690200); // open and close off by $1
 
             Bar[] latestBars = new Bar[] { msftBar, gmeBar, amcBar };
             bars.Update(latestBars);
@@ -233,7 +233,7 @@ namespace BrokerUnitTests
         {
             MultiBar t = new MultiBar(new string[] { "TEST" });
 
-            var testBar = new Bar("TEST", DataInterval.Day, DateTime.Now, 10, 10, 10, 10, 100);
+            var testBar = new Bar("TEST", Interval.Day, DateTime.Now, 10, 10, 10, 10, 100);
             t.Update(new Bar[] { testBar });
 
             // make sure engine returns our different bars object
@@ -258,7 +258,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(buyOrderId).State);
 
             // update the prices
-            testBar = new Bar("TEST", DataInterval.Day, DateTime.Now, 11, 11, 11, 11, 100);
+            testBar = new Bar("TEST", Interval.Day, DateTime.Now, 11, 11, 11, 11, 100);
             t.Update(new Bar[] { testBar });
 
             string sellOrderId = broker.PlaceOrder(sellRequest).OrderId;
@@ -278,7 +278,7 @@ namespace BrokerUnitTests
         {
             MultiBar t = new MultiBar(new string[] { "TEST" });
 
-            var testBar = new Bar("TEST", DataInterval.Day, DateTime.Now, 10, 10, 10, 10, 100);
+            var testBar = new Bar("TEST", Interval.Day, DateTime.Now, 10, 10, 10, 10, 100);
             t.Update(new Bar[] { testBar });
 
             mockEngine.Setup(m => m.Bars).Returns(t);
@@ -302,7 +302,7 @@ namespace BrokerUnitTests
             Assert.AreEqual(OrderState.Filled, broker.GetOrder(sellOrderId).State);
 
             // update the prices
-            testBar = new Bar("TEST", DataInterval.Day, DateTime.Now, 9, 9, 9, 9, 100);
+            testBar = new Bar("TEST", Interval.Day, DateTime.Now, 9, 9, 9, 9, 100);
             t.Update(new Bar[] { testBar });
 
             string buyOrderId = broker.PlaceOrder(buyRequest).OrderId;

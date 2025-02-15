@@ -2,6 +2,7 @@
 using Bot.Indicators.Interfaces;
 using Bot.Exceptions;
 using System;
+using Bot.Helpers;
 
 namespace Bot.Indicators
 {
@@ -54,7 +55,7 @@ namespace Bot.Indicators
 
             if (IsHydrated)
             {
-                position = (PositionType)Helpers.CompareDoubles(shortMA.Value, longMA.Value);
+                position = (PositionType)MathHelpers.CompareDoubles(shortMA.Value, longMA.Value);
             }
         }
 

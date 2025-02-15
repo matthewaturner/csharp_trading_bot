@@ -20,7 +20,7 @@ namespace StrategyTests
         [TestInitialize]
         public void Setup()
         {
-            amcData = LoadData("./StrategyTests/AMC.csv", "AMC", DataInterval.Day);
+            amcData = LoadData("./StrategyTests/AMC.csv", "AMC", Interval.Day);
         }
 
         /*
@@ -102,7 +102,7 @@ namespace StrategyTests
         public IList<Bar> LoadData(
            string fileName,
            string symbol,
-           DataInterval interval)
+           Interval interval)
         {
             Path.GetFullPath(fileName);
             List<Bar> barList = new List<Bar>();
