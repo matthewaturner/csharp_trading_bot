@@ -18,7 +18,8 @@ namespace Bot.Models
             double high,
             double low,
             double close,
-            long volume)
+            long volume,
+            double? adjClose = null)
         {
             Timestamp = dateTime;
             Open = open;
@@ -26,6 +27,7 @@ namespace Bot.Models
             Low = low;
             Close = close;
             Volume = volume;
+            AdjClose = adjClose;
         }
 
         [Required]
@@ -52,6 +54,9 @@ namespace Bot.Models
         [JsonPropertyName("Close")]
         public double Close { get; set; }
 
+        [JsonPropertyName("AdjClose")]
+        public double? AdjClose { get; set; }
+
         [Required]
         [JsonPropertyName("Volume")]
         public long Volume { get; set; }
@@ -59,8 +64,10 @@ namespace Bot.Models
         public override string ToString()
         {
             string ToStr(double v) => v.ToString("0.000");
+            string adjClose = AdjClose != null ? ToStr(AdjClose ?? -1) : "null";
 
-            return $"{Timestamp.StdToString()}:: O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume}";
+            return $"{Timestamp.StdToString()}  " +
+                $"O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume} A:{adjClose}";
         }
     }
 }

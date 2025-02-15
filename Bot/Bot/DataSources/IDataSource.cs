@@ -3,7 +3,7 @@ using Bot.Models;
 using System.Threading.Tasks;
 using System;
 
-namespace Bot.DataSources.Interfaces
+namespace Bot.DataSources
 {
     public interface IDataSource : IInitialize
     {

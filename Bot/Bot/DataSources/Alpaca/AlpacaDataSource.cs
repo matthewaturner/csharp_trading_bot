@@ -9,9 +9,6 @@ using Bot.Helpers;
 using Bot.Models;
 
 using Ap = Bot.DataSources.Alpaca.Models;
-using System.CodeDom.Compiler;
-using System.Collections.Specialized;
-using System.Web;
 
 namespace Bot.DataSources.Alpaca;
 

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.IO;
+using System;
 
 namespace Bot;
 
@@ -8,6 +10,11 @@ namespace Bot;
 /// </summary>
 public static class GlobalConfig
 {
+    // Path to the data folder
+    public static string DataFolderPath = Path.Combine(
+        AppContext.BaseDirectory,
+        "..", "..", "..", "..", "..", "Data", "epchan");
+
     private static IConfiguration Config { get; set; }
 
     static GlobalConfig()

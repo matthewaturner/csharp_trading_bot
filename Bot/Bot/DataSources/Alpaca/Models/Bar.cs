@@ -26,6 +26,6 @@ public class Bar
 
     public Bot.Models.Bar ToBotModel(string symbol)
     {
-        return new Bot.Models.Bar(DateTime.Parse(T), symbol, O, H, L, C, V);
+        return new Bot.Models.Bar(DateTime.Parse(T), symbol, O, H, L, C, V, null);
     }
 }

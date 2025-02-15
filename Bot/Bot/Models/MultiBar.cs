@@ -18,7 +18,7 @@ namespace Bot.Models
             this.symbols = symbols;
             bars = symbols.ToDictionary(
                 keySelector: s => s, 
-                elementSelector: s => new Bar(DateTime.MinValue, s, 0, 0, 0, 0, 0));
+                elementSelector: s => new Bar(DateTime.MinValue, s, 0, 0, 0, 0, 0, 0));
         }
 
         /// <summary>
