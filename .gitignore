@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+*/appsettings.json
+Epchan_Examples/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -343,4 +346,3 @@ healthchecksdb
 
 .DS_Store
 *.DS_Store
-/Theo/Theo/appsettings.json
