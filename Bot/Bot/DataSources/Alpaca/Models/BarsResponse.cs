@@ -7,4 +7,7 @@ public class BarsResponse
 {
     [JsonPropertyName("bars")]
     public List<Bar> Bars { get; set; }
+
+    [JsonPropertyName("next_page_token")]
+    public string NextPageToken { get; set; }
 }

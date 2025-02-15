@@ -9,8 +9,8 @@ public class DownloadData
     {
         AlpacaDataSource source = new AlpacaDataSource();
 
-        var start = new DateTime(2024, 1, 1);
-        var end = new DateTime(2025, 1, 1);
+        var start = new DateTime(2015, 1, 1);
+        var end = new DateTime(2025, 2, 15);
         var bars = source.GetHistoricalBarsAsync("MSFT", Interval.OneDay, start, end).Result;
 
         foreach (var bar in bars)

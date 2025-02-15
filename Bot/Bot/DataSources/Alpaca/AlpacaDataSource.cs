@@ -9,6 +9,9 @@ using Bot.Helpers;
 using Bot.Models;
 
 using Ap = Bot.DataSources.Alpaca.Models;
+using System.CodeDom.Compiler;
+using System.Collections.Specialized;
+using System.Web;
 
 namespace Bot.DataSources.Alpaca;
 
@@ -31,19 +34,25 @@ public class AlpacaDataSource : DataSourceBase
     /// </summary>
     public override async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, Interval interval, DateTime start, DateTime end)
     {
-        var response = await _httpClient.GetAsync($"stocks/{symbol}/bars?timeframe={interval}&start={start.StdToString()}&end={end.StdToString()}");
+        var results = new List<Bar>();
+        string? nextPageToken = null;
 
-        if (response.IsSuccessStatusCode)
+        do
         {
+            var response = await _httpClient.GetAsync($"stocks/{symbol}/bars?" +
+                $"timeframe={interval}&start={start.StdToString()}&end={end.StdToString()}&" +
+                $"page_token={nextPageToken}");
+            response.EnsureSuccessStatusCode();
+
             var json = await response.Content.ReadAsStringAsync();
-            var bars = JsonSerializer.Deserialize<Ap.BarsResponse>(json);
-            return bars?.Bars.Select(b => b.ToBotModel(symbol)).ToList() ?? [];
-        }
-        else
-        {
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-        }
+            var barsResult = JsonSerializer.Deserialize<Ap.BarsResponse>(json) 
+                ?? throw new JsonException($"{nameof(GetHistoricalBarsAsync)}: Failed to deserialize response.");
 
-        throw new Exception($"API call failed: {response.StatusCode}");
+            results.AddRange(barsResult?.Bars.Select(b => b.ToBotModel(symbol)));
+            nextPageToken = barsResult.NextPageToken;
+        }
+        while (!string.IsNullOrEmpty(nextPageToken));
+
+        return results;
     }
 }
