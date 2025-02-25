@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FormRunner": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileName PlotCsvData"
+    }
+  }
+}

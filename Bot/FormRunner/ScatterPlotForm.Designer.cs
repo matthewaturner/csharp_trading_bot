@@ -2,7 +2,7 @@
 
 namespace FormRunner
 {
-    partial class BacktestResultForm
+    partial class ScatterPlotForm
     {
         /// <summary>
         ///  Required designer variable.
