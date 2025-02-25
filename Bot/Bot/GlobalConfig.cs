@@ -11,7 +11,7 @@ namespace Bot;
 public static class GlobalConfig
 {
     // Path to the data folder
-    public static string DataFolderPath = Path.Combine(
+    public static string EpChanDataFolder = Path.Combine(
         AppContext.BaseDirectory,
         "..", "..", "..", "..", "..", "Data", "epchan");
 

@@ -8,7 +8,7 @@ public class TestCsvData
 {
     public void Run()
     {
-        var source = new CsvDataSource(GlobalConfig.DataFolderPath);
+        var source = new CsvDataSource(GlobalConfig.EpChanDataFolder);
 
         var bars = source.GetHistoricalBarsAsync("IGE", Interval.OneDay, DateTime.MinValue, DateTime.MaxValue).Result;
 

@@ -38,11 +38,11 @@ namespace Bot.Strategies
         /// OnBar method which call the strategy on bar when indicators are hydrated.
         /// </summary>
         /// <param name="bars"></param>
-        public void BaseOnBar(MultiBar bars)
+        public void BaseOnBar(Bar bar)
         {
             foreach (IIndicator ind in Indicators)
             {
-                ind.OnBar(bars);
+                ind.OnBar(bar);
             }
 
             Engine.Logger.LogVerbose($"Got Bars: {bars}");
@@ -50,7 +50,7 @@ namespace Bot.Strategies
 
             if (Indicators.All(ind => ind.IsHydrated))
             {
-                OnBar(bars);
+                OnBar(bar);
             }
             else
             {
