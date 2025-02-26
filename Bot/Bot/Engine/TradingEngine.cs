@@ -8,48 +8,37 @@ using System.Threading.Tasks;
 using System;
 using Bot.DataSources;
 using Microsoft.Extensions.Logging;
+using Bot.Brokers.BackTest;
+using Bot.Events;
 
 
 namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
-        private MultiBar bars;
-
-        private ILogger _logger = GlobalConfig.Logger;
-
         /// <summary>
-        /// Objects that receive new bars as they come in.
+        /// Empty constructor.
         /// </summary>
-        private IList<IBarReceiver> barReceivers;
-
         public TradingEngine()
         { }
 
-        /// <summary>
-        /// Get or set current bars.
-        /// </summary>
-        public MultiBar Bars => bars;
+        // Multi-bars object that holds the latest bar of each symbol in the universe.
+        public MultiBar Bars { get; private set; }
 
-        /// <summary>
-        /// Get or set all symbols in the universe.
-        /// </summary>
+        // All symbols in the universe
         public IList<string> Symbols { get; set; }
 
-        /// <summary>
-        /// Get or set the broker object.
-        /// </summary>
-        public IBroker Broker { get; set; }
+        // Broker object
+        public IBroker Broker { get; set; } = new BackTestingBroker(10000);
 
-        /// <summary>
-        /// Get or set the data source object.
-        /// </summary>
+        // Data source object
         public IDataSource DataSource { get; set; }
 
-        /// <summary>
-        /// Get or set the strategy object.
-        /// </summary>
+        // Single strategy object (for now)
         public IStrategy Strategy { get; set; }
+
+        // Shared logger, todo should remove in favor of referencing from shared config always
+        public ILogger Logger => GlobalConfig.Logger;
 
         /// <summary>
         /// Setup everything.
@@ -57,14 +46,10 @@ namespace Bot.Engine
         private void Setup()
         {
             // initialize stuff
-            bars = new MultiBar(Symbols.ToArray());
+            Bars = new MultiBar(Symbols.ToArray());
 
-            Strategy.Initialize(this);
             Broker.Initialize(this);
-            DataSource.Initialize(this);
 
-            ClearReceivers();
-            RegisterReceiver(DataSource);
             RegisterReceiver(Broker);
             RegisterReceiver(Strategy);
         }
@@ -90,8 +75,7 @@ namespace Bot.Engine
                     [.. Symbols],
                     interval,
                     start.Value,
-                    end.Value,
-                    SendOnBarEvents);
+                    end.Value);
             }
         }
 
@@ -101,37 +85,10 @@ namespace Bot.Engine
         /// <param name="obj"></param>
         private void RegisterReceiver(object obj)
         {
-            if (obj is IBarReceiver barReceiver)
+            if (obj is IMarketDataReceiver marketDataReceiver)
             {
-                barReceivers.Add(barReceiver);
+                DataSource.MarketDataReceivers += marketDataReceiver.OnMarketData;
             }
-        }
-
-        /// <summary>
-        /// Clears the receiver lists.
-        /// </summary>
-        private void ClearReceivers()
-        {
-            barReceivers = [];
-        }
-
-        /// <summary>
-        /// Sends on bar events to all interested parties.
-        /// </summary>
-        /// <param name="bars"></param>
-        private void SendOnBarEvents(Bar newBar)
-        {
-            _logger.LogInformation("-----");
-
-            // update only the bar we received
-            bars.Update(newBar);
-
-            foreach (IBarReceiver receiver in barReceivers)
-            {
-                receiver.BaseOnBar(bars);
-            }
-
-            _logger.LogDebug($"Account: {Broker.GetAccount()}");
         }
     }
 }

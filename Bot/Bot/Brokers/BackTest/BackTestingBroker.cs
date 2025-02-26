@@ -7,6 +7,7 @@ using Bot.Models.Interfaces;
 using Bot.Brokers.BackTest.Models;
 using Bot.Models;
 using Bot.Engine.Events;
+using Microsoft.Extensions.Logging;
 
 namespace Bot.Brokers.BackTest
 {
@@ -16,6 +17,7 @@ namespace Bot.Brokers.BackTest
         private IList<BackTestPosition> positions;
         private IList<BackTestOrder> openOrders;
         private IList<BackTestOrder> allOrders;
+        private ILogger Logger => GlobalConfig.Logger;
 
         /// <summary>
         /// Dependency injection constructor.
@@ -140,7 +142,7 @@ namespace Bot.Brokers.BackTest
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
                     order.Fill(bars[order.Symbol].Close, bars[order.Symbol].Timestamp);
-                    Engine.Logger.LogInformation($"Order filled. {order}");
+                    Logger.LogInformation($"Order filled. {order}");
                 }
 
                 openOrders.RemoveAt(0);

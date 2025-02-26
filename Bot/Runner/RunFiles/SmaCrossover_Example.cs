@@ -11,6 +11,7 @@ public class SmaCrossover_Example
 {
     public static void Run()
     {
+        /*
         var smaCrossStrat = new SMACrossoverStrategy("MSFT", 16, 64, true);
         var broker = new BackTestingBroker(10000);
         var dataSource = new AlpacaDataSource();
@@ -30,5 +31,6 @@ public class SmaCrossover_Example
             DateTime.Now).RunSynchronously();
 
         Console.WriteLine("Done.");
+        */
     }
 }
