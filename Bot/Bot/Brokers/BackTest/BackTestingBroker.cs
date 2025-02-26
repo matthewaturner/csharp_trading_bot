@@ -8,10 +8,11 @@ using Bot.Brokers.BackTest.Models;
 using Bot.Models;
 using Bot.Engine.Events;
 using Microsoft.Extensions.Logging;
+using Bot.Events;
 
 namespace Bot.Brokers.BackTest
 {
-    public class BackTestingBroker : BrokerBase, IBroker, IBarReceiver
+    public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     {
         private BackTestAccount account;
         private IList<BackTestPosition> positions;
@@ -112,11 +113,13 @@ namespace Bot.Brokers.BackTest
                 .Take(limit).ToList<IOrder>();
         }
 
+
         /// <summary>
-        /// Open orders execute at the open price of the next bar.
+        /// Execute orders at the next price.
         /// </summary>
-        /// <param name="_"></param>
-        public void BaseOnBar(MultiBar bars)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void OnMarketData(object sender, MarketDataEvent e)
         {
             BackTestOrder order = openOrders.FirstOrDefault();
             while (order != null)
@@ -131,17 +134,17 @@ namespace Bot.Brokers.BackTest
                     switch (order.Type)
                     {
                         case OrderType.MarketBuy:
-                            Buy(order.Symbol, order.Quantity, bars[order.Symbol].Close);
+                            Buy(order.Symbol, order.Quantity, e.Bar.Close);
                             break;
 
                         case OrderType.MarketSell:
-                            Sell(order.Symbol, order.Quantity, bars[order.Symbol].Close);
+                            Sell(order.Symbol, order.Quantity, e.Bar.Close);
                             break;
                     }
 
                     // mark order as filled and remove it from the open orders list,
                     // it will remain in the order history list
-                    order.Fill(bars[order.Symbol].Close, bars[order.Symbol].Timestamp);
+                    order.Fill(e.Bar.Close, e.Bar.Timestamp);
                     Logger.LogInformation($"Order filled. {order}");
                 }
 
@@ -149,7 +152,7 @@ namespace Bot.Brokers.BackTest
                 order = openOrders.FirstOrDefault();
             }
 
-            UpdateAccountValue(bars);
+            UpdateAccountValue(e.Bar);
         }
 
         /// <summary>
@@ -233,12 +236,12 @@ namespace Bot.Brokers.BackTest
         /// Updates the total account value based on latest prices.
         /// </summary>
         /// <param name="bar"></param>
-        private void UpdateAccountValue(MultiBar bar)
+        private void UpdateAccountValue(Bar bar)
         {
             double total = account.Cash;
             foreach (IPosition pos in positions)
             {
-                total += pos.Quantity * bar[pos.Symbol].Close;
+                total += pos.Quantity * bar.Close;
             }
 
             account.TotalValue = total;

@@ -1,11 +1,12 @@
 ﻿
+using Bot.Engine.Events;
 using Bot.Indicators;
 using Bot.Models;
 using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public interface IStrategy
+    public interface IStrategy : IInitialize
     {
         int Lookback { get; }
 

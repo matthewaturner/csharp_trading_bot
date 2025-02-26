@@ -1,4 +1,6 @@
 ﻿
+using Bot.Engine;
+using Bot.Engine.Events;
 using Bot.Events;
 using Bot.Indicators;
 using Bot.Models;
@@ -8,21 +10,21 @@ using System.Linq;
 
 namespace Bot.Strategies;
 
-public abstract class StrategyBase : IStrategy, IMarketDataReceiver
+public abstract class StrategyBase(List<IIndicator> indicators = null) 
+    : IStrategy, IInitialize, IMarketDataReceiver
 {
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public StrategyBase()
+    public void Initialize(ITradingEngine engine)
     {
-        Indicators = new List<IIndicator>();
+        Engine = engine;
     }
+
+    public ITradingEngine Engine { get; private set; }
+
+    public IList<IIndicator> Indicators { get; set; } = indicators ?? new List<IIndicator>();
 
     public int Lookback => Indicators.Max(ind => ind.Lookback);
 
     public bool IsHydrated => Indicators.All(ind => ind.IsHydrated);
-
-    public IList<IIndicator> Indicators { get; set; }
 
     /// <summary>
     /// The method that receives market data.
@@ -32,6 +34,7 @@ public abstract class StrategyBase : IStrategy, IMarketDataReceiver
     public void OnMarketData(object sender, MarketDataEvent e)
     {
         GlobalConfig.Logger.LogInformation($"Received bar: {e.Bar}");
+        ProcessBar(e.Bar);
     }
 
     public abstract void ProcessBar(Bar bar);

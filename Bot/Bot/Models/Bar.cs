@@ -3,6 +3,7 @@ using Bot.Helpers;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using System.Threading.Channels;
 
 namespace Bot.Models
 {
@@ -22,12 +23,13 @@ namespace Bot.Models
             double? adjClose = null)
         {
             Timestamp = dateTime;
+            Symbol = symbol;
             Open = open;
             High = high;
             Low = low;
             Close = close;
             Volume = volume;
-            AdjClose = adjClose;
+            _adjClose = adjClose;
         }
 
         [Required]
@@ -54,8 +56,16 @@ namespace Bot.Models
         [JsonPropertyName("Close")]
         public double Close { get; set; }
 
+
+        // Adjusted close will always have a value when getting, but may be null when setting
+        private double? _adjClose;
+
         [JsonPropertyName("AdjClose")]
-        public double? AdjClose { get; set; }
+        public double AdjClose
+        {
+            get { _adjClose ??= Close; return _adjClose.Value; }
+            set { _adjClose = value; }
+        }
 
         [Required]
         [JsonPropertyName("Volume")]
@@ -64,10 +74,9 @@ namespace Bot.Models
         public override string ToString()
         {
             string ToStr(double v) => v.ToString("0.000");
-            string adjClose = AdjClose != null ? ToStr(AdjClose ?? -1) : "null";
 
             return $"{Timestamp.StdToString()}  " +
-                $"O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume} A:{adjClose}";
+                $"O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume} A:{AdjClose}";
         }
     }
 }
