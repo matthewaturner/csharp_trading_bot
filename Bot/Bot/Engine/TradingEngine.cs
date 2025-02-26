@@ -1,7 +1,5 @@
 ﻿using Bot.Brokers;
 using Bot.Engine.Events;
-using Bot.Indicators;
-using Bot.Logging;
 using Bot.Models;
 using Bot.Strategies;
 using System.Collections.Generic;
@@ -9,15 +7,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using System;
 using Bot.DataSources;
+using Microsoft.Extensions.Logging;
+
 
 namespace Bot.Engine
 {
     public class TradingEngine : ITradingEngine
     {
-        /// <summary>
-        /// Holds the current bars.
-        /// </summary>
         private MultiBar bars;
+
+        private ILogger _logger = GlobalConfig.Logger;
 
         /// <summary>
         /// Objects that receive new bars as they come in.
@@ -25,9 +24,7 @@ namespace Bot.Engine
         private IList<IBarReceiver> barReceivers;
 
         public TradingEngine()
-        { 
-            this.Logger = new ConsoleLogger(LogLevel.Information);
-        }
+        { }
 
         /// <summary>
         /// Get or set current bars.
@@ -53,17 +50,6 @@ namespace Bot.Engine
         /// Get or set the strategy object.
         /// </summary>
         public IStrategy Strategy { get; set; }
-
-        /// <summary>
-        /// Gets or set the logger object.
-        /// </summary>
-        /// <value></value>
-        public ILogger Logger { get; set; }
-
-        /// <summary>
-        /// Get or set the output folder.
-        /// </summary>
-        public string OutputFolder { get; set; }
 
         /// <summary>
         /// Setup everything.
@@ -96,19 +82,7 @@ namespace Bot.Engine
 
             if (runMode == RunMode.Live || runMode == RunMode.Paper)
             {
-                throw new NotImplementedException("Not tested.");
-
-                // hydrate indicators
-                /*
-                await DataSource.StreamBars(
-                    Symbols.ToArray(),
-                    interval,
-                    DateTime.UtcNow.GetNthPreviousTradingDay(Strategy.Lookback + 1),
-                    null,
-                    SendOnBarEvents);
-                */
-
-                // setup live streaming
+                throw new NotImplementedException("Not implemented.");
             }
             else if (runMode == RunMode.BackTest)
             {
@@ -147,7 +121,7 @@ namespace Bot.Engine
         /// <param name="bars"></param>
         private void SendOnBarEvents(Bar newBar)
         {
-            Logger.LogInformation("-----");
+            _logger.LogInformation("-----");
 
             // update only the bar we received
             bars.Update(newBar);
@@ -157,7 +131,7 @@ namespace Bot.Engine
                 receiver.BaseOnBar(bars);
             }
 
-            Logger.LogVerbose($"Account: {Broker.GetAccount()}");
+            _logger.LogDebug($"Account: {Broker.GetAccount()}");
         }
     }
 }

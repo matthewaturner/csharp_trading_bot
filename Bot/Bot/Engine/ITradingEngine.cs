@@ -1,7 +1,6 @@
 ﻿using Bot.Brokers;
 using Bot.Models;
 using Bot.Strategies;
-using Bot.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -35,11 +34,6 @@ namespace Bot.Engine
         /// Gets current strategy.
         /// </summary>
         public IStrategy Strategy { get; }
-
-        /// <summary>
-        /// Get logger.
-        /// </summary>
-        public ILogger Logger { get; }
 
         /// <summary>
         /// Runs the strategy.

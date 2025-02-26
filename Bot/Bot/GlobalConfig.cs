@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.IO;
 using System;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Bot;
 
@@ -10,13 +12,17 @@ namespace Bot;
 /// </summary>
 public static class GlobalConfig
 {
-    // Path to the data folder
+    private static IConfiguration Config { get; set; }
+
+    public static ILogger Logger { get; private set; }
+
     public static string EpChanDataFolder = Path.Combine(
         AppContext.BaseDirectory,
         "..", "..", "..", "..", "..", "Data", "epchan");
 
-    private static IConfiguration Config { get; set; }
-
+    /// <summary>
+    /// Constructor.
+    /// </summary>
     static GlobalConfig()
     {
         var builder = new ConfigurationBuilder()
@@ -24,6 +30,21 @@ public static class GlobalConfig
             .AddEnvironmentVariables();
 
         Config = builder.Build();
+
+        // get the loglevel from appsettings
+        Enum.TryParse(GetValue("LogLevel"), out LogLevel logLevel);
+
+        Logger = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddSimpleConsole(options =>
+                {
+                    options.IncludeScopes = true;
+                    options.TimestampFormat = "[HH:mm:ss] ";
+                })
+                .AddConsole()
+                .SetMinimumLevel(logLevel);
+        }).CreateLogger("Global");
     }
 
     /// <summary>

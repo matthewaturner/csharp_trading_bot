@@ -2,7 +2,6 @@
 using Bot.Brokers.BackTest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
-using Bot.Logging;
 using Bot.Models;
 using Bot.Strategies;
 
@@ -18,7 +17,6 @@ public class SmaCrossover_Example
 
         var engine = new TradingEngine()
         {
-            Logger = new ConsoleLogger(LogLevel.Verbose),
             Broker = broker,
             DataSource = dataSource,
             Strategy = smaCrossStrat,
