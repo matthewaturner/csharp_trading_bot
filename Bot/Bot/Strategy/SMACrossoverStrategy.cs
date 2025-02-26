@@ -1,10 +1,10 @@
 ﻿using Bot.Indicators;
 using Bot.Indicators.Interfaces;
 using Bot.Models;
-using Bot.Engine;
 using Bot.Brokers;
 using Bot.Models.Interfaces;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Bot.Strategies
 {
@@ -33,7 +33,9 @@ namespace Bot.Strategies
             this.longOnly = longOnly;
         }
 
-        private IBroker broker => Engine.Broker;
+        private IBroker _broker => Engine.Broker;
+
+        private ILogger _logger => GlobalConfig.Logger;
 
         /// <summary>
         /// Enter Long position if the Moving average crossover value is greater than 0,
@@ -46,38 +48,38 @@ namespace Bot.Strategies
             Bar bar = bars[symbol];
             if (IsHydrated)
             {
-                foreach (var order in broker.GetOpenOrders())
+                foreach (var order in _broker.GetOpenOrders())
                 {
                     if (order.OrderId == orderId)
                     {
-                        broker.CancelOrder(orderId);
+                        _broker.CancelOrder(orderId);
                         orderId = null;
                     }
                 }
 
-                currentPosition = broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(bar.Symbol));
+                currentPosition = _broker.GetPositions().FirstOrDefault(pos => pos.Symbol.Equals(bar.Symbol));
                 int macVal = (int)mac.Value;
 
                 if (macVal == 0 && currentPosition != null)
                 {
-                    Engine.Logger.LogInformation("Exiting positions!");
+                    _logger.LogInformation("Exiting positions!");
                     ExitPosition(bar);
                 }
                 else if (macVal > 0 && (currentPosition == null || currentPosition.Type != PositionType.Long))
                 {
-                    Engine.Logger.LogInformation("Going long!");
+                    _logger.LogInformation("Going long!");
                     EnterLongPosition(bar);
                 }
                 else if (macVal < 0 && (currentPosition == null || currentPosition.Type != PositionType.Short))
                 {
                     if (!longOnly)
                     {
-                        Engine.Logger.LogInformation("Going short!");
+                        _logger.LogInformation("Going short!");
                         EnterShortPosition(bar);
                     }
                     else if (currentPosition != null)
                     {
-                        Engine.Logger.LogInformation("Exiting positions!");
+                        _logger.LogInformation("Exiting positions!");
                         ExitPosition(bar);
                     }
                 }
@@ -95,31 +97,30 @@ namespace Bot.Strategies
                 quantity,
                 targetPrice
                 );
-            broker.PlaceOrder(order);
+            _broker.PlaceOrder(order);
         }
 
         private void EnterLongPosition(Bar bar)
         {
-            double quantity = broker.GetAccount().TotalValue / bar.Close - 1;
+            double quantity = _broker.GetAccount().TotalValue / bar.Close - 1;
             var targetPrice = bar.Close;
             var order = new OrderRequest(
                 OrderType.MarketBuy,
                 bar.Symbol,
                 quantity,
                 targetPrice);
-            orderId = broker.PlaceOrder(order).OrderId;
+            orderId = _broker.PlaceOrder(order).OrderId;
         }
-
         private void EnterShortPosition(Bar bar)
         {
-            var quantity = broker.GetAccount().TotalValue / bar.Close - 1;
+            var quantity = _broker.GetAccount().TotalValue / bar.Close - 1;
             var targetPrice = bar.Close;
             var order = new OrderRequest(
                 OrderType.MarketSell,
                 bar.Symbol,
                 quantity,
                 targetPrice);
-            orderId = broker.PlaceOrder(order).OrderId;
+            orderId = _broker.PlaceOrder(order).OrderId;
         }        
     }
 }
