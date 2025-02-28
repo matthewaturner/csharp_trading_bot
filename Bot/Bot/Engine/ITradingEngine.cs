@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bot.DataSources;
 using Microsoft.Extensions.Logging;
+using Bot.Models.Results;
 
 namespace Bot.Engine;
 
@@ -20,6 +21,11 @@ public interface ITradingEngine
     /// Get current bars.
     /// </summary>
     public MultiBar Bars { get; }
+
+    /// <summary>
+    /// The interval we are trading on.
+    /// </summary>
+    public Interval Interval { get; }
 
     /// <summary>
     /// Gets current data source.
@@ -49,7 +55,7 @@ public interface ITradingEngine
     /// <param name="start"></param>
     /// <param name="end"></param>
     /// <returns></returns>
-    Task RunAsync(
+    Task<RunResult> RunAsync(
         RunMode runMode,
         Interval interval,
         DateTime? start = null,

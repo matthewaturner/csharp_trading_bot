@@ -33,6 +33,16 @@ public class Interval
     public static Interval Hours(int num) => new(IntervalType.Hour, num);
     public static Interval Mins(int num) => new(IntervalType.Minute, num);
 
+    public double GetIntervalsPerYear() => _type switch
+    {
+        IntervalType.Month => (252.0/12) / _num,
+        IntervalType.Week => (252.0/5) / _num,
+        IntervalType.Day => 252.0 / _num,            // 252 days of trading per year
+        IntervalType.Hour => 6.5*252 / _num,         // 6.5 hours of trading per day
+        IntervalType.Minute => 60.0*24*252 / _num,
+        _ => throw new ArgumentOutOfRangeException()
+    };
+
     public override string ToString() => _type switch
     {
         IntervalType.Month  => $"{_num}M",

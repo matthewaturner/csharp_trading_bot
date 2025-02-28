@@ -11,8 +11,7 @@ using System.Linq;
 
 namespace Bot.Strategies;
 
-public abstract class StrategyBase(List<IIndicator> indicators = null) 
-    : IStrategy, IInitialize, IMarketDataReceiver
+public abstract class StrategyBase(List<IIndicator> indicators = null) : IStrategy
 {
     public void Initialize(ITradingEngine engine)
     {
@@ -38,7 +37,7 @@ public abstract class StrategyBase(List<IIndicator> indicators = null)
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public void OnMarketData(object sender, MarketDataEvent e)
+    void IMarketDataReceiver.OnMarketData(object sender, MarketDataEvent e)
     {
         GlobalConfig.Logger.LogInformation($"Received bar: {e.Bar}");
         ProcessBar(e.Bar);

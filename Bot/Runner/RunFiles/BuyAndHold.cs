@@ -3,12 +3,12 @@ using Bot.Brokers.BackTest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Models;
-using Bot.Strategies;
+using Bot.Models.Results;
 using Bot.Strategy;
 
 namespace Runner.RunFiles;
 
-public class SmaCrossover_Example
+public class BuyAndHold
 {
     public void Run()
     {
@@ -24,11 +24,11 @@ public class SmaCrossover_Example
             Symbols = ["MSFT"]
         };
 
-        engine.RunAsync(
+        RunResult result = engine.RunAsync(
             RunMode.BackTest,
             Interval.OneDay,
             DateTime.Now.AddYears(-5),
-            DateTime.Now).Wait();
+            DateTime.Now).Result;
 
         Console.WriteLine("Done.");
     }

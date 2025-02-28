@@ -1,6 +1,7 @@
 ﻿using Bot.Brokers;
 using Bot.Engine;
 using Bot.Events;
+using Bot.Helpers;
 using Bot.Models.Results;
 using System;
 using System.Linq;
@@ -14,7 +15,7 @@ public class StrategyAnalyzer : IAnalyzer
     private IBroker Broker => Engine.Broker;
 
     // the object we are defining
-    public RunResults RunResults = new();
+    public RunResult RunResults { get; private set; } = new();
 
     public void Initialize(ITradingEngine engine)
     {
@@ -28,15 +29,36 @@ public class StrategyAnalyzer : IAnalyzer
     {
         DateTime currentTime = e.Bar.Timestamp;
 
-        decimal currentPortfolioValue = Broker.GetAccount().TotalValue;
-        decimal previousPortfolioValue = RunResults.PortfolioValues.LastOrDefault()?.Value ?? currentPortfolioValue;
+        double currentPortfolioValue = (double)Broker.GetAccount().TotalValue;
+        double previousPortfolioValue = RunResults.PortfolioValues.LastOrDefault()?.Value ?? currentPortfolioValue;
         RunResults.PortfolioValues.Add(currentTime, currentPortfolioValue);
 
-        decimal dailyReturn = (currentPortfolioValue - previousPortfolioValue) / previousPortfolioValue;
+        double dailyReturn = (currentPortfolioValue - previousPortfolioValue) / previousPortfolioValue;
         RunResults.DailyReturns.Add(currentTime, dailyReturn);
 
-        decimal prevCumulativeReturn = RunResults.CumulativeReturns.LastOrDefault()?.Value ?? 0;
-        decimal cumulativeReturn = (1 + prevCumulativeReturn) * (1 + dailyReturn) - 1;
+        double prevCumulativeReturn = RunResults.CumulativeReturns.LastOrDefault()?.Value ?? 0;
+        double cumulativeReturn = (1 + prevCumulativeReturn) * (1 + dailyReturn) - 1;
         RunResults.CumulativeReturns.Add(currentTime, cumulativeReturn);
     }
+
+    /// <summary>
+    /// Calculate all the final values. At least in backtest mode, it would be pointless to calculate any of these
+    /// before we are finished running.
+    /// </summary>
+    public void OnFinalize(object sender, FinalizeEvent e)
+    {
+        RunResults.SharpeRatio = CalculateSharpeRatio();
+    }
+
+    #region Final Calculations =======================================================================================
+
+    public double CalculateSharpeRatio()
+    {
+        double mean = RunResults.DailyReturns.Average(v => v.Value);
+        double stddev = MathHelpers.StandardDeviation(RunResults.DailyReturns.ToDoubles());
+        return (mean / stddev) * Math.Sqrt(Engine.Interval.GetIntervalsPerYear());
+    }
+
+    #endregion
+
 }

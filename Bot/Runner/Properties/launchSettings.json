@@ -2,7 +2,7 @@
   "profiles": {
     "Console": {
       "commandName": "Project",
-      "commandLineArgs": "--fileName SmaCrossover_Example"
+      "commandLineArgs": "--fileName BuyAndHold"
     }
   }
 }

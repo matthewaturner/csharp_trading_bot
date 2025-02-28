@@ -6,24 +6,32 @@ namespace Bot.Helpers
 {
     public static class MathHelpers
     {
+        /// <summary>
+        /// Polymorphism.
+        /// </summary>
+        public static decimal StandardDeviation(IEnumerable<decimal> values)
+        {
+            return (decimal)StandardDeviation(values.Select(v => (double)v));
+        }
+
         /// Standard deviation calculation.
         /// </summary>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static decimal StandardDeviation(IEnumerable<decimal> values)
+        public static double StandardDeviation(IEnumerable<double> values)
         {
-            decimal standardDeviation = 0;
+            double standardDeviation = 0;
 
             if (values.Any())
             {
                 // Compute the average.     
-                decimal avg = values.Average();
+                double avg = values.Average();
 
                 // Perform the Sum of (value-avg)_2_2.      
-                decimal sum = values.Sum(d => (decimal)Math.Pow((double)(d - avg), 2));
+                double sum = values.Sum(d => Math.Pow(d - avg, 2));
 
                 // Put it all together.      
-                standardDeviation = (decimal)Math.Sqrt((double)sum / (values.Count() - 1));
+                standardDeviation = Math.Sqrt(sum / (values.Count() - 1));
             }
 
             return standardDeviation;

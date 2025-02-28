@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Bot.Strategies
 {
-    public interface IStrategy : IInitialize
+    public interface IStrategy : IInitialize, IMarketDataReceiver
     {
         int Lookback { get; }
 
