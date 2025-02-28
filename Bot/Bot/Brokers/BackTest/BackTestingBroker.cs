@@ -1,12 +1,10 @@
 ﻿using Bot.Exceptions;
-using Bot.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Bot.Models.Interfaces;
 using Bot.Brokers.BackTest.Models;
 using Bot.Models;
-using Bot.Engine.Events;
 using Microsoft.Extensions.Logging;
 using Bot.Events;
 
@@ -24,7 +22,7 @@ namespace Bot.Brokers.BackTest
         /// Dependency injection constructor.
         /// </summary>
         public BackTestingBroker(
-            double initialFunds)
+            decimal initialFunds)
         { 
             this.account = new BackTestAccount(initialFunds);
             this.positions = new List<BackTestPosition>();
@@ -198,8 +196,8 @@ namespace Bot.Brokers.BackTest
         /// <returns></returns>
         public OrderState PreviewOrder(BackTestOrder order)
         {
-            double currentPrice = Bars[order.Symbol].Open;
-            double orderPrice = currentPrice * order.Quantity;
+            decimal currentPrice = Bars[order.Symbol].Open;
+            decimal orderPrice = currentPrice * order.Quantity;
 
             switch (order.Type)
             {
@@ -214,7 +212,7 @@ namespace Bot.Brokers.BackTest
                 case OrderType.MarketSell:
 
                     IPosition pos = positions.FirstOrDefault(pos => pos.Symbol.Equals(order.Symbol));
-                    double netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
+                    decimal netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
 
                     if (netQuantity < 0)
                     {
@@ -238,7 +236,7 @@ namespace Bot.Brokers.BackTest
         /// <param name="bar"></param>
         private void UpdateAccountValue(Bar bar)
         {
-            double total = account.Cash;
+            decimal total = account.Cash;
             foreach (IPosition pos in positions)
             {
                 total += pos.Quantity * bar.Close;
@@ -253,7 +251,7 @@ namespace Bot.Brokers.BackTest
         /// <param name="symbol"></param>
         /// <param name="quantity"></param>
         /// <param name="price"></param>
-        private void Buy(string symbol, double quantity, double price)
+        private void Buy(string symbol, decimal quantity, decimal price)
         {
             if (quantity == 0)
             {
@@ -285,7 +283,7 @@ namespace Bot.Brokers.BackTest
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="quantity"></param>
-        private void Sell(string symbol, double quantity, double price)
+        private void Sell(string symbol, decimal quantity, decimal price)
         {
             if (quantity == 0)
             {

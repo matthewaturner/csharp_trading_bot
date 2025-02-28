@@ -54,7 +54,7 @@ namespace Bot.Brokers.Alpaca.Models
         public DateTime ExecutionTime => DateTime.Parse(FilledTime);
 
         [JsonIgnore]
-        public double TargetPrice => double.NaN;
+        public decimal TargetPrice => 0;
 
         [JsonIgnore]
         public OrderState State
@@ -90,10 +90,10 @@ namespace Bot.Brokers.Alpaca.Models
         DateTime IOrder.PlacementTime => DateTime.Parse(PlacementTime);
 
         [JsonIgnore]
-        double IOrder.Quantity => double.Parse(Quantity);
+        decimal IOrder.Quantity => decimal.Parse(Quantity);
 
         [JsonIgnore]
-        double IOrder.AverageFillPrice => double.Parse(AverageFillPrice);
+        decimal IOrder.AverageFillPrice => decimal.Parse(AverageFillPrice);
 
         [JsonIgnore]
         OrderType IOrder.Type

@@ -11,7 +11,7 @@ namespace Bot.Models.Interfaces
         /// <summary>
         /// Amount held.
         /// </summary>
-        public double Quantity { get; }
+        public decimal Quantity { get; }
 
         /// <summary>
         /// Type of position. Long or short.

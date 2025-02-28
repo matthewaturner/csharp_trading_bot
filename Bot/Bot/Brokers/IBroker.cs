@@ -1,9 +1,9 @@
-﻿using Bot.Engine.Events;
-using Bot.Engine;
+﻿using Bot.Engine;
 using Bot.Models;
 using Bot.Models.Interfaces;
 using System;
 using System.Collections.Generic;
+using Bot.Events;
 
 namespace Bot.Brokers
 {

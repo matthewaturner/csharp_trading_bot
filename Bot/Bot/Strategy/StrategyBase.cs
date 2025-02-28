@@ -1,9 +1,10 @@
 ﻿
+using Bot.Brokers;
 using Bot.Engine;
-using Bot.Engine.Events;
 using Bot.Events;
 using Bot.Indicators;
 using Bot.Models;
+using Bot.Models.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,12 @@ public abstract class StrategyBase(List<IIndicator> indicators = null)
     public int Lookback => Indicators.Max(ind => ind.Lookback);
 
     public bool IsHydrated => Indicators.All(ind => ind.IsHydrated);
+
+    // Helpful proxies
+
+    public IBroker Broker => Engine.Broker;
+
+    public IAccount Account => Broker.GetAccount();
 
     /// <summary>
     /// The method that receives market data.

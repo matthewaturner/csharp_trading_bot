@@ -1,5 +1,4 @@
-﻿using Bot.Engine.Events;
-using Bot.Models;
+﻿using Bot.Models;
 using System.Threading.Tasks;
 using System;
 using Bot.Events;

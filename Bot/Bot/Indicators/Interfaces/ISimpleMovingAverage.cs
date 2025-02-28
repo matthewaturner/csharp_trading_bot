@@ -2,7 +2,7 @@
 
 namespace Bot.Indicators.Interfaces
 {
-	public interface ISimpleMovingAverage : ISimpleValueIndicator<double>
+	public interface ISimpleMovingAverage : ISimpleValueIndicator<decimal>
 	{
 	}
 }

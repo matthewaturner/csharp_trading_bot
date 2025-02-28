@@ -84,7 +84,7 @@ public static class DateTimeHelper
     public static bool IsTradingDay(this DateTime date)
     {
         // to ease typing
-        int nthWeekDay = (int)(Math.Ceiling((double)date.Day / 7.0d));
+        int nthWeekDay = (int)(Math.Ceiling(date.Day / 7.0d));
         DayOfWeek dayName = date.DayOfWeek;
         bool isThursday = dayName == DayOfWeek.Thursday;
         bool isFriday = dayName == DayOfWeek.Friday;

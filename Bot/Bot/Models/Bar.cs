@@ -15,12 +15,12 @@ namespace Bot.Models
         public Bar(
             DateTime dateTime,
             string symbol,
-            double open,
-            double high,
-            double low,
-            double close,
+            decimal open,
+            decimal high,
+            decimal low,
+            decimal close,
             long volume,
-            double? adjClose = null)
+            decimal? adjClose = null)
         {
             Timestamp = dateTime;
             Symbol = symbol;
@@ -42,26 +42,26 @@ namespace Bot.Models
 
         [Required]
         [JsonPropertyName("Open")]
-        public double Open { get; set; }
+        public decimal Open { get; set; }
 
         [Required]
         [JsonPropertyName("High")]
-        public double High { get; set; }
+        public decimal High { get; set; }
 
         [Required]
         [JsonPropertyName("Low")]
-        public double Low { get; set; }
+        public decimal Low { get; set; }
 
         [Required]
         [JsonPropertyName("Close")]
-        public double Close { get; set; }
+        public decimal Close { get; set; }
 
 
         // Adjusted close will always have a value when getting, but may be null when setting
-        private double? _adjClose;
+        private decimal? _adjClose;
 
         [JsonPropertyName("AdjClose")]
-        public double AdjClose
+        public decimal AdjClose
         {
             get { _adjClose ??= Close; return _adjClose.Value; }
             set { _adjClose = value; }
@@ -73,7 +73,7 @@ namespace Bot.Models
 
         public override string ToString()
         {
-            string ToStr(double v) => v.ToString("0.000");
+            string ToStr(decimal v) => v.ToString("0.000");
 
             return $"{Timestamp.StdToString()}  " +
                 $"O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume} A:{AdjClose}";

@@ -11,22 +11,22 @@ public record CsvBar
     public DateTime Date { get; set; }
 
     [Name("Open")]
-    public double Open { get; set; }
+    public decimal Open { get; set; }
 
     [Name("High")]
-    public double High { get; set; }
+    public decimal High { get; set; }
 
     [Name("Low")]
-    public double Low { get; set; }
+    public decimal Low { get; set; }
 
     [Name("Close")]
-    public double Close { get; set; }
+    public decimal Close { get; set; }
 
     [Name("Volume")]
     public long Volume { get; set; }
 
     [Name("Adj Close")]
-    public double AdjClose { get; set; }
+    public decimal AdjClose { get; set; }
 
     public Bar ToBotModel(string symbol) => new Bar(Date, symbol, Open, High, Low, Close, Volume, AdjClose);
 }

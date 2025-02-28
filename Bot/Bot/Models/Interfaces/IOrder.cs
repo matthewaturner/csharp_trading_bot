@@ -12,11 +12,11 @@ namespace Bot.Models.Interfaces
 
         public string Symbol { get; }
 
-        public double Quantity { get; }
+        public decimal Quantity { get; }
 
-        public double TargetPrice { get; }
+        public decimal TargetPrice { get; }
 
-        public double AverageFillPrice { get; }
+        public decimal AverageFillPrice { get; }
 
         public OrderType Type { get; }
 

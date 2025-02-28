@@ -21,11 +21,11 @@ namespace Bot.Models.Interfaces
         /// <summary>
         /// Quantity to buy or sell.
         /// </summary>
-        public double Quantity { get; }
+        public decimal Quantity { get; }
 
         /// <summary>
         /// Price when the order was placed. Useful to calculate slippage.
         /// </summary>
-        public double TargetPrice { get; }
+        public decimal TargetPrice { get; }
     }
 }

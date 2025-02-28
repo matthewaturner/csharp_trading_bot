@@ -1,5 +1,6 @@
+using Bot.Engine;
 
-namespace Bot.Engine.Events
+namespace Bot.Events
 {
     public interface IInitialize
     {

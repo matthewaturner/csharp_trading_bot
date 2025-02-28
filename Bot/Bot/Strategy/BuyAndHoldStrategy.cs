@@ -1,6 +1,6 @@
-﻿using Bot.Models;
+﻿using Bot.Brokers;
+using Bot.Models;
 using Bot.Strategies;
-using System;
 
 namespace Bot.Strategy;
 
@@ -12,8 +12,7 @@ public class BuyAndHoldStrategy() : StrategyBase
     {
         if (!invested)
         {
-            double funds = Engine.Broker.GetAccount().BuyingPower;
-            Engine.Broker.PlaceOrder(new OrderRequest(OrderType.MarketBuy, bar.Symbol, funds / bar.Close, bar.Close));
+            Broker.MarketBuy(bar.Symbol, Account.BuyingPower / bar.Close);
             invested = true;
         }
     }

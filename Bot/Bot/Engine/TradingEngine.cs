@@ -1,5 +1,4 @@
 ﻿using Bot.Brokers;
-using Bot.Engine.Events;
 using Bot.Models;
 using Bot.Strategies;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using Bot.DataSources;
 using Microsoft.Extensions.Logging;
 using Bot.Brokers.BackTest;
 using Bot.Events;
+using Bot.DataSources.Alpaca;
 
 
 namespace Bot.Engine;
@@ -26,7 +26,7 @@ public class TradingEngine() : ITradingEngine
     public IBroker Broker { get; set; } = new BackTestingBroker(10000);
 
     // Data source object
-    public IDataSource DataSource { get; set; }
+    public IDataSource DataSource { get; set; } = new AlpacaDataSource();
 
     // Single strategy object (for now)
     public IStrategy Strategy { get; set; }
@@ -45,7 +45,10 @@ public class TradingEngine() : ITradingEngine
         Broker.Initialize(this);
         Strategy.Initialize(this);
 
+        // The broker is only listening to market data if it is a backtesting broker, in which case it should
+        // receive new market data before the strategy does in order to execute trades at the current price.
         RegisterReceiver(Broker);
+
         RegisterReceiver(Strategy);
     }
 

@@ -24,9 +24,9 @@ namespace Bot.Models
             DateTime placementTime,
             DateTime executionTime,
             string symbol,
-            double executionPrice,
-            double targetPrice,
-            double quantity,
+            decimal executionPrice,
+            decimal targetPrice,
+            decimal quantity,
             OrderType type,
             OrderState state)
         {
@@ -51,7 +51,7 @@ namespace Bot.Models
             PlacementTime = DateTime.Now;
             ExecutionTime = new DateTime();
             Symbol = request.Symbol.ToUpper();
-            AverageFillPrice = double.NaN;
+            AverageFillPrice = 0;
             TargetPrice = request.TargetPrice;
             Quantity = request.Quantity;
             Type = request.Type;
@@ -81,18 +81,18 @@ namespace Bot.Models
         /// <summary>
         /// Price the order actually executed at.
         /// </summary>
-        public double AverageFillPrice { get; set; }
+        public decimal AverageFillPrice { get; set; }
 
         /// <summary>
         /// Price the order is for at placement time.
         /// Best bid/ask for market orders, limit price for limit orders.
         /// </summary>
-        public double TargetPrice { get; set; }
+        public decimal TargetPrice { get; set; }
 
         /// <summary>
         /// Units to buy or sell.
         /// </summary>
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
         /// <summary>
         /// Type of the order. Market buy, etc.
@@ -109,7 +109,7 @@ namespace Bot.Models
         /// </summary>
         /// <param name="price"></param>
         /// <param name="executionTime"></param>
-        public void Fill(double price, DateTime executionTime)
+        public void Fill(decimal price, DateTime executionTime)
         {
             AverageFillPrice = price;
             State = OrderState.Filled;

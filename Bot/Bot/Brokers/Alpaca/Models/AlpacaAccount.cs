@@ -23,12 +23,12 @@ namespace Bot.Brokers.Alpaca.Models
         // IAccount interface
 
         [JsonIgnore]
-        double IAccount.BuyingPower => double.Parse(BuyingPower);
+        decimal IAccount.BuyingPower => decimal.Parse(BuyingPower);
 
         [JsonIgnore]
-        double IAccount.Cash => double.Parse(Cash);
+        decimal IAccount.Cash => decimal.Parse(Cash);
 
         [JsonIgnore]
-        double IAccount.TotalValue => double.Parse(Equity);
+        decimal IAccount.TotalValue => decimal.Parse(Equity);
     }
 }

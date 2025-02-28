@@ -23,6 +23,6 @@ namespace Bot.Brokers.Alpaca.Models
         public PositionType Type => Side;
 
         [JsonIgnore]
-        double IPosition.Quantity => double.Parse(Quantity);
+        decimal IPosition.Quantity => decimal.Parse(Quantity);
     }
 }

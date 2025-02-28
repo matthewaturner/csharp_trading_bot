@@ -7,8 +7,8 @@ namespace Bot.Models
         public OrderRequest(
             OrderType type,
             string symbol,
-            double quantity,
-            double targetPrice)
+            decimal quantity,
+            decimal targetPrice)
         {
             Type = type;
             Symbol = symbol.ToUpper();
@@ -20,9 +20,13 @@ namespace Bot.Models
 
         public string Symbol { get; set; }
 
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
-        public double TargetPrice { get; set; }
+        public decimal TargetPrice { get; set; }
 
+        public static OrderRequest MarketBuy(string symbol, decimal quantity)
+        {
+            return new OrderRequest(OrderType.MarketBuy, symbol, quantity, 0);
+        }
     }
 }

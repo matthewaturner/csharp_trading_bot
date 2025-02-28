@@ -15,7 +15,7 @@ public class PlotCsvData
 
         var form = new ScatterPlotForm(
             bars.Select(b => b.Timestamp).ToArray(),
-            bars.Select(b => (double)b.AdjClose!).ToArray());
+            bars.Select(b => (decimal)b.AdjClose!).ToArray());
 
         return form;
     }

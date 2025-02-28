@@ -10,16 +10,16 @@ public class Bar
     public string T { get; set; }
 
     [JsonPropertyName("o")]
-    public double O { get; set; }
+    public decimal O { get; set; }
 
     [JsonPropertyName("h")]
-    public double H { get; set; }
+    public decimal H { get; set; }
 
     [JsonPropertyName("l")]
-    public double L { get; set; }
+    public decimal L { get; set; }
     
     [JsonPropertyName("c")]
-    public double C { get; set; }
+    public decimal C { get; set; }
 
     [JsonPropertyName("v")]
     public long V { get; set; }

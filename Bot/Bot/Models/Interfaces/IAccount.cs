@@ -11,16 +11,16 @@ namespace Bot.Models.Interfaces
         /// <summary>
         /// Cash available to trade.
         /// </summary>
-        public double Cash { get; }
+        public decimal Cash { get; }
 
         /// <summary>
         /// Amount that can be bought or sold currently.
         /// </summary>
-        public double BuyingPower { get; }
+        public decimal BuyingPower { get; }
 
         /// <summary>
         /// Total market value of the account. Cash + long value + short value.
         /// </summary>
-        public double TotalValue { get; }
+        public decimal TotalValue { get; }
     }
 }
