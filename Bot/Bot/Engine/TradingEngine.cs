@@ -1,8 +1,6 @@
 ﻿using Bot.Brokers;
 using Bot.Models;
 using Bot.Strategies;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System;
 using Bot.DataSources;
@@ -20,11 +18,8 @@ public class TradingEngine() : ITradingEngine
 {
     #region Shared Properties ========================================================================================
 
-    // Multi-bars object that holds the latest bar of each symbol in the universe.
-    public MultiBar Bars { get; private set; }
-
-    // All symbols in the universe
-    public IList<string> Symbols { get; set; }
+    // The single symbol that currently represents the universe of stocks
+    public string Symbol { get; set; }
 
     // The interval we are running on, daily hourly monthly etc.
     public Interval Interval { get; private set; }
@@ -58,8 +53,6 @@ public class TradingEngine() : ITradingEngine
     private void Setup()
     {
         // initialize stuff
-        Bars = new MultiBar(Symbols.ToArray());
-
         Broker.Initialize(this);
         Analyzer.Initialize(this);
         Strategy.Initialize(this);
@@ -97,7 +90,7 @@ public class TradingEngine() : ITradingEngine
 
             case RunMode.BackTest:
                 await DataSource.StreamBars(
-                    [.. Symbols],
+                    Symbol,
                     interval,
                     start ?? DateTime.MinValue,
                     end ?? DateTime.MaxValue);
@@ -107,22 +100,5 @@ public class TradingEngine() : ITradingEngine
 
         FinalizeEvent?.Invoke(this, new FinalizeEvent());
         return Analyzer.RunResults;
-    }
-
-    /// <summary>
-    /// Adds the objects to the receiver lists for the different types of events.
-    /// </summary>
-    /// <param name="obj"></param>
-    private void RegisterReceiver(object obj)
-    {
-        if (obj is IMarketDataReceiver marketDataReceiver)
-        {
-            DataSource.MarketDataReceivers += marketDataReceiver.OnMarketData;
-        }
-
-        if (obj is IFinalizeReceiver finalizeReceiver)
-        {
-            FinalizeEvent += finalizeReceiver.OnFinalize;
-        }
     }
 }

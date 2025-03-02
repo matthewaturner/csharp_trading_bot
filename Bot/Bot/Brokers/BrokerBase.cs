@@ -1,3 +1,4 @@
+using Bot.DataSources;
 using Bot.Engine;
 using Bot.Events;
 
@@ -11,5 +12,7 @@ namespace Bot.Brokers
         }
 
         protected ITradingEngine Engine { get; set; }
+
+        protected IDataSource DataSource => Engine.DataSource;
     }
 }

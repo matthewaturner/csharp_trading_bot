@@ -14,7 +14,7 @@ public class RunResult
     public List<DatedValue> DailyReturns = new();
     public List<DatedValue> CumulativeReturns = new();
 
-    public double SharpeRatio = double.NaN;
+    public double AnnualizedSharpeRatio = double.NaN;
     public double MaxDrawdown = double.NaN;
     public double MaxDrawdownDuration = double.NaN;
 }
@@ -39,7 +39,7 @@ public static class ResultExtensions
         list.Add(new DatedValue(timestamp, value));
     }
 
-    public static IEnumerable<double> ToDoubles(this List<DatedValue> list)
+    public static IEnumerable<double> Values(this List<DatedValue> list)
     {
         return list.Select(v => (double)v.Value);
     }

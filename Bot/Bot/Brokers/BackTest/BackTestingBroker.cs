@@ -8,321 +8,272 @@ using Bot.Models;
 using Microsoft.Extensions.Logging;
 using Bot.Events;
 
-namespace Bot.Brokers.BackTest
+namespace Bot.Brokers.BackTest;
+
+public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
 {
-    public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
+    private BackTestAccount account;
+    private IList<BackTestPosition> positions;
+    private IList<BackTestOrder> openOrders;
+    private IList<BackTestOrder> allOrders;
+
+    private ILogger Logger => GlobalConfig.Logger;
+
+    /// <summary>
+    /// Dependency injection constructor.
+    /// </summary>
+    public BackTestingBroker(
+        decimal initialFunds)
+    { 
+        this.account = new BackTestAccount(initialFunds);
+        this.positions = new List<BackTestPosition>();
+        this.openOrders = new List<BackTestOrder>();
+        this.allOrders = new List<BackTestOrder>();
+    }
+
+    #region Events ===================================================================================================
+
+    /// <summary>
+    /// Execute orders at the next price.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public void OnMarketData(object sender, MarketDataEvent e)
     {
-        private BackTestAccount account;
-        private IList<BackTestPosition> positions;
-        private IList<BackTestOrder> openOrders;
-        private IList<BackTestOrder> allOrders;
-        private ILogger Logger => GlobalConfig.Logger;
+        ExecuteAllOrders(e.Bar);
+    }
 
-        /// <summary>
-        /// Dependency injection constructor.
-        /// </summary>
-        public BackTestingBroker(
-            decimal initialFunds)
-        { 
-            this.account = new BackTestAccount(initialFunds);
-            this.positions = new List<BackTestPosition>();
-            this.openOrders = new List<BackTestOrder>();
-            this.allOrders = new List<BackTestOrder>();
-        }
+    #endregion =======================================================================================================
 
-        private MultiBar Bars => Engine.Bars;
+    /// <summary>
+    /// Gets asset information.
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public IAssetInformation GetAssetInformation(string symbol)
+    {
+        return new BackTestAssetInformation(symbol);
+    }
 
-        /// <summary>
-        /// Gets asset information.
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        public IAssetInformation GetAssetInformation(string symbol)
+    /// <summary>
+    /// Gets account object.
+    /// </summary>
+    public IAccount GetAccount()
+    {
+        // update total value then return account
+        account.TotalValue = account.Cash + positions.Sum(p => p.Quantity * DataSource.GetLatestBar(p.Symbol).AdjClose);
+        return account;
+    }
+
+    /// <summary>
+    /// Gets all positions held.
+    /// </summary>
+    public IList<IPosition> GetPositions()
+    {
+        return positions.ToList<IPosition>();
+    }
+
+    /// <summary>
+    /// Gets the position held in some symbol.
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <returns></returns>
+    public IPosition GetPosition(string symbol)
+    {
+        return positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+    }
+
+    /// <summary>
+    /// Gets the status of an order.
+    /// </summary>
+    /// <param name="orderId"></param>
+    /// <returns></returns>
+    public IOrder GetOrder(string orderId)
+    {
+        return allOrders.FirstOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
+    }
+
+    /// <summary>
+    /// Gets all outstanding orders.
+    /// </summary>
+    /// <returns></returns>
+    public IList<IOrder> GetOpenOrders()
+    {
+        return openOrders.ToList<IOrder>();
+    }
+
+    /// <summary>
+    /// Gets all orders.
+    /// </summary>
+    /// <returns></returns>
+    public IList<IOrder> GetAllOrders()
+    {
+        return allOrders.ToList<IOrder>();
+    }
+
+    /// <summary>
+    /// Gets all orders in some state (open, filled, etc.)
+    /// </summary>
+    /// <param name="state"></param>
+    /// <returns></returns>
+    public IList<IOrder> QueryOrders(IEnumerable<string> symbols, OrderState state, DateTime after, DateTime until, int limit = 50)
+    {
+        return allOrders.Where(order => 
+            symbols.Contains(order.Symbol, StringComparer.OrdinalIgnoreCase)
+            && order.State == state
+            && order.PlacementTime > after 
+            && order.PlacementTime < until)
+            .Take(limit).ToList<IOrder>();
+    }
+
+    /// <summary>
+    /// Placing an order just puts it into the open orders list.
+    /// </summary>
+    /// <param name="order"></param>
+    public IOrder PlaceOrder(IOrderRequest request)
+    {
+        BackTestOrder order = new BackTestOrder(request);
+        order.OrderId = Guid.NewGuid().ToString();
+        order.PlacementTime = DateTime.Now;
+        openOrders.Add(order);
+        allOrders.Add(order);
+        return order;
+    }
+
+
+    /// <summary>
+    /// Cancels an order if it hasn't been filled yet.
+    /// </summary>
+    /// <param name="orderId"></param>
+    public void CancelOrder(string orderId)
+    {
+        BackTestOrder order = openOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
+
+        if (order != null)
         {
-            return new BackTestAssetInformation(symbol);
+            order.State = OrderState.Cancelled;
+            openOrders.Remove(order);
         }
+    }
 
-        /// <summary>
-        /// Gets account object.
-        /// </summary>
-        public IAccount GetAccount()
+    /// <summary>
+    /// Basically just returns if an order is valid or not.
+    /// </summary>
+    /// <param name="order"></param>
+    /// <returns></returns>
+    public OrderState PreviewOrder(BackTestOrder order)
+    {
+        // todo: multibars
+        decimal currentPrice = Engine.DataSource.GetLatestBar(order.Symbol).AdjClose;
+        decimal orderPrice = currentPrice * order.Quantity;
+
+        switch (order.Type)
         {
-            return account;
-        }
-
-        /// <summary>
-        /// Gets all positions held.
-        /// </summary>
-        public IList<IPosition> GetPositions()
-        {
-            return positions.ToList<IPosition>();
-        }
-
-        /// <summary>
-        /// Gets the position held in some symbol.
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
-        public IPosition GetPosition(string symbol)
-        {
-            return positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
-        }
-
-        /// <summary>
-        /// Gets the status of an order.
-        /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        public IOrder GetOrder(string orderId)
-        {
-            return allOrders.FirstOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
-        }
-
-        /// <summary>
-        /// Gets all outstanding orders.
-        /// </summary>
-        /// <returns></returns>
-        public IList<IOrder> GetOpenOrders()
-        {
-            return openOrders.ToList<IOrder>();
-        }
-
-        /// <summary>
-        /// Gets all orders.
-        /// </summary>
-        /// <returns></returns>
-        public IList<IOrder> GetAllOrders()
-        {
-            return allOrders.ToList<IOrder>();
-        }
-
-        /// <summary>
-        /// Gets all orders in some state (open, filled, etc.)
-        /// </summary>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public IList<IOrder> QueryOrders(IEnumerable<string> symbols, OrderState state, DateTime after, DateTime until, int limit = 50)
-        {
-            return allOrders.Where(order => 
-                symbols.Contains(order.Symbol, StringComparer.OrdinalIgnoreCase)
-                && order.State == state
-                && order.PlacementTime > after 
-                && order.PlacementTime < until)
-                .Take(limit).ToList<IOrder>();
-        }
-
-
-        /// <summary>
-        /// Execute orders at the next price.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public void OnMarketData(object sender, MarketDataEvent e)
-        {
-            BackTestOrder order = openOrders.FirstOrDefault();
-            while (order != null)
-            {
-                OrderState state = PreviewOrder(order);
-                if (state == OrderState.Rejected)
+            // logic is the same for now
+            case OrderType.MarketBuy:
+                if (orderPrice > account.Cash)
                 {
-                    order.State = OrderState.Rejected;
+                    return OrderState.Rejected;
                 }
-                else
+                break;
+
+            case OrderType.MarketSell:
+
+                IPosition pos = positions.FirstOrDefault(pos => pos.Symbol.Equals(order.Symbol));
+                decimal netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
+
+                if (netQuantity < 0)
                 {
-                    switch (order.Type)
-                    {
-                        case OrderType.MarketBuy:
-                            Buy(order.Symbol, order.Quantity, e.Bar.Close);
-                            break;
-
-                        case OrderType.MarketSell:
-                            Sell(order.Symbol, order.Quantity, e.Bar.Close);
-                            break;
-                    }
-
-                    // mark order as filled and remove it from the open orders list,
-                    // it will remain in the order history list
-                    order.Fill(e.Bar.Close, e.Bar.Timestamp);
-                    Logger.LogInformation($"Order filled. {order}");
-                }
-
-                openOrders.RemoveAt(0);
-                order = openOrders.FirstOrDefault();
-            }
-
-            UpdateAccountValue(e.Bar);
-        }
-
-        /// <summary>
-        /// Placing an order just puts it into the open orders list.
-        /// </summary>
-        /// <param name="order"></param>
-        public IOrder PlaceOrder(IOrderRequest request)
-        {
-            BackTestOrder order = new BackTestOrder(request);
-
-            if (!Engine.Bars.HasSymbol(order.Symbol))
-            {
-                throw new InvalidOrderException("Cannot place orders for symbols we aren't gathering prices for.");
-            }
-
-            order.OrderId = Guid.NewGuid().ToString();
-            order.PlacementTime = Bars[order.Symbol].Timestamp;
-            openOrders.Add(order);
-            allOrders.Add(order);
-            return order;
-        }
-
-
-        /// <summary>
-        /// Cancels an order if it hasn't been filled yet.
-        /// </summary>
-        /// <param name="orderId"></param>
-        public void CancelOrder(string orderId)
-        {
-            BackTestOrder order = openOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
-
-            if (order != null)
-            {
-                order.State = OrderState.Cancelled;
-                openOrders.Remove(order);
-            }
-        }
-
-        /// <summary>
-        /// Basically just returns if an order is valid or not.
-        /// </summary>
-        /// <param name="order"></param>
-        /// <returns></returns>
-        public OrderState PreviewOrder(BackTestOrder order)
-        {
-            decimal currentPrice = Bars[order.Symbol].Open;
-            decimal orderPrice = currentPrice * order.Quantity;
-
-            switch (order.Type)
-            {
-                // logic is the same for now
-                case OrderType.MarketBuy:
-                    if (orderPrice > account.Cash)
+                    if (currentPrice * -netQuantity > account.TotalValue)
                     {
                         return OrderState.Rejected;
                     }
-                    break;
-
-                case OrderType.MarketSell:
-
-                    IPosition pos = positions.FirstOrDefault(pos => pos.Symbol.Equals(order.Symbol));
-                    decimal netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
-
-                    if (netQuantity < 0)
-                    {
-                        if (currentPrice * -netQuantity > account.TotalValue)
-                        {
-                            return OrderState.Rejected;
-                        }
-                    }
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
-
-            return OrderState.Open;
-        }
-
-        /// <summary>
-        /// Updates the total account value based on latest prices.
-        /// </summary>
-        /// <param name="bar"></param>
-        private void UpdateAccountValue(Bar bar)
-        {
-            decimal total = account.Cash;
-            foreach (IPosition pos in positions)
-            {
-                total += pos.Quantity * bar.Close;
-            }
-
-            account.TotalValue = total;
-        }
-
-        /// <summary>
-        /// Buys a security.
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="quantity"></param>
-        /// <param name="price"></param>
-        private void Buy(string symbol, decimal quantity, decimal price)
-        {
-            if (quantity == 0)
-            {
-                return;
-            }
-
-            BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
-
-            if (currentPosition != null)
-            {
-                currentPosition.Quantity += quantity;
-                currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
-                account.Cash -= price * quantity;
-
-                if (currentPosition.Quantity == 0)
-                {
-                    positions.Remove(currentPosition);
                 }
+                break;
+
+            default:
+                throw new NotImplementedException();
+        }
+
+        return OrderState.Open;
+    }
+
+    /// <summary>
+    /// Execute all of the outstanding orders at the current bar price.
+    /// </summary>
+    /// <param name="bar"></param>
+    private void ExecuteAllOrders(Bar bar)
+    {
+        BackTestOrder order = openOrders.FirstOrDefault();
+        while (order != null)
+        {
+            OrderState state = PreviewOrder(order);
+            if (state == OrderState.Rejected)
+            {
+                order.State = OrderState.Rejected;
             }
             else
             {
-                positions.Add(new BackTestPosition(symbol, quantity));
-                account.Cash -= price * quantity;
-            }
-        }
-
-        /// <summary>
-        /// Sells a symbol.
-        /// </summary>
-        /// <param name="symbol"></param>
-        /// <param name="quantity"></param>
-        private void Sell(string symbol, decimal quantity, decimal price)
-        {
-            if (quantity == 0)
-            {
-                return;
-            }
-
-            BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
-
-            if (currentPosition != null)
-            {
-                currentPosition.Quantity -= quantity;
-                currentPosition.Type = quantity > 0 ? PositionType.Long : PositionType.Short;
-                account.Cash += price * quantity;
-
-                if (currentPosition.Quantity == 0)
+                switch (order.Type)
                 {
-                    positions.Remove(currentPosition);
+                    case OrderType.MarketBuy:
+                        ApplyTransaction(order.Symbol, order.Quantity, bar.AdjClose);
+                        break;
+
+                    case OrderType.MarketSell:
+                        ApplyTransaction(order.Symbol, -order.Quantity, bar.AdjClose);
+                        break;
                 }
+
+                // mark order as filled and remove it from the open orders list,
+                // it will remain in the order history list
+                order.Fill(bar.AdjClose, bar.Timestamp);
+                Logger.LogInformation($"Order filled. {order}");
             }
-            else
-            {
-                positions.Add(new BackTestPosition(symbol, -quantity));
-                account.Cash += price * quantity;
-            }
+
+            openOrders.RemoveAt(0);
+            order = openOrders.FirstOrDefault();
+        }
+    }
+
+    /// <summary>
+    /// Buys a security.
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="quantity">Negative for sells.</param>
+    /// <param name="price"></param>
+    private void ApplyTransaction(string symbol, decimal quantity, decimal price)
+    {
+        if (quantity == 0)
+        {
+            return;
         }
 
-        /// <summary>
-        /// Closes a position.
-        /// </summary>
-        /// <param name="symbol"></param>
-        public IOrder ClosePosition(string symbol)
+        BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+
+        if (currentPosition != null)
         {
-            IPosition position = GetPosition(symbol);
-            OrderRequest order = new OrderRequest(
-                position.Quantity > 0 ? OrderType.MarketSell : OrderType.MarketBuy,
-                symbol,
-                Math.Abs(position.Quantity),
-                Bars[symbol].Close);
-            return PlaceOrder(order);
+            currentPosition.Quantity += quantity;
+            account.Cash -= price * quantity;
         }
+        else
+        {
+            positions.Add(new BackTestPosition(symbol, quantity));
+            account.Cash -= price * quantity;
+        }
+    }
+
+    /// <summary>
+    /// Closes a position.
+    /// </summary>
+    /// <param name="symbol"></param>
+    public IOrder ClosePosition(string symbol)
+    {
+        IPosition position = GetPosition(symbol);
+        OrderRequest order = new OrderRequest(
+            position.Quantity > 0 ? OrderType.MarketSell : OrderType.MarketBuy,
+            symbol,
+            Math.Abs(position.Quantity));
+        return PlaceOrder(order);
     }
 }

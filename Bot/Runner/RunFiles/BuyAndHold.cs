@@ -21,7 +21,7 @@ public class BuyAndHold
             Broker = broker,
             DataSource = dataSource,
             Strategy = smaCrossStrat,
-            Symbols = ["MSFT"]
+            Symbol = "MSFT"
         };
 
         RunResult result = engine.RunAsync(

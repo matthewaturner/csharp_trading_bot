@@ -1,7 +1,7 @@
 ﻿
 using Bot;
+using Bot.Analyzers;
 using Bot.Brokers.BackTest;
-using Bot.DataSources.Alpaca;
 using Bot.DataSources.Csv;
 using Bot.Engine;
 using Bot.Models;
@@ -17,13 +17,15 @@ public class BuyAndHold
         var smaCrossStrat = new BuyAndHoldStrategy();
         var broker = new BackTestingBroker(10000);
         var dataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder);
+        var analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04);
 
         var engine = new TradingEngine()
         {
             Broker = broker,
             DataSource = dataSource,
+            Analyzer = analyzer,
             Strategy = smaCrossStrat,
-            Symbols = ["IGE"]
+            Symbol = "IGE"
         };
 
         RunResult result = engine.RunAsync(RunMode.BackTest, Interval.OneDay).Result;

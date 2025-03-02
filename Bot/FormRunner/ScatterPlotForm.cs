@@ -16,7 +16,7 @@ namespace FormRunner
             formsPlot1.Plot.Axes.DateTimeTicksBottom();
             formsPlot1.Refresh();
 
-            sharpeRatioValue.Text = runResult.SharpeRatio.ToString();
+            sharpeRatioValue.Text = runResult.AnnualizedSharpeRatio.ToString();
             maxDrawdownValue.Text = "2.0";
             maxDrawdownDurationValue.Text = "3.0";
         }

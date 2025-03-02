@@ -13,14 +13,9 @@ namespace Bot.Engine;
 public interface ITradingEngine
 {
     /// <summary>
-    /// Gets the symbols we are running for.
+    /// The single symbol that represents the universe currently
     /// </summary>
-    public IList<string> Symbols { get; }
-
-    /// <summary>
-    /// Get current bars.
-    /// </summary>
-    public MultiBar Bars { get; }
+    public string Symbol { get; }
 
     /// <summary>
     /// The interval we are trading on.

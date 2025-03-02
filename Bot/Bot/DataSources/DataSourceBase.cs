@@ -13,52 +13,36 @@ public abstract class DataSourceBase : IDataSource
 {
     private ILogger Logger => GlobalConfig.Logger;
 
+    private Bar CurrentBar;
+
     public event EventHandler<MarketDataEvent> MarketDataReceivers;
 
     /// <summary>
     /// Stream bars to the engine.
     /// </summary>
-    /// <param name="symbols"></param>
-    /// <param name="interval"></param>
-    /// <param name="start"></param>
-    /// <param name="end"></param>
-    /// <param name="callback"></param>
-    /// <returns></returns>
-    public async Task StreamBars(
-        string[] symbols,
+    async Task IDataSource.StreamBars(
+        string symbol,
         Interval interval,
         DateTime start,
         DateTime? end)
     {
-        IDictionary<string, IList<Bar>> allBars = new Dictionary<string, IList<Bar>>(symbols.Length);
         end = end.HasValue ? end.Value : DateTime.UtcNow;
 
-        foreach (string s in symbols)
-        {
-            allBars[s] = await GetHistoricalBarsAsync(s, interval, start, end.Value);
-        }
+        var bars = await GetHistoricalBarsAsync(symbol, interval, start, end.Value);
 
-        int barCount = allBars.Values.First().Count();
-        if (!allBars.Values.All(bars => bars.Count() == barCount))
+        foreach (Bar b in bars)
         {
-            throw new DataMisalignedException("Got a different number of bars for each symbol.");
+            CurrentBar = b;
+            MarketDataReceivers?.Invoke(this, new MarketDataEvent(b));
         }
+    }
 
-        IList<IEnumerator<Bar>> enumerators = allBars.Values.Select(bars => bars.GetEnumerator()).ToList();
-        while (enumerators.All(e => e.MoveNext()) && enumerators[0].Current.Timestamp < end.Value)
-        {
-            foreach (var e in enumerators)
-            {
-                try
-                {
-                    MarketDataReceivers?.Invoke(this, new MarketDataEvent(e.Current));
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError(ex, ex.ToString());
-                }
-            }
-        }
+    /// <summary>
+    /// Get the latest bar for a given symbol.
+    /// </summary>
+    Bar IDataSource.GetLatestBar(string symbol)
+    {
+        return CurrentBar;
     }
 
     /// <summary>

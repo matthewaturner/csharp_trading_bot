@@ -4,15 +4,18 @@ using Bot.Events;
 using Bot.Helpers;
 using Bot.Models.Results;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bot.Analyzers;
 
-public class StrategyAnalyzer : IAnalyzer
+public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
 {
     private ITradingEngine Engine;
-
     private IBroker Broker => Engine.Broker;
+
+    private double AnnualRiskFreeRate = annualRiskFreeRate;
 
     // the object we are defining
     public RunResult RunResults { get; private set; } = new();
@@ -47,16 +50,21 @@ public class StrategyAnalyzer : IAnalyzer
     /// </summary>
     public void OnFinalize(object sender, FinalizeEvent e)
     {
-        RunResults.SharpeRatio = CalculateSharpeRatio();
+        RunResults.AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio();
     }
 
     #region Final Calculations =======================================================================================
 
-    public double CalculateSharpeRatio()
+    public double CalculateAnnualizedSharpeRatio()
     {
-        double mean = RunResults.DailyReturns.Average(v => v.Value);
-        double stddev = MathHelpers.StandardDeviation(RunResults.DailyReturns.ToDoubles());
-        return (mean / stddev) * Math.Sqrt(Engine.Interval.GetIntervalsPerYear());
+        double periodsPerYear = Engine.Interval.GetIntervalsPerYear();
+        double riskFreeRate = AnnualRiskFreeRate != 0 ? AnnualRiskFreeRate / periodsPerYear : 0;
+
+        IEnumerable<double> excessReturns = RunResults.DailyReturns.Values().Select(v => v - riskFreeRate);
+
+        double mean = excessReturns.Average();
+        double stddev = MathHelpers.StandardDeviation(excessReturns);
+        return (mean / stddev) * Math.Sqrt(periodsPerYear);
     }
 
     #endregion
