@@ -9,7 +9,6 @@ namespace Bot.Models.Results;
 /// </summary>
 public class RunResult
 {
-    public List<DatedValue> UnderlyingValues = new();
     public List<DatedValue> PortfolioValues = new();
     public List<DatedValue> DailyReturns = new();
     public List<DatedValue> ExcessDailyReturns = new();

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Bot.Analyzers;
 
-public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
+public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
 {
     private ITradingEngine Engine;
     private IBroker Broker => Engine.Broker;
@@ -28,7 +28,7 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
     /// <summary>
     /// Update the RunResults every time we receive market data.
     /// </summary>
-    public void OnMarketData(object sender, MarketDataEvent e)
+    public void OnEvent(object sender, MarketDataEvent e)
     {
         DateTime currentTime = e.Bar.Timestamp;
 
@@ -45,6 +45,17 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
         double prevCumulativeReturn = RunResults.CumulativeReturns.LastOrDefault()?.Value ?? 0;
         double cumulativeReturn = (1 + prevCumulativeReturn) * (1 + dailyReturn) - 1;
         RunResults.CumulativeReturns.Add(currentTime, cumulativeReturn);
+
+        double highWaterMark = RunResults.HighWaterMark.LastOrDefault()?.Value ?? 0;
+        if (cumulativeReturn > highWaterMark) highWaterMark = cumulativeReturn;
+        RunResults.HighWaterMark.Add(currentTime, highWaterMark);
+
+        double drawdown = (1 + cumulativeReturn) / (1 + highWaterMark) - 1;
+        RunResults.Drawdown.Add(currentTime, drawdown);
+
+        double prevDrawdownDuration = RunResults.MaxDrawdownDuration.LastOrDefault()?.Value ?? 0;
+        double maxDrawdownDuration = drawdown < 0 ? prevDrawdownDuration + 1 : 0;
+        RunResults.MaxDrawdownDuration.Add(currentTime, maxDrawdownDuration);
     }
 
     /// <summary>
@@ -71,5 +82,4 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
     }
 
     #endregion
-
 }

@@ -37,7 +37,7 @@ public abstract class StrategyBase(List<IIndicator> indicators = null) : IStrate
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    void IMarketDataReceiver.OnMarketData(object sender, MarketDataEvent e)
+    void IEventReceiver<MarketDataEvent>.OnEvent(object sender, MarketDataEvent e)
     {
         GlobalConfig.GlobalLogger.LogInformation($"Received bar: {e.Bar}");
         ProcessBar(e.Bar);

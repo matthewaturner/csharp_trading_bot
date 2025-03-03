@@ -1,13 +1,12 @@
 using Bot.Engine;
 
-namespace Bot.Events
+namespace Bot.Events;
+
+public interface IInitialize
 {
-    public interface IInitialize
-    {
-        /// <summary>
-        /// Initialize the object, called on startup.
-        /// </summary>
-        /// <param name="engine">Engine object.</param>
-        public void Initialize(ITradingEngine engine);
-    }
+    /// <summary>
+    /// Initialize the object, called on startup.
+    /// </summary>
+    /// <param name="engine">Engine object.</param>
+    public void Initialize(ITradingEngine engine);
 }

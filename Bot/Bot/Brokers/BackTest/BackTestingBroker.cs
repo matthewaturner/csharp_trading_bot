@@ -43,7 +43,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public void OnMarketData(object sender, MarketDataEvent e)
+    public void OnEvent(object sender, MarketDataEvent e)
     {
         if (executionMode == ExecutionMode.OnNextBar)
         {

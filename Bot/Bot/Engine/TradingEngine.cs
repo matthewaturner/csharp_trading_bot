@@ -12,6 +12,7 @@ using Bot.Analyzers;
 using Bot.Models.Results;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Bot.Helpers;
 
 namespace Bot.Engine;
 
@@ -32,7 +33,7 @@ public class TradingEngine() : ITradingEngine
     public IDataSource DataSource { get; set; } = new AlpacaDataSource();
 
     // Single analyzer for now
-    public IAnalyzer Analyzer { get; set; } = new StrategyAnalyzer();
+    public IStrategyAnalyzer Analyzer { get; set; } = new StrategyAnalyzer();
 
     // Single strategy object (for now)
     public IStrategy Strategy { get; set; }
@@ -61,10 +62,10 @@ public class TradingEngine() : ITradingEngine
         // register market data receivers
         if (Broker is IMarketDataReceiver b)
         {
-            DataSource.MarketDataReceivers += b.OnMarketData;
+            DataSource.MarketDataReceivers += b.OnEvent;
         }
-        DataSource.MarketDataReceivers += Analyzer.OnMarketData;
-        DataSource.MarketDataReceivers += Strategy.OnMarketData;
+        DataSource.MarketDataReceivers += Analyzer.OnEvent;
+        DataSource.MarketDataReceivers += Strategy.OnEvent;
 
         // register finalize receivers
         FinalizeEvent += Analyzer.OnFinalize;
