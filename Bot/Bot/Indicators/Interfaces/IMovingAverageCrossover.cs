@@ -5,7 +5,7 @@ namespace Bot.Indicators.Interfaces
 {
 	public interface IMovingAverageCrossover : ISimpleValueIndicator<PositionType>
 	{
-		public decimal ShortMa { get; }
-		public decimal LongMa { get; }
+		public double ShortMa { get; }
+		public double LongMa { get; }
 	}
 }

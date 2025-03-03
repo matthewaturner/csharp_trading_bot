@@ -5,11 +5,11 @@ using System;
 
 namespace Bot.Indicators
 {
-    public class SimpleMovingAverage : IndicatorBase<decimal>, ISimpleValueIndicator<decimal>
+    public class SimpleMovingAverage : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
-        private readonly Func<MultiBar, decimal> transform;
-        private decimal[] data;
-        private decimal average;
+        private readonly Func<MultiBar, double> transform;
+        private double[] data;
+        private double average;
         private int index;
 
         /// <summary>
@@ -17,7 +17,7 @@ namespace Bot.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public SimpleMovingAverage(int lookback, Func<MultiBar, decimal> transform)
+        public SimpleMovingAverage(int lookback, Func<MultiBar, double> transform)
             : base(lookback)
         {
             if (lookback < 1)
@@ -26,14 +26,14 @@ namespace Bot.Indicators
             }
 
             this.transform = transform;
-            data = new decimal[lookback];
+            data = new double[lookback];
             index = 0;
             average = 0;
         }
 
         public override string Name => $"SMA-{Lookback}";
 
-        public decimal Value => average;
+        public double Value => average;
 
         /// <summary>
         /// Calculates new values.

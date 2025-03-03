@@ -12,7 +12,7 @@ public class BuyAndHoldStrategy() : StrategyBase
     {
         if (!invested)
         {
-            Broker.MarketBuy(bar.Symbol, Account.BuyingPower / bar.Close);
+            Broker.MarketBuy(bar.Symbol, Account.BuyingPower / bar.AdjClose);
             invested = true;
         }
     }

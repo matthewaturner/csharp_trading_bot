@@ -11,5 +11,5 @@ public interface IPosition
     /// <summary>
     /// Amount held.
     /// </summary>
-    public decimal Quantity { get; }
+    public double Quantity { get; }
 }

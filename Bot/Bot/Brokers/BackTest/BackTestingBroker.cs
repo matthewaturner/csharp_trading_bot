@@ -12,23 +12,28 @@ namespace Bot.Brokers.BackTest;
 
 public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
 {
+    // private objects
     private BackTestAccount account;
     private IList<BackTestPosition> positions;
     private IList<BackTestOrder> openOrders;
     private IList<BackTestOrder> allOrders;
+    private ExecutionMode executionMode;
 
+    // private funcs
     private ILogger Logger => GlobalConfig.Logger;
+
+    private Bar CurrentBar(string symbol) => Engine.DataSource.GetLatestBar(symbol);
 
     /// <summary>
     /// Dependency injection constructor.
     /// </summary>
-    public BackTestingBroker(
-        decimal initialFunds)
+    public BackTestingBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBar)
     { 
         this.account = new BackTestAccount(initialFunds);
         this.positions = new List<BackTestPosition>();
         this.openOrders = new List<BackTestOrder>();
         this.allOrders = new List<BackTestOrder>();
+        this.executionMode = executionMode;
     }
 
     #region Events ===================================================================================================
@@ -40,7 +45,10 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="e"></param>
     public void OnMarketData(object sender, MarketDataEvent e)
     {
-        ExecuteAllOrders(e.Bar);
+        if (executionMode == ExecutionMode.OnNextBar)
+        {
+            ExecuteAllOrders();
+        }
     }
 
     #endregion =======================================================================================================
@@ -137,6 +145,12 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
         order.PlacementTime = DateTime.Now;
         openOrders.Add(order);
         allOrders.Add(order);
+
+        if (executionMode == ExecutionMode.OnCurrentBar)
+        {
+            ExecuteAllOrders();
+        }
+
         return order;
     }
 
@@ -164,8 +178,8 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     public OrderState PreviewOrder(BackTestOrder order)
     {
         // todo: multibars
-        decimal currentPrice = Engine.DataSource.GetLatestBar(order.Symbol).AdjClose;
-        decimal orderPrice = currentPrice * order.Quantity;
+        double currentPrice = Engine.DataSource.GetLatestBar(order.Symbol).AdjClose;
+        double orderPrice = currentPrice * order.Quantity;
 
         switch (order.Type)
         {
@@ -180,7 +194,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
             case OrderType.MarketSell:
 
                 IPosition pos = positions.FirstOrDefault(pos => pos.Symbol.Equals(order.Symbol));
-                decimal netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
+                double netQuantity = pos != null ? pos.Quantity - order.Quantity : -order.Quantity;
 
                 if (netQuantity < 0)
                 {
@@ -202,9 +216,11 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// Execute all of the outstanding orders at the current bar price.
     /// </summary>
     /// <param name="bar"></param>
-    private void ExecuteAllOrders(Bar bar)
+    private void ExecuteAllOrders()
     {
         BackTestOrder order = openOrders.FirstOrDefault();
+        Bar bar = CurrentBar(order.Symbol);
+
         while (order != null)
         {
             OrderState state = PreviewOrder(order);
@@ -242,7 +258,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="symbol"></param>
     /// <param name="quantity">Negative for sells.</param>
     /// <param name="price"></param>
-    private void ApplyTransaction(string symbol, decimal quantity, decimal price)
+    private void ApplyTransaction(string symbol, double quantity, double price)
     {
         if (quantity == 0)
         {

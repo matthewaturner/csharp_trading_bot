@@ -6,10 +6,10 @@ using Bot.Helpers;
 
 namespace Bot.Indicators
 {
-    public class MovingStandardDeviation : IndicatorBase<decimal>, ISimpleValueIndicator<decimal>
+    public class MovingStandardDeviation : IndicatorBase<double>, ISimpleValueIndicator<double>
     {
-        private readonly Func<MultiBar, decimal> transform;
-        private decimal[] data;
+        private readonly Func<MultiBar, double> transform;
+        private double[] data;
         private int index;
 
         /// <summary>
@@ -17,7 +17,7 @@ namespace Bot.Indicators
         /// </summary>
         /// <param name="lookback"></param>
         /// <param name="transform"></param>
-        public MovingStandardDeviation(int lookback, Func<MultiBar, decimal> transform)
+        public MovingStandardDeviation(int lookback, Func<MultiBar, double> transform)
             : base(lookback)
         {
             if (lookback < 1)
@@ -26,12 +26,12 @@ namespace Bot.Indicators
             }
 
             this.transform = transform;
-            data = new decimal[lookback];
+            data = new double[lookback];
         }
 
         public override string Name => $"MSTD-{Lookback}";
 
-        public decimal Value { get; private set; }
+        public double Value { get; private set; }
 
         /// <summary>
         /// Calculate new values.

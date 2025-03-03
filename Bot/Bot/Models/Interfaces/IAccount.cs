@@ -11,15 +11,15 @@ public interface IAccount
     /// <summary>
     /// Cash available to trade.
     /// </summary>
-    public decimal Cash { get; }
+    public double Cash { get; }
 
     /// <summary>
     /// Amount that can be bought or sold currently.
     /// </summary>
-    public decimal BuyingPower { get; }
+    public double BuyingPower { get; }
 
     /// <summary>
     /// Total market value of the account. Cash + long value + short value.
     /// </summary>
-    public decimal TotalValue { get; }
+    public double TotalValue { get; }
 }

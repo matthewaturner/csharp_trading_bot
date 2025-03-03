@@ -19,7 +19,7 @@ public class MovingAverageCrossover : IndicatorBase<PositionType>, IMovingAverag
     public MovingAverageCrossover(
         int shortLookback,
         int longLookback,
-        Func<MultiBar, decimal> transform)
+        Func<MultiBar, double> transform)
         : base(longLookback)
     {
         if (shortLookback >= longLookback)
@@ -37,9 +37,9 @@ public class MovingAverageCrossover : IndicatorBase<PositionType>, IMovingAverag
 
     public PositionType Value => position;
 
-    public decimal ShortMa => shortMA.Value;
+    public double ShortMa => shortMA.Value;
 
-    public decimal LongMa => longMA.Value;
+    public double LongMa => longMA.Value;
 
     /// <summary>
     /// Calculate new values.

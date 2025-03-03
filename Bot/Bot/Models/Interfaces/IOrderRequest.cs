@@ -21,5 +21,5 @@ public interface IOrderRequest
     /// <summary>
     /// Quantity to buy or sell.
     /// </summary>
-    public decimal Quantity { get; }
+    public double Quantity { get; }
 }

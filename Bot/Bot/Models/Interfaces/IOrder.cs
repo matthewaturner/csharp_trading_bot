@@ -12,9 +12,9 @@ public interface IOrder
 
     public string Symbol { get; }
 
-    public decimal Quantity { get; }
+    public double Quantity { get; }
 
-    public decimal AverageFillPrice { get; }
+    public double AverageFillPrice { get; }
 
     public OrderType Type { get; }
 

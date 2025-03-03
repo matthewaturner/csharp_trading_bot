@@ -29,11 +29,6 @@ public record DatedValue(DateTime Timestamp, double Value);
 /// </summary>
 public static class ResultExtensions
 {
-    public static void Add(this List<DatedValue> list, DateTime timestamp, decimal value)
-    {
-        list.Add(new DatedValue(timestamp, (double)value));
-    }
-
     public static void Add(this List<DatedValue> list, DateTime timestamp, double value)
     {
         list.Add(new DatedValue(timestamp, value));

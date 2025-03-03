@@ -9,7 +9,7 @@ namespace Bot.Brokers;
 /// </summary>
 public static class BrokerExtensions
 {
-    public static IOrder MarketBuy(this IBroker broker, string symbol, decimal quantity)
+    public static IOrder MarketBuy(this IBroker broker, string symbol, double quantity)
     {
         return broker.PlaceOrder(OrderRequest.MarketBuy(symbol, quantity));
     }

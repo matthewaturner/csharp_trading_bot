@@ -18,7 +18,7 @@ namespace Bot.Brokers.BackTest.Models
         /// <param name="quantity"></param>
         public BackTestPosition(
             string symbol,
-            decimal quantity)
+            double quantity)
         {
             Symbol = symbol.ToUpper();
             Quantity = quantity;
@@ -33,7 +33,7 @@ namespace Bot.Brokers.BackTest.Models
         /// <summary>
         /// Number of units. Can be fractional.
         /// </summary>
-        public decimal Quantity { get; set; }
+        public double Quantity { get; set; }
 
         /// <summary>
         /// Long or short.

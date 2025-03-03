@@ -15,7 +15,7 @@ public class BuyAndHold
     public Form Run()
     {
         var smaCrossStrat = new BuyAndHoldStrategy();
-        var broker = new BackTestingBroker(10000);
+        var broker = new BackTestingBroker(42.09);
         var dataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder);
         var analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04);
 

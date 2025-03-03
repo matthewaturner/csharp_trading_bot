@@ -20,7 +20,7 @@ namespace Bot.Brokers.BackTest.Models
         /// Constructor.
         /// </summary>
         /// <param name="initialCash"></param>
-        public BackTestAccount(decimal initialCash)
+        public BackTestAccount(double initialCash)
         {
             AccountId = "backtest-account";
             Cash = initialCash;
@@ -36,17 +36,17 @@ namespace Bot.Brokers.BackTest.Models
         /// <summary>
         /// Cash balance.
         /// </summary>
-        public decimal Cash { get; set; }
+        public double Cash { get; set; }
 
         /// <summary>
         /// Buying power.
         /// </summary>
-        public decimal BuyingPower { get; set; }
+        public double BuyingPower { get; set; }
 
         /// <summary>
         /// Total value of the account.
         /// </summary>
-        public decimal TotalValue { get; set; }
+        public double TotalValue { get; set; }
 
         public override string ToString()
         {
