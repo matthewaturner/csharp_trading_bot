@@ -5,6 +5,7 @@
 
 **/appsettings.json
 Epchan_Examples/
+Output/
 
 # User-specific files
 *.rsuser
