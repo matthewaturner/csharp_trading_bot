@@ -20,7 +20,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     private ExecutionMode executionMode;
 
     // private funcs
-    private ILogger Logger => GlobalConfig.Logger;
+    private ILogger Logger => GlobalConfig.GlobalLogger;
 
     private Bar CurrentBar(string symbol) => Engine.DataSource.GetLatestBar(symbol);
 

@@ -75,7 +75,7 @@ namespace Bot.Models
         {
             string ToStr(double v) => v.ToString("0.000");
 
-            return $"{Timestamp.StdToString()}  " +
+            return $"{Timestamp.StdToString()} " +
                 $"O:{ToStr(Open)} H:{ToStr(High)} L:{ToStr(Low)} C:{ToStr(Close)} V:{Volume} A:{AdjClose}";
         }
     }

@@ -10,7 +10,8 @@ using Bot.Events;
 using Bot.DataSources.Alpaca;
 using Bot.Analyzers;
 using Bot.Models.Results;
-
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Bot.Engine;
 
@@ -37,7 +38,7 @@ public class TradingEngine() : ITradingEngine
     public IStrategy Strategy { get; set; }
 
     // Shared logger, todo should remove in favor of referencing from shared config always
-    public ILogger Logger => GlobalConfig.Logger;
+    public ILogger Logger => GlobalConfig.GlobalLogger;
 
     #endregion
 
@@ -76,7 +77,8 @@ public class TradingEngine() : ITradingEngine
         RunMode runMode,
         Interval interval,
         DateTime? start = null,
-        DateTime? end = null)
+        DateTime? end = null,
+        [CallerFilePath] string callerFilePath = null)
     {
         Interval = interval;
         Setup();
@@ -95,10 +97,18 @@ public class TradingEngine() : ITradingEngine
                     start ?? DateTime.MinValue,
                     end ?? DateTime.MaxValue);
                 break;
-
         }
 
         FinalizeEvent?.Invoke(this, new FinalizeEvent());
+
+        if (!string.IsNullOrWhiteSpace(callerFilePath))
+        {
+            string dateTimeStr = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            string callerClass = Path.GetFileNameWithoutExtension(callerFilePath);
+            string fullFileName = Path.Join(GlobalConfig.OutputFolder, $"{dateTimeStr} {callerClass}.csv");
+            CsvExporter.ExportToCSV(Analyzer.RunResults, fullFileName);
+        }
+
         return Analyzer.RunResults;
     }
 }

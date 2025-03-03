@@ -39,6 +39,9 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IAnalyzer
         double dailyReturn = (currentPortfolioValue - previousPortfolioValue) / previousPortfolioValue;
         RunResults.DailyReturns.Add(currentTime, dailyReturn);
 
+        double excessDailyReturn = dailyReturn - (AnnualRiskFreeRate / Engine.Interval.GetIntervalsPerYear());
+        RunResults.ExcessDailyReturns.Add(currentTime, excessDailyReturn);
+
         double prevCumulativeReturn = RunResults.CumulativeReturns.LastOrDefault()?.Value ?? 0;
         double cumulativeReturn = (1 + prevCumulativeReturn) * (1 + dailyReturn) - 1;
         RunResults.CumulativeReturns.Add(currentTime, cumulativeReturn);

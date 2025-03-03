@@ -12,11 +12,15 @@ public class RunResult
     public List<DatedValue> UnderlyingValues = new();
     public List<DatedValue> PortfolioValues = new();
     public List<DatedValue> DailyReturns = new();
+    public List<DatedValue> ExcessDailyReturns = new();
     public List<DatedValue> CumulativeReturns = new();
 
+    public List<DatedValue> HighWaterMark = new();
+    public List<DatedValue> Drawdown = new();
+    public List<DatedValue> MaxDrawdownDuration = new();
+    public List<DatedValue> SharpeRatio = new();
+
     public double AnnualizedSharpeRatio = double.NaN;
-    public double MaxDrawdown = double.NaN;
-    public double MaxDrawdownDuration = double.NaN;
 }
 
 /// <summary>

@@ -14,11 +14,17 @@ public static class GlobalConfig
 {
     private static IConfiguration Config { get; set; }
 
-    public static ILogger Logger { get; private set; }
+    public static ILoggerFactory LogFactory { get; private set; }
+
+    public static ILogger GlobalLogger { get; private set; }
 
     public static string EpChanDataFolder = Path.Combine(
         AppContext.BaseDirectory,
         "..", "..", "..", "..", "..", "Data", "epchan");
+
+    public static string OutputFolder = Path.Combine(
+        AppContext.BaseDirectory,
+        "..", "..", "..", "..", "..", "Output");
 
     /// <summary>
     /// Constructor.
@@ -34,17 +40,19 @@ public static class GlobalConfig
         // get the loglevel from appsettings
         Enum.TryParse(GetValue("LogLevel"), out LogLevel logLevel);
 
-        Logger = LoggerFactory.Create(builder =>
+        LogFactory = LoggerFactory.Create(builder =>
         {
             builder
                 .AddSimpleConsole(options =>
                 {
-                    options.IncludeScopes = true;
                     options.TimestampFormat = "[HH:mm:ss] ";
+                    options.SingleLine = true;
                 })
                 .AddConsole()
                 .SetMinimumLevel(logLevel);
-        }).CreateLogger("Global");
+        });
+
+        GlobalLogger = LogFactory.CreateLogger("Global");
     }
 
     /// <summary>

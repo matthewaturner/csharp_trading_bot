@@ -11,7 +11,7 @@ namespace Bot.DataSources;
 
 public abstract class DataSourceBase : IDataSource
 {
-    private ILogger Logger => GlobalConfig.Logger;
+    private ILogger Logger => GlobalConfig.GlobalLogger;
 
     private Bar CurrentBar;
 
