@@ -16,8 +16,10 @@ using Bot.Helpers;
 
 namespace Bot.Engine;
 
-public class TradingEngine() : ITradingEngine
+public class TradingEngine(bool writeCsvOutput = false) : ITradingEngine
 {
+    private bool WriteCsvOutput = writeCsvOutput;
+
     #region Shared Properties ========================================================================================
 
     // The single symbol that currently represents the universe of stocks
@@ -102,7 +104,7 @@ public class TradingEngine() : ITradingEngine
 
         FinalizeEvent?.Invoke(this, new FinalizeEvent());
 
-        if (!string.IsNullOrWhiteSpace(callerFilePath))
+        if (!string.IsNullOrWhiteSpace(callerFilePath) && WriteCsvOutput)
         {
             string dateTimeStr = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             string callerClass = Path.GetFileNameWithoutExtension(callerFilePath);

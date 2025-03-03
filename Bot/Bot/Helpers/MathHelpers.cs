@@ -13,6 +13,6 @@ public static class MathHelpers
     public static double StdDev(IEnumerable<double> values)
     {
         double avg = values.Average();
-        return values.Sum(v => Math.Pow(v - avg, 2)) / (values.Count() - 1);
+        return Math.Sqrt(values.Sum(v => Math.Pow(v - avg, 2)) / (values.Count() - 1));
     }
 }

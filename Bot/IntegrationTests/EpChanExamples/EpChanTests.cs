@@ -31,6 +31,6 @@ public class EpChanTests
 
         RunResult result = engine.RunAsync(RunMode.BackTest, Interval.OneDay).Result;
 
-        result.AnnualizedSharpeRatio.IsApproximately(0.789);
+        result.AnnualizedSharpeRatio.IsApproximately(0.789054m);
     }
 }
