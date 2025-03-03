@@ -4,8 +4,6 @@ using Bot.Events;
 using Bot.Helpers;
 using Bot.Models.Results;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Bot.Analyzers;

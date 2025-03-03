@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace FormRunner;
 
@@ -12,9 +13,10 @@ internal static class Program
     static extern bool AllocConsole();
 
     /// <summary>
-    ///  The main entry point for the application.
+    /// The main entry point for the application.
     /// </summary>
     [STAThread]
+    [SupportedOSPlatform("windows")]
     static void Main(string[] args)
     {
         if (args.Length < 2 || args[0] != "--fileName")
@@ -58,6 +60,5 @@ internal static class Program
         Form form = (Form)method.Invoke(instance, null)!;
 
         Application.Run(form);
-
     }
 }

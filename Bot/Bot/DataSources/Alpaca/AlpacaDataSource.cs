@@ -32,7 +32,7 @@ public class AlpacaDataSource : DataSourceBase
     public override async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, Interval interval, DateTime start, DateTime end)
     {
         var results = new List<Bar>();
-        string? nextPageToken = null;
+        string nextPageToken = null;
 
         do
         {
