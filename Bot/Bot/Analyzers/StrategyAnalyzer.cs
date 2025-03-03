@@ -86,11 +86,8 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
     {
         double periodsPerYear = Engine.Interval.GetIntervalsPerYear();
         double riskFreeRate = AnnualRiskFreeRate != 0 ? AnnualRiskFreeRate / periodsPerYear : 0;
-
-        IEnumerable<double> excessReturns = RunResults.DailyReturns.Values().Select(v => v - riskFreeRate);
-
-        double mean = excessReturns.Average();
-        double stddev = MathHelpers.StandardDeviation(excessReturns);
+        double mean = RunResults.ExcessDailyReturns.Values().Average();
+        double stddev = MathHelpers.StdDev(RunResults.ExcessDailyReturns.Values());
         return (mean / stddev) * Math.Sqrt(periodsPerYear);
     }
 

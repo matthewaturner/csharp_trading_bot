@@ -47,7 +47,7 @@ namespace Bot.Indicators
                 this.IsHydrated = true;
             }
 
-            Value = MathHelpers.StandardDeviation(data);
+            Value = MathHelpers.StdDev(data);
         }
 
         /// <summary>
