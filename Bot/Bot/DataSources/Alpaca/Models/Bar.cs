@@ -17,7 +17,7 @@ public class Bar
 
     [JsonPropertyName("l")]
     public double L { get; set; }
-    
+
     [JsonPropertyName("c")]
     public double C { get; set; }
 

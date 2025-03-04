@@ -1,10 +1,8 @@
-﻿using Bot.Engine;
-using Bot.Events;
+﻿using Bot.Events;
 using Bot.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bot.DataSources;
@@ -49,8 +47,8 @@ public abstract class DataSourceBase : IDataSource
     /// Gets a list of bars for a symbol, interval, and period of time.
     /// </summary>
     public abstract Task<List<Bar>> GetHistoricalBarsAsync(
-        string symbol, 
-        Interval interval, 
-        DateTime start, 
+        string symbol,
+        Interval interval,
+        DateTime start,
         DateTime end);
 }

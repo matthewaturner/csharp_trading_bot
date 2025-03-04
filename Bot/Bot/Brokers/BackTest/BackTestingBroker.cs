@@ -1,12 +1,11 @@
-﻿using Bot.Exceptions;
+﻿using Bot.Brokers.BackTest.Models;
+using Bot.Events;
+using Bot.Models;
+using Bot.Models.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bot.Models.Interfaces;
-using Bot.Brokers.BackTest.Models;
-using Bot.Models;
-using Microsoft.Extensions.Logging;
-using Bot.Events;
 
 namespace Bot.Brokers.BackTest;
 
@@ -28,7 +27,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// Dependency injection constructor.
     /// </summary>
     public BackTestingBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBar)
-    { 
+    {
         this.account = new BackTestAccount(initialFunds);
         this.positions = new List<BackTestPosition>();
         this.openOrders = new List<BackTestOrder>();
@@ -126,10 +125,10 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <returns></returns>
     public IList<IOrder> QueryOrders(IEnumerable<string> symbols, OrderState state, DateTime after, DateTime until, int limit = 50)
     {
-        return allOrders.Where(order => 
+        return allOrders.Where(order =>
             symbols.Contains(order.Symbol, StringComparer.OrdinalIgnoreCase)
             && order.State == state
-            && order.PlacementTime > after 
+            && order.PlacementTime > after
             && order.PlacementTime < until)
             .Take(limit).ToList<IOrder>();
     }

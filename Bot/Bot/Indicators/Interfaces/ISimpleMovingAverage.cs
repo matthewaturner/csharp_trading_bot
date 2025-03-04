@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace Bot.Indicators.Interfaces;
 
-namespace Bot.Indicators.Interfaces
+public interface ISimpleMovingAverage : ISimpleValueIndicator<double>
 {
-	public interface ISimpleMovingAverage : ISimpleValueIndicator<double>
-	{
-	}
 }
 

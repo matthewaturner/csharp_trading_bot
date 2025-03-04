@@ -54,18 +54,18 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
             double drawdown = (1 + cumulativeReturn) / (1 + highWaterMark) - 1;
             RunResults.Drawdown.Add(currentTime, drawdown);
 
-            double prevDrawdownDuration = RunResults.MaxDrawdownDuration.LastOrDefault()?.Value ?? 0;
-            double maxDrawdownDuration = drawdown < 0 ? prevDrawdownDuration + 1 : 0;
-            RunResults.MaxDrawdownDuration.Add(currentTime, maxDrawdownDuration);
+            double prevDrawdownDuration = RunResults.DrawdownDuration.LastOrDefault()?.Value ?? 0;
+            double drawdownDuration = drawdown < 0 ? prevDrawdownDuration + 1 : 0;
+            RunResults.DrawdownDuration.Add(currentTime, drawdownDuration);
         }
         else
         {
             RunResults.DailyReturns.Add(currentTime, 0);
             RunResults.ExcessDailyReturns.Add(currentTime, 0);
             RunResults.CumulativeReturns.Add(currentTime, 0);
-            RunResults.HighWaterMark.Add(currentTime, currentPortfolioValue);
+            RunResults.HighWaterMark.Add(currentTime, 0);
             RunResults.Drawdown.Add(currentTime, 0);
-            RunResults.MaxDrawdownDuration.Add(currentTime, 0);
+            RunResults.DrawdownDuration.Add(currentTime, 0);
         }
     }
 
@@ -76,6 +76,8 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
     public void OnFinalize(object sender, FinalizeEvent e)
     {
         RunResults.AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio();
+        RunResults.MaximumDrawdown = RunResults.Drawdown.Values().Min();
+        RunResults.MaximumDrawdownDuration = RunResults.DrawdownDuration.Values().Max();
     }
 
     #region Final Calculations =======================================================================================

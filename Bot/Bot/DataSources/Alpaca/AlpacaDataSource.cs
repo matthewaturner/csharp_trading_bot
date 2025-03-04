@@ -1,13 +1,12 @@
 
+using Bot.Helpers;
+using Bot.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System;
-using Bot.Helpers;
-using Bot.Models;
-
 using Ap = Bot.DataSources.Alpaca.Models;
 
 namespace Bot.DataSources.Alpaca;
@@ -42,7 +41,7 @@ public class AlpacaDataSource : DataSourceBase
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            var barsResult = JsonSerializer.Deserialize<Ap.BarsResponse>(json) 
+            var barsResult = JsonSerializer.Deserialize<Ap.BarsResponse>(json)
                 ?? throw new JsonException($"{nameof(GetHistoricalBarsAsync)}: Failed to deserialize response.");
 
             results.AddRange(barsResult?.Bars.Select(b => b.ToBotModel(symbol)));

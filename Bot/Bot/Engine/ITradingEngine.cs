@@ -1,11 +1,11 @@
 ﻿using Bot.Brokers;
+using Bot.DataSources;
 using Bot.Models;
+using Bot.Models.Results;
 using Bot.Strategies;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Bot.DataSources;
-using Microsoft.Extensions.Logging;
-using Bot.Models.Results;
 
 namespace Bot.Engine;
 

@@ -69,7 +69,7 @@ public static class DateTimeHelper
     /// <returns></returns>
     public static DateTime GetNthPreviousTradingDay(this DateTime dt, int n)
     {
-        for (int i=0; i<n; i++)
+        for (int i = 0; i < n; i++)
         {
             dt = dt.GetPreviousTradingDay();
         }

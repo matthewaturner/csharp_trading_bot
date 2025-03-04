@@ -1,27 +1,26 @@
 ﻿
 using System.Runtime.Serialization;
 
-namespace Bot.Models
+namespace Bot.Models;
+
+public enum OrderState
 {
-    public enum OrderState
-    {
-        [EnumMember(Value = "open")]
-        Open,
+    [EnumMember(Value = "open")]
+    Open,
 
-        [EnumMember(Value = "cancelled")]
-        Cancelled,
+    [EnumMember(Value = "cancelled")]
+    Cancelled,
 
-        [EnumMember(Value = "rejected")]
-        Rejected,
+    [EnumMember(Value = "rejected")]
+    Rejected,
 
-        [EnumMember(Value = "filled")]
-        Filled,
+    [EnumMember(Value = "filled")]
+    Filled,
 
-        /// <summary>
-        /// Catch all for unimplemented broker-specific order states.
-        /// </summary>
-        [EnumMember(Value = "unknown")]
-        Unknown
+    /// <summary>
+    /// Catch all for unimplemented broker-specific order states.
+    /// </summary>
+    [EnumMember(Value = "unknown")]
+    Unknown
 
-    }
 }

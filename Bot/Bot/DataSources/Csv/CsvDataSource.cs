@@ -16,7 +16,7 @@ namespace Bot.DataSources.Csv;
 /// </summary>
 public class CsvDataSource : DataSourceBase
 {
-    private readonly string DataPath; 
+    private readonly string DataPath;
 
     public CsvDataSource(string dataFolderPath)
     {

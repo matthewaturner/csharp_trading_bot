@@ -19,7 +19,7 @@ public class BuyAndHold
         var dataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder);
         var analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04);
 
-        var engine = new TradingEngine()
+        var engine = new TradingEngine(writeCsvOutput: true)
         {
             Broker = broker,
             DataSource = dataSource,

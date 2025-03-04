@@ -16,9 +16,11 @@ public class RunResult
 
     public List<DatedValue> HighWaterMark = new();
     public List<DatedValue> Drawdown = new();
-    public List<DatedValue> MaxDrawdownDuration = new();
+    public List<DatedValue> DrawdownDuration = new();
 
     public double AnnualizedSharpeRatio = double.NaN;
+    public double MaximumDrawdown = 0;
+    public double MaximumDrawdownDuration = 0;
 }
 
 /// <summary>

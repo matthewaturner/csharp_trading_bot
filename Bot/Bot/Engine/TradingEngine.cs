@@ -1,18 +1,18 @@
-﻿using Bot.Brokers;
-using Bot.Models;
-using Bot.Strategies;
-using System.Threading.Tasks;
-using System;
-using Bot.DataSources;
-using Microsoft.Extensions.Logging;
+﻿using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.Brokers.BackTest;
-using Bot.Events;
+using Bot.DataSources;
 using Bot.DataSources.Alpaca;
-using Bot.Analyzers;
+using Bot.Events;
+using Bot.Helpers;
+using Bot.Models;
 using Bot.Models.Results;
+using Bot.Strategies;
+using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Bot.Helpers;
+using System.Threading.Tasks;
 
 namespace Bot.Engine;
 

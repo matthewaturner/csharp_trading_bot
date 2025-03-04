@@ -3,16 +3,15 @@ using Bot.Indicators;
 using Bot.Models;
 using System.Collections.Generic;
 
-namespace Bot.Strategies
+namespace Bot.Strategies;
+
+public interface IStrategy : IInitialize, IMarketDataReceiver
 {
-    public interface IStrategy : IInitialize, IMarketDataReceiver
-    {
-        int Lookback { get; }
+    int Lookback { get; }
 
-        bool IsHydrated { get; }
+    bool IsHydrated { get; }
 
-        IList<IIndicator> Indicators { get; }
+    IList<IIndicator> Indicators { get; }
 
-        void ProcessBar(Bar bar);
-    }
+    void ProcessBar(Bar bar);
 }

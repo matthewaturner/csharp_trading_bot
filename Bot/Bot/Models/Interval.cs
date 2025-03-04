@@ -35,20 +35,20 @@ public class Interval
 
     public double GetIntervalsPerYear() => _type switch
     {
-        IntervalType.Month => (252.0/12) / _num,
-        IntervalType.Week => (252.0/5) / _num,
+        IntervalType.Month => (252.0 / 12) / _num,
+        IntervalType.Week => (252.0 / 5) / _num,
         IntervalType.Day => 252.0 / _num,            // 252 days of trading per year
-        IntervalType.Hour => 6.5*252 / _num,         // 6.5 hours of trading per day
-        IntervalType.Minute => 60.0*24*252 / _num,
+        IntervalType.Hour => 6.5 * 252 / _num,         // 6.5 hours of trading per day
+        IntervalType.Minute => 60.0 * 24 * 252 / _num,
         _ => throw new ArgumentOutOfRangeException()
     };
 
     public override string ToString() => _type switch
     {
-        IntervalType.Month  => $"{_num}M",
-        IntervalType.Week   => $"{_num}W",
-        IntervalType.Day    => $"{_num}D",
-        IntervalType.Hour   => $"{_num}H",
+        IntervalType.Month => $"{_num}M",
+        IntervalType.Week => $"{_num}W",
+        IntervalType.Day => $"{_num}D",
+        IntervalType.Hour => $"{_num}H",
         IntervalType.Minute => $"{_num}T",
         _ => throw new ArgumentOutOfRangeException()
     };

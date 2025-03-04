@@ -1,5 +1,5 @@
-﻿using Bot.Models;
-using Bot.Indicators.Interfaces;
+﻿using Bot.Indicators.Interfaces;
+using Bot.Models;
 using System;
 
 namespace Bot.Indicators;

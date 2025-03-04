@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Bot.Exceptions
-{
-    public class NotHydratedException : Exception
-    {
-        public NotHydratedException()
-            : base()
-        { }
+namespace Bot.Exceptions;
 
-        public NotHydratedException(string message)
-            : base(message)
-        { }
-    }
+public class NotHydratedException : Exception
+{
+    public NotHydratedException()
+        : base()
+    { }
+
+    public NotHydratedException(string message)
+        : base(message)
+    { }
 }

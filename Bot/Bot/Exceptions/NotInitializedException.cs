@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace Bot.Exceptions
-{
-    public class NotInitializedException : Exception
-    {
-        public NotInitializedException()
-            : base()
-        { }
+namespace Bot.Exceptions;
 
-        public NotInitializedException(string message)
-            : base(message)
-        { }
-    }
+public class NotInitializedException : Exception
+{
+    public NotInitializedException()
+        : base()
+    { }
+
+    public NotInitializedException(string message)
+        : base(message)
+    { }
 }

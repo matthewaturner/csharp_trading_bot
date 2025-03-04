@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System.IO;
-using System;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
+using System;
+using System.IO;
 
 namespace Bot;
 

@@ -1,10 +1,9 @@
 ﻿
-namespace Bot.Models
+namespace Bot.Models;
+
+public enum PositionType
 {
-    public enum PositionType
-    {
-        Long = 1,
-        Short = -1,
-        Neutral = 0,
-    }
+    Long = 1,
+    Short = -1,
+    Neutral = 0,
 }

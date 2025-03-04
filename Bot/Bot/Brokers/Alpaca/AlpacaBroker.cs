@@ -1,6 +1,4 @@
-﻿
-using Bot.Brokers.Alpaca;
-using Bot.Brokers.Alpaca.Models;
+﻿using Bot.Brokers.Alpaca.Models;
 using Bot.Engine;
 using Bot.Exceptions;
 using Bot.Models;
@@ -12,13 +10,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace Bot.Brokers;
+namespace Bot.Brokers.Alpaca;
 
 public class AlpacaBroker : IBroker
 {
     private readonly string apiKeyId;
     private readonly string apiKeySecret;
-    private readonly AlpacaConfig config;
 
     private ITradingEngine engine;
     private RestClient restClient;
@@ -35,6 +32,7 @@ public class AlpacaBroker : IBroker
         apiKeyId = GlobalConfig.GetValue("Alpaca:ApiKey");
         apiKeySecret = GlobalConfig.GetValue("Alpaca:ApiKeySecret");
 
+        /*
         baseUrl = config.RunMode switch
         {
             RunMode.BackTest => throw new NotImplementedException(),
@@ -42,8 +40,11 @@ public class AlpacaBroker : IBroker
             RunMode.Paper => config.PaperApiBaseUrl,
             _ => throw new NotImplementedException(),
         };
+        */
 
         restClient = new RestClient(baseUrl);
+
+        throw new NotImplementedException("Fix the broker.");
     }
 
     /// <summary>
@@ -145,9 +146,9 @@ public class AlpacaBroker : IBroker
         {
             throw new ArgumentNullException(nameof(orderId));
         }
-        
+
         RestRequest request = new RestRequest($"/v2/orders/{orderId}", Method.Get);
-        RestResponse response = SendAuthenticatedHttpRequest(request, validate:false);
+        RestResponse response = SendAuthenticatedHttpRequest(request, validate: false);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {

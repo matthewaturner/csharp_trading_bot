@@ -2,24 +2,23 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Bot.Brokers.Alpaca.Models
+namespace Bot.Brokers.Alpaca.Models;
+
+[JsonConverter(typeof(StringEnumConverter))]
+public enum AlpacaOrderType
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum AlpacaOrderType
-    {
-        [EnumMember(Value = "market")]
-        Market,
+    [EnumMember(Value = "market")]
+    Market,
 
-        [EnumMember(Value = "limit")]
-        Limit,
+    [EnumMember(Value = "limit")]
+    Limit,
 
-        [EnumMember(Value = "stop")]
-        Stop,
+    [EnumMember(Value = "stop")]
+    Stop,
 
-        [EnumMember(Value = "stop_limit")]
-        StopLimit,
+    [EnumMember(Value = "stop_limit")]
+    StopLimit,
 
-        [EnumMember(Value = "trailing_stop")]
-        TrailingStop
-    }
+    [EnumMember(Value = "trailing_stop")]
+    TrailingStop
 }

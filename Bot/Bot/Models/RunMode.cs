@@ -1,9 +1,8 @@
-﻿namespace Bot.Models
+﻿namespace Bot.Models;
+
+public enum RunMode
 {
-    public enum RunMode
-    {
-        BackTest,
-        Paper,
-        Live
-    }
+    BackTest,
+    Paper,
+    Live
 }
