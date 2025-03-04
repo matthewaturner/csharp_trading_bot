@@ -1,4 +1,5 @@
-﻿using Bot.Models.Interfaces;
+﻿using Bot.Models.Broker;
+using Bot.Models.Interfaces;
 using System;
 
 namespace Bot.Models;

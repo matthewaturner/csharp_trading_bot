@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Models.Broker;
 using Bot.Models.Interfaces;
 
 namespace Bot.Brokers.BackTest.Models;

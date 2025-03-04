@@ -1,13 +1,13 @@
-﻿using Bot.Models;
+﻿using Bot.Models.MarketData;
 
 namespace Bot.Events;
 
 /// <summary>
 /// The event to raise.
 /// </summary>
-public class MarketDataEvent(Bar bar)
+public class MarketDataEvent(MarketSnapshot bars)
 {
-    public Bar Bar { get; } = bar;
+    public MarketSnapshot Snapshot { get; } = bars;
 }
 
 /// <summary>

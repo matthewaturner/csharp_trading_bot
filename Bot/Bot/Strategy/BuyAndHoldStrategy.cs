@@ -1,18 +1,19 @@
 ﻿using Bot.Brokers;
-using Bot.Models;
+using Bot.Models.MarketData;
 using Bot.Strategies;
 
 namespace Bot.Strategy;
 
-public class BuyAndHoldStrategy() : StrategyBase
+public class BuyAndHoldStrategy(string symbol) : StrategyBase
 {
+    private string symbol = symbol;
     private bool invested = false;
 
-    public override void ProcessBar(Bar bar)
+    public override void ProcessBar(MarketSnapshot snapshot)
     {
         if (!invested)
         {
-            Broker.MarketBuy(bar.Symbol, Account.BuyingPower / bar.AdjClose);
+            Broker.MarketBuy(symbol, Account.BuyingPower / snapshot[symbol].AdjClose);
             invested = true;
         }
     }

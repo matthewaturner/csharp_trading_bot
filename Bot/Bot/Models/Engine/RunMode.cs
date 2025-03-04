@@ -1,4 +1,4 @@
-﻿namespace Bot.Models;
+﻿namespace Bot.Models.Engine;
 
 public enum RunMode
 {

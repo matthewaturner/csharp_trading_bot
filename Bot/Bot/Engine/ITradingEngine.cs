@@ -1,10 +1,9 @@
 ﻿using Bot.Brokers;
 using Bot.DataSources;
-using Bot.Models;
+using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
 
 namespace Bot.Engine;
@@ -12,14 +11,9 @@ namespace Bot.Engine;
 public interface ITradingEngine
 {
     /// <summary>
-    /// The single symbol that represents the universe currently
+    /// The config for this run.
     /// </summary>
-    public string Symbol { get; }
-
-    /// <summary>
-    /// The interval we are trading on.
-    /// </summary>
-    public Interval Interval { get; }
+    public RunConfig RunConfig { get; }
 
     /// <summary>
     /// Gets current data source.
@@ -44,10 +38,5 @@ public interface ITradingEngine
     /// <summary>
     /// Runs the strategy.
     /// </summary>
-    Task<RunResult> RunAsync(
-        RunMode runMode,
-        Interval interval,
-        DateTime? start = null,
-        DateTime? end = null,
-        string callerFilePath = null);
+    Task<RunResult> RunAsync();
 }

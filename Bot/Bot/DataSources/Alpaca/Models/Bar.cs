@@ -1,4 +1,3 @@
-
 using System;
 using System.Text.Json.Serialization;
 
@@ -24,8 +23,8 @@ public class Bar
     [JsonPropertyName("v")]
     public long V { get; set; }
 
-    public Bot.Models.Bar ToBotModel(string symbol)
+    public Bot.Models.MarketData.Bar ToBotModel(string symbol)
     {
-        return new Bot.Models.Bar(DateTime.Parse(T), symbol, O, H, L, C, V, null);
+        return new Bot.Models.MarketData.Bar(DateTime.Parse(T), symbol, O, H, L, C, V, null);
     }
 }

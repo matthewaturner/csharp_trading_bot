@@ -1,10 +1,9 @@
-﻿
-using Bot.Helpers;
+﻿using Bot.Helpers;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Bot.Models;
+namespace Bot.Models.MarketData;
 
 public class Bar
 {

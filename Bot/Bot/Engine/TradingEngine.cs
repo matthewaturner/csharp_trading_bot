@@ -5,28 +5,20 @@ using Bot.DataSources;
 using Bot.DataSources.Alpaca;
 using Bot.Events;
 using Bot.Helpers;
-using Bot.Models;
+using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Bot.Engine;
 
-public class TradingEngine(bool writeCsvOutput = false) : ITradingEngine
+public class TradingEngine : ITradingEngine
 {
-    private bool WriteCsvOutput = writeCsvOutput;
-
-    #region Shared Properties ========================================================================================
-
-    // The single symbol that currently represents the universe of stocks
-    public string Symbol { get; set; }
-
-    // The interval we are running on, daily hourly monthly etc.
-    public Interval Interval { get; private set; }
+    // RunConfig object holds all the configuration for the run
+    public RunConfig RunConfig { get; set;  }
 
     // Broker object
     public IBroker Broker { get; set; } = new BackTestingBroker(10000);
@@ -43,13 +35,10 @@ public class TradingEngine(bool writeCsvOutput = false) : ITradingEngine
     // Shared logger, todo should remove in favor of referencing from shared config always
     public ILogger Logger => GlobalConfig.GlobalLogger;
 
-    #endregion
-
-    #region Event Handlers ===========================================================================================
-
+    /// <summary>
+    /// Finalize event handlers.
+    /// </summary>
     private event EventHandler<FinalizeEvent> FinalizeEvent;
-
-    #endregion
 
     /// <summary>
     /// Setup everything.
@@ -76,17 +65,11 @@ public class TradingEngine(bool writeCsvOutput = false) : ITradingEngine
     /// <summary>
     /// Sets up the trading engine.
     /// </summary>
-    public async Task<RunResult> RunAsync(
-        RunMode runMode,
-        Interval interval,
-        DateTime? start = null,
-        DateTime? end = null,
-        [CallerFilePath] string callerFilePath = null)
+    public async Task<RunResult> RunAsync()
     {
-        Interval = interval;
         Setup();
 
-        switch (runMode)
+        switch (RunConfig.RunMode)
         {
             default:
             case RunMode.Live:
@@ -95,20 +78,18 @@ public class TradingEngine(bool writeCsvOutput = false) : ITradingEngine
 
             case RunMode.BackTest:
                 await DataSource.StreamBars(
-                    Symbol,
-                    interval,
-                    start ?? DateTime.MinValue,
-                    end ?? DateTime.MaxValue);
+                    RunConfig.Universe.AllSymbols,
+                    RunConfig.Interval,
+                    RunConfig.Start,
+                    RunConfig.End);
                 break;
         }
 
         FinalizeEvent?.Invoke(this, new FinalizeEvent());
 
-        if (!string.IsNullOrWhiteSpace(callerFilePath) && WriteCsvOutput)
+        if (RunConfig.ShouldWriteCsvOutput)
         {
-            string dateTimeStr = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string callerClass = Path.GetFileNameWithoutExtension(callerFilePath);
-            string fullFileName = Path.Join(GlobalConfig.OutputFolder, $"{dateTimeStr} {callerClass}.csv");
+            string fullFileName = Path.Join(GlobalConfig.OutputFolder, RunConfig.CsvOutputFileName);
             CsvExporter.ExportToCSV(Analyzer.RunResults, fullFileName);
         }
 

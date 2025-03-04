@@ -1,5 +1,5 @@
 ﻿using Bot.DataSources.Alpaca;
-using Bot.Models;
+using Bot.Models.Engine;
 
 namespace Runner.RunFiles;
 

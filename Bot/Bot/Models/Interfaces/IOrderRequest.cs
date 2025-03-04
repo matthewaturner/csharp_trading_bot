@@ -1,4 +1,6 @@
-﻿namespace Bot.Models.Interfaces;
+﻿using Bot.Models.Broker;
+
+namespace Bot.Models.Interfaces;
 
 public interface IOrderRequest
 {

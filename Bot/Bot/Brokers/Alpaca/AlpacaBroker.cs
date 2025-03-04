@@ -1,7 +1,7 @@
 ﻿using Bot.Brokers.Alpaca.Models;
 using Bot.Engine;
 using Bot.Exceptions;
-using Bot.Models;
+using Bot.Models.Broker;
 using Bot.Models.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
@@ -19,12 +19,10 @@ public class AlpacaBroker : IBroker
 
     private ITradingEngine engine;
     private RestClient restClient;
-    private string baseUrl;
 
     /// <summary>
     /// Constructor which allows for dependency injection on startup.
     /// </summary>
-    /// <param name="config"></param>
     /// <param name="keyVaultManager"></param>
     /// <param name="httpClient"></param>
     public AlpacaBroker()
@@ -42,7 +40,7 @@ public class AlpacaBroker : IBroker
         };
         */
 
-        restClient = new RestClient(baseUrl);
+        restClient = new RestClient("fakseBaseUrl");
 
         throw new NotImplementedException("Fix the broker.");
     }

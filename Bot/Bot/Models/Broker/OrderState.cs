@@ -1,7 +1,6 @@
-﻿
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
-namespace Bot.Models;
+namespace Bot.Models.Broker;
 
 public enum OrderState
 {

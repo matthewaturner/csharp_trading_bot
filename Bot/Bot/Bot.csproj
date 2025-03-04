@@ -19,10 +19,6 @@
     <PackageReference Include="RestSharp" Version="112.1.0" />
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="112.1.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Indicators\Interfaces\" />
-  </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -33,9 +29,5 @@
     <None Update="Config\backtest_fljh_ewje_fltw.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Indicators\Interfaces\" />
   </ItemGroup>
 </Project>

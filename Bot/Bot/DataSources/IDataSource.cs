@@ -1,5 +1,6 @@
 ﻿using Bot.Events;
-using Bot.Models;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using System;
 using System.Threading.Tasks;
 
@@ -15,11 +16,8 @@ public interface IDataSource
     /// <summary>
     /// Stream bars to the engine.
     /// </summary>
-    /// <param name="interval"></param>
-    /// <param name="start"></param>
-    /// <param name="end"></param>
     Task StreamBars(
-        string symbol,
+        string[] symbols,
         Interval interval,
         DateTime start,
         DateTime? end);

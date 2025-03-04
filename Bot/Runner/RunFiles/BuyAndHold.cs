@@ -2,7 +2,8 @@
 using Bot.Brokers.BackTest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
-using Bot.Models;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using Bot.Models.Results;
 using Bot.Strategy;
 
@@ -12,23 +13,20 @@ public class BuyAndHold
 {
     public void Run()
     {
-        var smaCrossStrat = new BuyAndHoldStrategy();
-        var broker = new BackTestingBroker(10000);
-        var dataSource = new AlpacaDataSource();
-
         var engine = new TradingEngine()
         {
-            Broker = broker,
-            DataSource = dataSource,
-            Strategy = smaCrossStrat,
-            Symbol = "MSFT"
+            RunConfig = new RunConfig(
+                interval: Interval.OneDay,
+                runMode: RunMode.BackTest,
+                start: DateTime.Now.AddYears(-5),
+                end: DateTime.Now,
+                universe: new Universe("MSFT")),
+            Broker = new BackTestingBroker(10000),
+            DataSource = new AlpacaDataSource(),
+            Strategy = new BuyAndHoldStrategy("IGE"),
         };
 
-        RunResult result = engine.RunAsync(
-            RunMode.BackTest,
-            Interval.OneDay,
-            DateTime.Now.AddYears(-5),
-            DateTime.Now).Result;
+        RunResult result = engine.RunAsync().Result;
 
         Console.WriteLine("Done.");
     }

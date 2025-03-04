@@ -2,6 +2,7 @@
 using Bot.Engine;
 using Bot.Events;
 using Bot.Helpers;
+using Bot.Models.Engine;
 using Bot.Models.Results;
 using System;
 using System.Linq;
@@ -12,6 +13,7 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
 {
     private ITradingEngine Engine;
     private IBroker Broker => Engine.Broker;
+    private Interval Interval => Engine.RunConfig.Interval;
 
     private double AnnualRiskFreeRate = annualRiskFreeRate;
 
@@ -29,7 +31,7 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
     public void OnEvent(object sender, MarketDataEvent e)
     {
         bool isFirstBar = RunResults.PortfolioValues.Count == 0;
-        DateTime currentTime = e.Bar.Timestamp;
+        DateTime currentTime = e.Snapshot.Timestamp;
 
         double currentPortfolioValue = (double)Broker.GetAccount().TotalValue;
         double previousPortfolioValue = RunResults.PortfolioValues.LastOrDefault()?.Value ?? currentPortfolioValue;
@@ -40,7 +42,7 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
             double dailyReturn = (currentPortfolioValue - previousPortfolioValue) / previousPortfolioValue;
             RunResults.DailyReturns.Add(currentTime, dailyReturn);
 
-            double excessDailyReturn = dailyReturn - (AnnualRiskFreeRate / Engine.Interval.GetIntervalsPerYear());
+            double excessDailyReturn = dailyReturn - (AnnualRiskFreeRate / Interval.GetIntervalsPerYear());
             RunResults.ExcessDailyReturns.Add(currentTime, excessDailyReturn);
 
             double prevCumulativeReturn = RunResults.CumulativeReturns.LastOrDefault()?.Value ?? 0;
@@ -84,7 +86,7 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
 
     public double CalculateAnnualizedSharpeRatio()
     {
-        double periodsPerYear = Engine.Interval.GetIntervalsPerYear();
+        double periodsPerYear = Interval.GetIntervalsPerYear();
         double riskFreeRate = AnnualRiskFreeRate != 0 ? AnnualRiskFreeRate / periodsPerYear : 0;
         double mean = RunResults.ExcessDailyReturns.Values().Average();
         double stddev = MathHelpers.StdDev(RunResults.ExcessDailyReturns.Values());

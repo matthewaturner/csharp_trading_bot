@@ -1,6 +1,7 @@
 
 using Bot.Helpers;
-using Bot.Models;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using System;
 using System.Collections.Generic;
 using System.Linq;

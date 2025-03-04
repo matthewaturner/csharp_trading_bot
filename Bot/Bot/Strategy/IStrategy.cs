@@ -1,17 +1,9 @@
 ﻿using Bot.Events;
-using Bot.Indicators;
-using Bot.Models;
-using System.Collections.Generic;
+using Bot.Models.MarketData;
 
 namespace Bot.Strategies;
 
 public interface IStrategy : IInitialize, IMarketDataReceiver
 {
-    int Lookback { get; }
-
-    bool IsHydrated { get; }
-
-    IList<IIndicator> Indicators { get; }
-
-    void ProcessBar(Bar bar);
+    void ProcessBar(MarketSnapshot snapshot);
 }

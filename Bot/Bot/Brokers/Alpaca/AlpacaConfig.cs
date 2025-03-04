@@ -1,4 +1,4 @@
-﻿using Bot.Models;
+﻿using Bot.Models.Engine;
 
 namespace Bot.Brokers.Alpaca;
 

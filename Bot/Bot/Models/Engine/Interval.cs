@@ -1,7 +1,6 @@
-﻿
-using System;
+﻿using System;
 
-namespace Bot.Models;
+namespace Bot.Models.Engine;
 
 /// <summary>
 /// Class representing an interval of time, usually for a bar.
@@ -35,8 +34,8 @@ public class Interval
 
     public double GetIntervalsPerYear() => _type switch
     {
-        IntervalType.Month => (252.0 / 12) / _num,
-        IntervalType.Week => (252.0 / 5) / _num,
+        IntervalType.Month => 252.0 / 12 / _num,
+        IntervalType.Week => 252.0 / 5 / _num,
         IntervalType.Day => 252.0 / _num,            // 252 days of trading per year
         IntervalType.Hour => 6.5 * 252 / _num,         // 6.5 hours of trading per day
         IntervalType.Minute => 60.0 * 24 * 252 / _num,

@@ -1,5 +1,4 @@
-﻿
-namespace Bot.Models;
+﻿namespace Bot.Models.Broker;
 
 public enum PositionType
 {

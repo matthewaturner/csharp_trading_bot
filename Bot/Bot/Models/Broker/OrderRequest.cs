@@ -1,6 +1,6 @@
 ﻿using Bot.Models.Interfaces;
 
-namespace Bot.Models;
+namespace Bot.Models.Broker;
 
 public class OrderRequest : IOrderRequest
 {

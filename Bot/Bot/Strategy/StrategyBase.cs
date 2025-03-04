@@ -2,16 +2,13 @@
 using Bot.Brokers;
 using Bot.Engine;
 using Bot.Events;
-using Bot.Indicators;
-using Bot.Models;
 using Bot.Models.Interfaces;
+using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Bot.Strategies;
 
-public abstract class StrategyBase(List<IIndicator> indicators = null) : IStrategy
+public abstract class StrategyBase() : IStrategy
 {
     public void Initialize(ITradingEngine engine)
     {
@@ -19,14 +16,6 @@ public abstract class StrategyBase(List<IIndicator> indicators = null) : IStrate
     }
 
     public ITradingEngine Engine { get; private set; }
-
-    public IList<IIndicator> Indicators { get; set; } = indicators ?? new List<IIndicator>();
-
-    public int Lookback => Indicators.Max(ind => ind.Lookback);
-
-    public bool IsHydrated => Indicators.All(ind => ind.IsHydrated);
-
-    // Helpful proxies
 
     public IBroker Broker => Engine.Broker;
 
@@ -39,9 +28,9 @@ public abstract class StrategyBase(List<IIndicator> indicators = null) : IStrate
     /// <param name="e"></param>
     void IEventReceiver<MarketDataEvent>.OnEvent(object sender, MarketDataEvent e)
     {
-        GlobalConfig.GlobalLogger.LogInformation($"Received bar: {e.Bar}");
-        ProcessBar(e.Bar);
+        GlobalConfig.GlobalLogger.LogInformation($"Received snapshot: {e.Snapshot}");
+        ProcessBar(e.Snapshot);
     }
 
-    public abstract void ProcessBar(Bar bar);
+    public abstract void ProcessBar(MarketSnapshot bar);
 }

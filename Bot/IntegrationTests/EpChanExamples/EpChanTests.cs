@@ -4,7 +4,8 @@ using Bot.Analyzers;
 using Bot.Brokers.BackTest;
 using Bot.DataSources.Csv;
 using Bot.Engine;
-using Bot.Models;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using Bot.Models.Results;
 using Bot.Strategy;
 
@@ -15,21 +16,19 @@ public class EpChanTests
     [Test]
     public void Example3_4()
     {
-        var smaCrossStrat = new BuyAndHoldStrategy();
-        var broker = new BackTestingBroker(42.09);
-        var dataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder);
-        var analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04);
-
         var engine = new TradingEngine()
         {
-            Broker = broker,
-            DataSource = dataSource,
-            Analyzer = analyzer,
-            Strategy = smaCrossStrat,
-            Symbol = "IGE"
+            RunConfig = new RunConfig(
+                interval: Interval.OneDay,
+                runMode: RunMode.BackTest,
+                universe: new Universe("IGE")),
+            Broker = new BackTestingBroker(42.09),
+            DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
+            Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
+            Strategy = new BuyAndHoldStrategy("IGE"),
         };
 
-        RunResult result = engine.RunAsync(RunMode.BackTest, Interval.OneDay).Result;
+        RunResult result = engine.RunAsync().Result;
 
         result.AnnualizedSharpeRatio.IsApproximately(0.789054m);
     }

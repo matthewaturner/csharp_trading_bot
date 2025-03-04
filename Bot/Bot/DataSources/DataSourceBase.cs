@@ -1,17 +1,16 @@
 ﻿using Bot.Events;
-using Bot.Models;
-using Microsoft.Extensions.Logging;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bot.DataSources;
 
 public abstract class DataSourceBase : IDataSource
 {
-    private ILogger Logger => GlobalConfig.GlobalLogger;
-
-    private Bar CurrentBar;
+    private MarketSnapshot CurrentSnapshot;
 
     public event EventHandler<MarketDataEvent> MarketDataReceivers;
 
@@ -19,19 +18,30 @@ public abstract class DataSourceBase : IDataSource
     /// Stream bars to the engine.
     /// </summary>
     async Task IDataSource.StreamBars(
-        string symbol,
+        string[] symbols,
         Interval interval,
         DateTime start,
         DateTime? end)
     {
         end = end.HasValue ? end.Value : DateTime.UtcNow;
 
-        var bars = await GetHistoricalBarsAsync(symbol, interval, start, end.Value);
+        Dictionary<string, List<Bar>> barsDict = new();
 
-        foreach (Bar b in bars)
+        foreach (string symbol in symbols)
         {
-            CurrentBar = b;
-            MarketDataReceivers?.Invoke(this, new MarketDataEvent(b));
+            var bars = await GetHistoricalBarsAsync(symbol, interval, start, end.Value);
+            barsDict.Add(symbol, bars);
+        }
+
+        var snapshots = barsDict.SelectMany(kv => kv.Value)
+            .GroupBy(b => b.Timestamp)
+            .OrderBy(g => g.Key)
+            .Select(g => new MarketSnapshot(g.Key, g.ToArray()));
+
+        foreach (MarketSnapshot snapshot in snapshots)
+        {
+            CurrentSnapshot = snapshot;
+            MarketDataReceivers?.Invoke(this, new MarketDataEvent(snapshot));
         }
     }
 
@@ -40,7 +50,7 @@ public abstract class DataSourceBase : IDataSource
     /// </summary>
     Bar IDataSource.GetLatestBar(string symbol)
     {
-        return CurrentBar;
+        return CurrentSnapshot[symbol];
     }
 
     /// <summary>

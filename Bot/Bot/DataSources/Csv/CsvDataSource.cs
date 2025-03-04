@@ -1,5 +1,6 @@
 ﻿using Bot.DataSources.Csv.Models;
-using Bot.Models;
+using Bot.Models.Engine;
+using Bot.Models.MarketData;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System;

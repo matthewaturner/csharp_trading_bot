@@ -1,9 +1,8 @@
-﻿
-using Newtonsoft.Json.Converters;
+﻿using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Bot.Models;
+namespace Bot.Models.Broker;
 
 [JsonConverter(typeof(StringEnumConverter))]
 public enum OrderType
