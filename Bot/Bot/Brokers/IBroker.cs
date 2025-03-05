@@ -30,7 +30,7 @@ public interface IBroker : IInitializeReceiver
     /// <summary>
     /// Get account information.
     /// </summary>
-    IAccount GetAccount();
+    IPortfolio GetAccount();
 
     /// <summary>
     /// Get current positions.

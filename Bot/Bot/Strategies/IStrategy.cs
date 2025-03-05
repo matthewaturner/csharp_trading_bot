@@ -5,5 +5,5 @@ namespace Bot.Strategies;
 
 public interface IStrategy : IInitializeReceiver, IMarketDataReceiver
 {
-    void ProcessBar(MarketSnapshot snapshot);
+    void OnMarketData(MarketSnapshot snapshot);
 }

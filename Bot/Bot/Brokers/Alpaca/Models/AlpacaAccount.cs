@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Bot.Brokers.Alpaca.Models;
 
-public class AlpacaAccount : IAccount
+public class AlpacaAccount : IPortfolio
 {
     // Alpaca fields
 
@@ -23,11 +23,11 @@ public class AlpacaAccount : IAccount
     // IAccount interface
 
     [JsonIgnore]
-    double IAccount.BuyingPower => double.Parse(BuyingPower);
+    double IPortfolio.BuyingPower => double.Parse(BuyingPower);
 
     [JsonIgnore]
-    double IAccount.Cash => double.Parse(Cash);
+    double IPortfolio.Cash => double.Parse(Cash);
 
     [JsonIgnore]
-    double IAccount.TotalValue => double.Parse(Equity);
+    double IPortfolio.TotalValue => double.Parse(Equity);
 }

@@ -4,7 +4,7 @@ using System;
 
 namespace Bot.Models;
 
-public class BackTestOrder : IOrder
+public class BacktestOrder : IOrder
 {
     /// <summary>
     /// Constructor
@@ -18,7 +18,7 @@ public class BackTestOrder : IOrder
     /// <param name="quantity"></param>
     /// <param name="type"></param>
     /// <param name="state"></param>
-    public BackTestOrder(
+    public BacktestOrder(
         string orderId,
         DateTime placementTime,
         DateTime executionTime,
@@ -43,7 +43,7 @@ public class BackTestOrder : IOrder
     /// Constructor.
     /// </summary>
     /// <param name="request"></param>
-    public BackTestOrder(IOrderRequest request)
+    public BacktestOrder(IOrderRequest request)
     {
         OrderId = Guid.NewGuid().ToString();
         PlacementTime = DateTime.Now;

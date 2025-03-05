@@ -14,10 +14,10 @@ namespace Bot.Brokers.BackTest;
 public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
 {
     // private objects
-    private BackTestAccount account;
-    private IList<BackTestPosition> positions;
-    private IList<BackTestOrder> openOrders;
-    private IList<BackTestOrder> allOrders;
+    private BacktestPortfolio account;
+    private IList<BacktestPosition> positions;
+    private IList<BacktestOrder> openOrders;
+    private IList<BacktestOrder> allOrders;
     private ExecutionMode executionMode;
 
     private Bar CurrentBar(string symbol) => Engine.DataSource.GetLatestBar(symbol);
@@ -27,10 +27,10 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// </summary>
     public BackTestingBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBar)
     {
-        this.account = new BackTestAccount(initialFunds);
-        this.positions = new List<BackTestPosition>();
-        this.openOrders = new List<BackTestOrder>();
-        this.allOrders = new List<BackTestOrder>();
+        this.account = new BacktestPortfolio(initialFunds);
+        this.positions = new List<BacktestPosition>();
+        this.openOrders = new List<BacktestOrder>();
+        this.allOrders = new List<BacktestOrder>();
         this.executionMode = executionMode;
     }
 
@@ -54,13 +54,13 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <returns></returns>
     public IAssetInformation GetAssetInformation(string symbol)
     {
-        return new BackTestAssetInformation(symbol);
+        return new BacktestAssetInformation(symbol);
     }
 
     /// <summary>
     /// Gets account object.
     /// </summary>
-    public IAccount GetAccount()
+    public IPortfolio GetAccount()
     {
         // update total value then return account
         account.TotalValue = account.Cash + positions.Sum(p => p.Quantity * DataSource.GetLatestBar(p.Symbol).AdjClose);
@@ -136,7 +136,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     {
         logger.LogInformation($"Placed order type: {request.Type} for {request.Quantity} quantity of {request.Symbol}");
 
-        BackTestOrder order = new BackTestOrder(request);
+        BacktestOrder order = new BacktestOrder(request);
         order.OrderId = Guid.NewGuid().ToString();
         order.PlacementTime = DateTime.Now;
         openOrders.Add(order);
@@ -157,7 +157,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="orderId"></param>
     public void CancelOrder(string orderId)
     {
-        BackTestOrder order = openOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
+        BacktestOrder order = openOrders.SingleOrDefault(order => string.CompareOrdinal(order.OrderId, orderId) == 0);
 
         if (order != null)
         {
@@ -171,7 +171,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// </summary>
     /// <param name="order"></param>
     /// <returns></returns>
-    public OrderState PreviewOrder(BackTestOrder order)
+    public OrderState PreviewOrder(BacktestOrder order)
     {
         // todo: multibars
         double currentPrice = Engine.DataSource.GetLatestBar(order.Symbol).AdjClose;
@@ -214,7 +214,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="bar"></param>
     private void ExecuteAllOrders()
     {
-        BackTestOrder order = openOrders.FirstOrDefault();
+        BacktestOrder order = openOrders.FirstOrDefault();
         Bar bar = CurrentBar(order.Symbol);
 
         while (order != null)
@@ -260,7 +260,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
             return;
         }
 
-        BackTestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
+        BacktestPosition currentPosition = positions.FirstOrDefault(pos => pos.Symbol.Equals(symbol));
 
         if (currentPosition != null)
         {
@@ -269,7 +269,7 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
         }
         else
         {
-            positions.Add(new BackTestPosition(symbol, quantity));
+            positions.Add(new BacktestPosition(symbol, quantity));
             account.Cash -= price * quantity;
         }
     }

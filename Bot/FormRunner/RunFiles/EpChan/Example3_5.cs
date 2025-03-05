@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FormRunner.RunFiles.EpChan;
 
-public class Example3_4
+public class Example3_5
 {
     public Form Run()
     {
@@ -21,13 +21,13 @@ public class Example3_4
             RunConfig = new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                universe: new Universe("IGE"),
+                universe: new Universe("IGE", "SPY"),
                 minLogLevel: LogLevel.Debug,
                 shouldWriteCsv: true),
-            Broker = new BackTestingBroker(42.09),
+            Broker = new BackTestingBroker(100000), // does not matter how much you start with
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
-            Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new Ex3_4_BuyAndHold("IGE"),
+            Analyzer = new StrategyAnalyzer(), // no risk free rate for fully invested long/short strategy
+            Strategy = new Ex3_5_LongShort("IGE", "SPY"),
         };
 
         RunResult result = engine.RunAsync().Result;

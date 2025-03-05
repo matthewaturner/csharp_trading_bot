@@ -2,13 +2,13 @@
 
 namespace Bot.Brokers.BackTest.Models;
 
-class BackTestAssetInformation : IAssetInformation
+class BacktestAssetInformation : IAssetInformation
 {
     /// <summary>
     /// Constructor.
     /// </summary>
     /// <param name="symbol"></param>
-    public BackTestAssetInformation(string symbol)
+    public BacktestAssetInformation(string symbol)
     {
         Id = symbol;
         Class = "unknown";

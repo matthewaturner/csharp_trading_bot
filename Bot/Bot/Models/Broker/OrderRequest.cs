@@ -24,4 +24,9 @@ public class OrderRequest : IOrderRequest
     {
         return new OrderRequest(OrderType.MarketBuy, symbol, quantity);
     }
+
+    public static OrderRequest MarketSell(string symbol, double quantity)
+    {
+        return new OrderRequest(OrderType.MarketSell, symbol, quantity);
+    }
 }

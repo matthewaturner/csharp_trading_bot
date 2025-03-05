@@ -7,6 +7,7 @@ using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using Bot.Models.Results;
 using Bot.Strategy;
+using Bot.Strategy.EpChan;
 
 namespace FormRunner.RunFiles;
 
@@ -25,7 +26,7 @@ public class BuyAndHold
             Broker = new BackTestingBroker(42.09),
             DataSource = new AlpacaDataSource(),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new BuyAndHoldStrategy("XOM"),
+            Strategy = new Ex3_4_BuyAndHold("XOM"),
         };
 
         RunResult result = engine.RunAsync().Result;

@@ -12,4 +12,9 @@ public static class BrokerExtensions
     {
         return broker.PlaceOrder(OrderRequest.MarketBuy(symbol, quantity));
     }
+
+    public static IOrder MarketSell(this IBroker broker, string symbol, double quantity)
+    {
+        return broker.PlaceOrder(OrderRequest.MarketSell(symbol, quantity));
+    }
 }

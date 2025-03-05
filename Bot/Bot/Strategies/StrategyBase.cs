@@ -9,7 +9,7 @@ using System;
 
 namespace Bot.Strategies;
 
-public abstract class StrategyBase() : IStrategy
+public abstract class StrategyBase : IStrategy
 {
     // private
     private ILogger logger;
@@ -19,7 +19,7 @@ public abstract class StrategyBase() : IStrategy
 
     public IBroker Broker => Engine.Broker;
 
-    public IAccount Account => Broker.GetAccount();
+    public IPortfolio Account => Broker.GetAccount();
 
     /// <summary>
     /// Handle initialize event.
@@ -36,8 +36,8 @@ public abstract class StrategyBase() : IStrategy
     void IMarketDataReceiver.OnMarketData(object sender, MarketDataEvent e)
     {
         logger.LogDebug($"Received snapshot: {e.Snapshot}");
-        ProcessBar(e.Snapshot);
+        OnMarketData(e.Snapshot);
     }
 
-    public abstract void ProcessBar(MarketSnapshot bar);
+    public abstract void OnMarketData(MarketSnapshot bar);
 }

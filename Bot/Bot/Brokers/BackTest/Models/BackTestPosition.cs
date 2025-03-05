@@ -3,12 +3,12 @@ using Bot.Models.Interfaces;
 
 namespace Bot.Brokers.BackTest.Models;
 
-public class BackTestPosition : IPosition
+public class BacktestPosition : IPosition
 {
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BackTestPosition()
+    public BacktestPosition()
     { }
 
     /// <summary>
@@ -16,7 +16,7 @@ public class BackTestPosition : IPosition
     /// </summary>
     /// <param name="symbol"></param>
     /// <param name="quantity"></param>
-    public BackTestPosition(
+    public BacktestPosition(
         string symbol,
         double quantity)
     {

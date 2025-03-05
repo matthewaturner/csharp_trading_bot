@@ -7,7 +7,7 @@ using Bot.Engine;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using Bot.Models.Results;
-using Bot.Strategy;
+using Bot.Strategy.EpChan;
 using Microsoft.Extensions.Logging;
 
 namespace IntegrationTests.EpChanExamples;
@@ -27,11 +27,12 @@ public class EpChanTests
             Broker = new BackTestingBroker(10000), // it should not matter how much capital you begin with
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new BuyAndHoldStrategy("IGE"),
+            Strategy = new Ex3_4_BuyAndHold("IGE"),
         };
 
         RunResult result = engine.RunAsync().Result;
 
         result.AnnualizedSharpeRatio.IsApproximately(0.789054m);
     }
+
 }

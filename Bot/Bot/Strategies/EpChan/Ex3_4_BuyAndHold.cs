@@ -2,14 +2,14 @@
 using Bot.Models.MarketData;
 using Bot.Strategies;
 
-namespace Bot.Strategy;
+namespace Bot.Strategy.EpChan;
 
-public class BuyAndHoldStrategy(string symbol) : StrategyBase
+public class Ex3_4_BuyAndHold(string symbol) : StrategyBase
 {
     private string symbol = symbol;
     private bool invested = false;
 
-    public override void ProcessBar(MarketSnapshot snapshot)
+    public override void OnMarketData(MarketSnapshot snapshot)
     {
         if (!invested)
         {

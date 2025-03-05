@@ -111,7 +111,8 @@ public class TradingEngine : ITradingEngine
 
         if (RunConfig.ShouldWriteCsvOutput)
         {
-            string fullFileName = Path.Join(GlobalConfig.OutputFolder, RunConfig.CsvOutputFileName);
+            string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            string fullFileName = Path.Join(GlobalConfig.OutputFolder, $"{timestamp} {RunConfig.CsvOutputFileName}");
             CsvExporter.ExportToCSV(Analyzer.RunResults, fullFileName);
         }
 
