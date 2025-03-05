@@ -31,9 +31,9 @@ public interface ITradingEngine
     public IStrategy Strategy { get; }
 
     /// <summary>
-    /// Shared logger.
+    /// Create a logger for use in a downstream class.
     /// </summary>
-    public ILogger Logger { get; }
+    public ILogger CreateLogger(string name);
 
     /// <summary>
     /// Runs the strategy.

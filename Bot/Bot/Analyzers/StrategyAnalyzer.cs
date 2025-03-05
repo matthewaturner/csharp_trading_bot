@@ -11,24 +11,35 @@ namespace Bot.Analyzers;
 
 public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
 {
+    // private
     private ITradingEngine Engine;
-    private IBroker Broker => Engine.Broker;
-    private Interval Interval => Engine.RunConfig.Interval;
-
     private double AnnualRiskFreeRate = annualRiskFreeRate;
 
-    // the object we are defining
+    // public
     public RunResult RunResults { get; private set; } = new();
 
-    public void Initialize(ITradingEngine engine)
+    /// <summary>
+    /// Broker shorthand.
+    /// </summary>
+    private IBroker Broker => Engine.Broker;
+
+    /// <summary>
+    /// Interval shorthand.
+    /// </summary>
+    private Interval Interval => Engine.RunConfig.Interval;
+
+    /// <summary>
+    /// Handle initialize event.
+    /// </summary>
+    public void OnInitialize(object sender, EventArgs _)
     {
-        Engine = engine;
+        Engine = sender as ITradingEngine;
     }
 
     /// <summary>
-    /// Update the RunResults every time we receive market data.
+    /// Handle market data event.
     /// </summary>
-    public void OnEvent(object sender, MarketDataEvent e)
+    public void OnMarketData(object sender, MarketDataEvent e)
     {
         bool isFirstBar = RunResults.PortfolioValues.Count == 0;
         DateTime currentTime = e.Snapshot.Timestamp;
@@ -75,15 +86,17 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
     /// Calculate all the final values. At least in backtest mode, it would be pointless to calculate any of these
     /// before we are finished running.
     /// </summary>
-    public void OnFinalize(object sender, FinalizeEvent e)
+    public void OnFinalize(object sender, EventArgs _)
     {
         RunResults.AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio();
         RunResults.MaximumDrawdown = RunResults.Drawdown.Values().Min();
         RunResults.MaximumDrawdownDuration = RunResults.DrawdownDuration.Values().Max();
     }
 
-    #region Final Calculations =======================================================================================
-
+    /// <summary>
+    /// Calculate the annualized sharpe ratio.
+    /// </summary>
+    /// <returns></returns>
     public double CalculateAnnualizedSharpeRatio()
     {
         double periodsPerYear = Interval.GetIntervalsPerYear();
@@ -92,6 +105,4 @@ public class StrategyAnalyzer(double annualRiskFreeRate = 0) : IStrategyAnalyzer
         double stddev = MathHelpers.StdDev(RunResults.ExcessDailyReturns.Values());
         return (mean / stddev) * Math.Sqrt(periodsPerYear);
     }
-
-    #endregion
 }

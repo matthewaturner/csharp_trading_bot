@@ -5,16 +5,16 @@ using Bot.Events;
 using Bot.Models.Interfaces;
 using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Bot.Strategies;
 
 public abstract class StrategyBase() : IStrategy
 {
-    public void Initialize(ITradingEngine engine)
-    {
-        Engine = engine;
-    }
+    // private
+    private ILogger logger;
 
+    // public
     public ITradingEngine Engine { get; private set; }
 
     public IBroker Broker => Engine.Broker;
@@ -22,13 +22,20 @@ public abstract class StrategyBase() : IStrategy
     public IAccount Account => Broker.GetAccount();
 
     /// <summary>
-    /// The method that receives market data.
+    /// Handle initialize event.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    void IEventReceiver<MarketDataEvent>.OnEvent(object sender, MarketDataEvent e)
+    public void OnInitialize(object sender, EventArgs _)
     {
-        GlobalConfig.GlobalLogger.LogInformation($"Received snapshot: {e.Snapshot}");
+        Engine = sender as ITradingEngine;
+        this.logger = Engine.CreateLogger(this.GetType().Name);
+    }
+
+    /// <summary>
+    /// Handler market data event.
+    /// </summary>
+    void IMarketDataReceiver.OnMarketData(object sender, MarketDataEvent e)
+    {
+        logger.LogDebug($"Received snapshot: {e.Snapshot}");
         ProcessBar(e.Snapshot);
     }
 

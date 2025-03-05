@@ -6,11 +6,30 @@ namespace FormRunner;
 
 internal static class Program
 {
-
-    // Import the AllocConsole function from kernel32.dll
+    // Import the necessary Windows API functions
     [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    static extern bool AllocConsole();
+    private static extern bool AllocConsole();
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+    private const int STD_OUTPUT_HANDLE = -11;
+    private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
+
+    static void EnableAnsiColors()
+    {
+        IntPtr consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (GetConsoleMode(consoleHandle, out uint mode))
+        {
+            SetConsoleMode(consoleHandle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        }
+    }
 
     /// <summary>
     /// The main entry point for the application.
@@ -51,6 +70,7 @@ internal static class Program
 
         // Always run a console app
         AllocConsole();
+        EnableAnsiColors();
 
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.

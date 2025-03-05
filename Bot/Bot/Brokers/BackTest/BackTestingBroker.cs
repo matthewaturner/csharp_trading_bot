@@ -20,9 +20,6 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     private IList<BackTestOrder> allOrders;
     private ExecutionMode executionMode;
 
-    // private funcs
-    private ILogger Logger => GlobalConfig.GlobalLogger;
-
     private Bar CurrentBar(string symbol) => Engine.DataSource.GetLatestBar(symbol);
 
     /// <summary>
@@ -37,22 +34,18 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
         this.executionMode = executionMode;
     }
 
-    #region Events ===================================================================================================
-
     /// <summary>
     /// Execute orders at the next price.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public void OnEvent(object sender, MarketDataEvent e)
+    public void OnMarketData(object sender, MarketDataEvent e)
     {
         if (executionMode == ExecutionMode.OnNextBar)
         {
             ExecuteAllOrders();
         }
     }
-
-    #endregion =======================================================================================================
 
     /// <summary>
     /// Gets asset information.
@@ -141,6 +134,8 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="order"></param>
     public IOrder PlaceOrder(IOrderRequest request)
     {
+        logger.LogInformation($"Placed order type: {request.Type} for {request.Quantity} quantity of {request.Symbol}");
+
         BackTestOrder order = new BackTestOrder(request);
         order.OrderId = Guid.NewGuid().ToString();
         order.PlacementTime = DateTime.Now;
@@ -245,7 +240,6 @@ public class BackTestingBroker : BrokerBase, IBroker, IMarketDataReceiver
                 // mark order as filled and remove it from the open orders list,
                 // it will remain in the order history list
                 order.Fill(bar.AdjClose, bar.Timestamp);
-                Logger.LogInformation($"Order filled. {order}");
             }
 
             openOrders.RemoveAt(0);

@@ -15,7 +15,7 @@ public static class GlobalConfig
 
     public static ILoggerFactory LogFactory { get; private set; }
 
-    public static ILogger GlobalLogger { get; private set; }
+    public static LogLevel MinimumLogLevel { get; set; } = LogLevel.Information;
 
     public static string EpChanDataFolder = Path.Combine(
         AppContext.BaseDirectory,
@@ -36,9 +36,6 @@ public static class GlobalConfig
 
         Config = builder.Build();
 
-        // get the loglevel from appsettings
-        Enum.TryParse(GetValue("LogLevel"), out LogLevel logLevel);
-
         LogFactory = LoggerFactory.Create(builder =>
         {
             builder
@@ -48,10 +45,8 @@ public static class GlobalConfig
                     options.SingleLine = true;
                 })
                 .AddConsole()
-                .SetMinimumLevel(logLevel);
+                .SetMinimumLevel(MinimumLogLevel);
         });
-
-        GlobalLogger = LogFactory.CreateLogger("Global");
     }
 
     /// <summary>

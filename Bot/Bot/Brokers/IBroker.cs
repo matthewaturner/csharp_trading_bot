@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Bot.Brokers;
 
-public interface IBroker : IInitialize
+public interface IBroker : IInitializeReceiver
 {
     /// <summary>
     /// Gets information for an asset like whether it is easy to borrow.

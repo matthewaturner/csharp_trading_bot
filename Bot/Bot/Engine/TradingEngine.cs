@@ -3,12 +3,13 @@ using Bot.Brokers;
 using Bot.Brokers.BackTest;
 using Bot.DataSources;
 using Bot.DataSources.Alpaca;
-using Bot.Events;
 using Bot.Helpers;
+using Bot.Logging;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,6 +18,12 @@ namespace Bot.Engine;
 
 public class TradingEngine : ITradingEngine
 {
+    private ILoggerFactory loggerFactory;
+
+    // Event handlers
+    private event EventHandler<EventArgs> InitializeEventHandlers;
+    private event EventHandler<EventArgs> FinalizeEventHandlers;
+
     // RunConfig object holds all the configuration for the run
     public RunConfig RunConfig { get; set;  }
 
@@ -32,34 +39,49 @@ public class TradingEngine : ITradingEngine
     // Single strategy object (for now)
     public IStrategy Strategy { get; set; }
 
-    // Shared logger, todo should remove in favor of referencing from shared config always
-    public ILogger Logger => GlobalConfig.GlobalLogger;
 
     /// <summary>
-    /// Finalize event handlers.
+    /// Method to create loggers.
     /// </summary>
-    private event EventHandler<FinalizeEvent> FinalizeEvent;
+    public ILogger CreateLogger(string name) => new ColoredLogger(loggerFactory.CreateLogger(name));
 
     /// <summary>
     /// Setup everything.
     /// </summary>
     private void Setup()
     {
-        // initialize stuff
-        Broker.Initialize(this);
-        Analyzer.Initialize(this);
-        Strategy.Initialize(this);
-
-        // register market data receivers
-        if (Broker is IMarketDataReceiver b)
+        // create logger factory
+        loggerFactory = LoggerFactory.Create(builder =>
         {
-            DataSource.MarketDataReceivers += b.OnEvent;
-        }
-        DataSource.MarketDataReceivers += Analyzer.OnEvent;
-        DataSource.MarketDataReceivers += Strategy.OnEvent;
+            builder
+                .AddSimpleConsole(options =>
+                {
+                    options.TimestampFormat = "[HH:mm:ss] ";
+                    options.SingleLine = true;
+                    options.ColorBehavior = LoggerColorBehavior.Enabled;
+                })
+                .AddConsole()
+                .SetMinimumLevel(RunConfig.LogLevel);
+        });
 
-        // register finalize receivers
-        FinalizeEvent += Analyzer.OnFinalize;
+        // register initialize handlers
+        InitializeEventHandlers += Broker.OnInitialize;
+        InitializeEventHandlers += Analyzer.OnInitialize;
+        InitializeEventHandlers += Strategy.OnInitialize;
+
+        // register market data handlers
+        if (Broker is BackTestingBroker b)
+        {
+            DataSource.MarketDataReceivers += b.OnMarketData;
+        }
+        DataSource.MarketDataReceivers += Analyzer.OnMarketData;
+        DataSource.MarketDataReceivers += Strategy.OnMarketData;
+
+        // register finalize handlers
+        FinalizeEventHandlers += Analyzer.OnFinalize;
+
+        // send initialize event
+        InitializeEventHandlers?.Invoke(this, new EventArgs());
     }
 
     /// <summary>
@@ -85,7 +107,7 @@ public class TradingEngine : ITradingEngine
                 break;
         }
 
-        FinalizeEvent?.Invoke(this, new FinalizeEvent());
+        FinalizeEventHandlers?.Invoke(this, new EventArgs());
 
         if (RunConfig.ShouldWriteCsvOutput)
         {

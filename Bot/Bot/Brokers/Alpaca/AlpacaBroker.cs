@@ -46,13 +46,11 @@ public class AlpacaBroker : IBroker
     }
 
     /// <summary>
-    /// Initialize method called by the engine when a backtest begins.
+    /// Handle initialize event.
     /// </summary>
-    /// <param name="engine"></param>
-    /// <param name="args"></param>
-    public void Initialize(ITradingEngine engine)
+    public void OnInitialize(object sender, EventArgs _)
     {
-        this.engine = engine;
+        this.engine = sender as ITradingEngine;
     }
 
     /// <summary>

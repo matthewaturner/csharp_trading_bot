@@ -1,4 +1,4 @@
-
+﻿
 using Bot;
 using Bot.Analyzers;
 using Bot.Brokers.BackTest;
@@ -10,21 +10,20 @@ using Bot.Models.Results;
 using Bot.Strategy;
 using Microsoft.Extensions.Logging;
 
-namespace IntegrationTests.EpChanExamples;
+namespace FormRunner.RunFiles.EpChan;
 
-public class EpChanTests
+public class Example3_4
 {
-    [Test]
-    public void Example3_4()
+    public Form Run()
     {
-        var engine = new TradingEngine()
+        var engine = new TradingEngine
         {
             RunConfig = new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
                 universe: new Universe("IGE"),
-                minLogLevel: LogLevel.Error),
-            Broker = new BackTestingBroker(10000), // it should not matter how much capital you begin with
+                minLogLevel: LogLevel.Debug),
+            Broker = new BackTestingBroker(42.09),
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
             Strategy = new BuyAndHoldStrategy("IGE"),
@@ -32,6 +31,6 @@ public class EpChanTests
 
         RunResult result = engine.RunAsync().Result;
 
-        result.AnnualizedSharpeRatio.IsApproximately(0.789054m);
+        return new ScatterPlotForm(result);
     }
 }

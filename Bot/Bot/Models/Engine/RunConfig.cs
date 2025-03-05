@@ -1,4 +1,5 @@
 ﻿using Bot.Models.MarketData;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -17,6 +18,7 @@ public class RunConfig
         DateTime? end = null,
         Universe universe = null,
         bool shouldWriteCsv = false,
+        LogLevel minLogLevel = LogLevel.Debug,
         [CallerFilePath] string callerFilePath = null)
     {
         Interval = interval ?? Interval.OneDay;
@@ -25,6 +27,7 @@ public class RunConfig
         End = end ?? DateTime.MaxValue;
         Universe = universe ?? throw new ArgumentNullException("Symbol universe must be defined.");
         ShouldWriteCsvOutput = shouldWriteCsv;
+        LogLevel = minLogLevel;
 
         string dateTimeStr = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
         string callerClass = Path.GetFileNameWithoutExtension(callerFilePath);
@@ -66,4 +69,14 @@ public class RunConfig
     /// The file name if csv output is enabled.
     /// </summary>
     public string CsvOutputFileName { get; }
+
+    /// <summary>
+    /// The log level for the run.
+    /// </summary>
+    public LogLevel LogLevel
+    {
+        // The actual log level has to be in global config where the logger lives.
+        get => GlobalConfig.MinimumLogLevel;
+        set => GlobalConfig.MinimumLogLevel = value;
+    }
 }

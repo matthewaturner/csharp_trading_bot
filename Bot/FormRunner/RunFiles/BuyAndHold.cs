@@ -1,8 +1,7 @@
 ﻿
-using Bot;
 using Bot.Analyzers;
 using Bot.Brokers.BackTest;
-using Bot.DataSources.Csv;
+using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
@@ -20,11 +19,13 @@ public class BuyAndHold
             RunConfig = new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                universe: new Universe("IGE")),
+                start: new DateTime(2000, 1, 1),
+                end: DateTime.Now,
+                universe: new Universe("XOM")),
             Broker = new BackTestingBroker(42.09),
-            DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
+            DataSource = new AlpacaDataSource(),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new BuyAndHoldStrategy("IGE"),
+            Strategy = new BuyAndHoldStrategy("XOM"),
         };
 
         RunResult result = engine.RunAsync().Result;

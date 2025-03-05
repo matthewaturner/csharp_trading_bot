@@ -1,19 +1,18 @@
 ﻿using Bot.Models.MarketData;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Bot.Events;
 
 /// <summary>
-/// The event to raise.
+/// An event containing new market data.
 /// </summary>
-public class MarketDataEvent(MarketSnapshot bars)
+/// <param name="snapshot"></param>
+public class MarketDataEvent(MarketSnapshot snapshot)
 {
-    public MarketSnapshot Snapshot { get; } = bars;
-}
-
-/// <summary>
-/// Defines the method implemented by event receivers.
-/// </summary>
-public interface IMarketDataReceiver : IEventReceiver<MarketDataEvent>
-{
+    public MarketSnapshot Snapshot { get; } = snapshot;
 }
 
