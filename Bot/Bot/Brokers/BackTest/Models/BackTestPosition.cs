@@ -1,7 +1,6 @@
 ﻿using Bot.Models.Broker;
-using Bot.Models.Interfaces;
 
-namespace Bot.Brokers.BackTest.Models;
+namespace Bot.Brokers.Backtest.Models;
 
 public class BacktestPosition : IPosition
 {

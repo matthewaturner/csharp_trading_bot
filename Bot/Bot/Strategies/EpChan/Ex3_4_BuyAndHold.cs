@@ -13,7 +13,7 @@ public class Ex3_4_BuyAndHold(string symbol) : StrategyBase
     {
         if (!invested)
         {
-            Broker.MarketBuy(symbol, Account.BuyingPower / snapshot[symbol].AdjClose);
+            Broker.MarketBuy(symbol, Account.Cash / snapshot[symbol].AdjClose);
             invested = true;
         }
     }

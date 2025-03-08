@@ -1,5 +1,5 @@
 ﻿
-using Bot.Models.Interfaces;
+using Bot.Models.Broker;
 using Newtonsoft.Json;
 
 namespace Bot.Brokers.Alpaca.Models;
@@ -20,14 +20,26 @@ public class AlpacaAccount : IPortfolio
     [JsonProperty("equity")]
     public string Equity { get; set; }
 
-    // IAccount interface
+    // junk to make it build
+    public double InitialCapital => throw new System.NotImplementedException();
 
-    [JsonIgnore]
-    double IPortfolio.BuyingPower => double.Parse(BuyingPower);
+    public double PortfolioValue => throw new System.NotImplementedException();
 
-    [JsonIgnore]
-    double IPortfolio.Cash => double.Parse(Cash);
+    public double LongPositionsValue => throw new System.NotImplementedException();
 
-    [JsonIgnore]
-    double IPortfolio.TotalValue => double.Parse(Equity);
+    public double ShortPositionsValue => throw new System.NotImplementedException();
+
+    public double GrossExposure => throw new System.NotImplementedException();
+
+    public double NetExposure => throw new System.NotImplementedException();
+
+    public double CapitalAtRisk => throw new System.NotImplementedException();
+
+    public double Leverage => throw new System.NotImplementedException();
+
+    public double RealizedPnL => throw new System.NotImplementedException();
+
+    public double UnrealizedPnL => throw new System.NotImplementedException();
+
+    double IPortfolio.Cash => throw new System.NotImplementedException();
 }

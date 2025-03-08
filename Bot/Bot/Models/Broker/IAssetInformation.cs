@@ -1,5 +1,4 @@
-﻿
-namespace Bot.Models.Interfaces;
+﻿namespace Bot.Models.Broker;
 
 public interface IAssetInformation
 {

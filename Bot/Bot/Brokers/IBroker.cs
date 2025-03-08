@@ -1,6 +1,5 @@
 ﻿using Bot.Events;
 using Bot.Models.Broker;
-using Bot.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 
@@ -44,13 +43,6 @@ public interface IBroker : IInitializeReceiver
     /// <param name="symbol"></param>
     /// <returns></returns>
     IPosition GetPosition(string symbol);
-
-    /// <summary>
-    /// Closes a position in a given symbol.
-    /// </summary>
-    /// <param name="symbol"></param>
-    /// <returns></returns>
-    IOrder ClosePosition(string symbol);
 
     /// <summary>
     /// Gets the status of an order.

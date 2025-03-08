@@ -1,6 +1,6 @@
 ﻿using Bot.Analyzers;
 using Bot.Brokers;
-using Bot.Brokers.BackTest;
+using Bot.Brokers.Backtest;
 using Bot.DataSources;
 using Bot.DataSources.Alpaca;
 using Bot.Helpers;
@@ -28,7 +28,7 @@ public class TradingEngine : ITradingEngine
     public RunConfig RunConfig { get; set;  }
 
     // Broker object
-    public IBroker Broker { get; set; } = new BackTestingBroker(10000);
+    public IBroker Broker { get; set; } = new BacktestBroker(10000);
 
     // Data source object
     public IDataSource DataSource { get; set; } = new AlpacaDataSource();
@@ -70,7 +70,7 @@ public class TradingEngine : ITradingEngine
         InitializeEventHandlers += Strategy.OnInitialize;
 
         // register market data handlers
-        if (Broker is BackTestingBroker b)
+        if (Broker is BacktestBroker b)
         {
             DataSource.MarketDataReceivers += b.OnMarketData;
         }

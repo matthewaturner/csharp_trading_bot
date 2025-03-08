@@ -1,7 +1,7 @@
 ﻿
 using Bot;
 using Bot.Analyzers;
-using Bot.Brokers.BackTest;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
 using Bot.Engine;
 using Bot.Models.Engine;
@@ -24,7 +24,7 @@ public class Example3_4
                 universe: new Universe("IGE"),
                 minLogLevel: LogLevel.Debug,
                 shouldWriteCsv: true),
-            Broker = new BackTestingBroker(42.09),
+            Broker = new BacktestBroker(42.09),
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
             Strategy = new Ex3_4_BuyAndHold("IGE"),

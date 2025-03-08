@@ -1,5 +1,5 @@
 ﻿
-namespace Bot.Brokers.BackTest;
+namespace Bot.Brokers.Backtest;
 
 public enum ExecutionMode
 {

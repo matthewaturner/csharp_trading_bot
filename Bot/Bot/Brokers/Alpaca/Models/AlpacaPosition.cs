@@ -1,5 +1,4 @@
 ﻿using Bot.Models.Broker;
-using Bot.Models.Interfaces;
 using Newtonsoft.Json;
 
 namespace Bot.Brokers.Alpaca.Models;

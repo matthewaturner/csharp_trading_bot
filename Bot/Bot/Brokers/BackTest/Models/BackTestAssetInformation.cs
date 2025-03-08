@@ -1,6 +1,6 @@
-﻿using Bot.Models.Interfaces;
+﻿using Bot.Models.Broker;
 
-namespace Bot.Brokers.BackTest.Models;
+namespace Bot.Brokers.Backtest.Models;
 
 class BacktestAssetInformation : IAssetInformation
 {

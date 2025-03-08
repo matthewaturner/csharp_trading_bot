@@ -2,7 +2,7 @@
 using Bot.Brokers;
 using Bot.Engine;
 using Bot.Events;
-using Bot.Models.Interfaces;
+using Bot.Models.Broker;
 using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
 using System;

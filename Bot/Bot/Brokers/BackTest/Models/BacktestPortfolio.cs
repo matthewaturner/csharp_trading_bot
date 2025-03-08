@@ -1,8 +1,13 @@
 ﻿
-using Bot.Models.Interfaces;
+using Bot.Models;
+using Bot.Models.Broker;
+using Bot.Models.MarketData;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Bot.Brokers.BackTest.Models;
+namespace Bot.Brokers.Backtest.Models;
 
 public class BacktestPortfolio : IPortfolio
 {
@@ -28,6 +33,8 @@ public class BacktestPortfolio : IPortfolio
 
     public string AccountId { get; set; }
 
+    public IDictionary<string, BacktestPosition> Positions { get; private set; }
+
     public double InitialCapital { get; private set; }
 
     public double Cash { get; private set; }
@@ -49,4 +56,40 @@ public class BacktestPortfolio : IPortfolio
     public double RealizedPnL { get; private set; }
 
     public double UnrealizedPnL { get; private set; }
+
+    /// <summary>
+    /// Update all the values of the portfolio based on the snapshot prices.
+    /// </summary>
+    public void ApplyMarketData(MarketSnapshot snapshot)
+    {
+        LongPositionsValue = Positions.Values.Where(p => p.Quantity > 0).Sum(p => p.Quantity * snapshot[p.Symbol].AdjClose);
+        ShortPositionsValue = Positions.Values.Where(p => p.Quantity < 0).Sum(p => Math.Abs(p.Quantity) * snapshot[p.Symbol].AdjClose);
+    }
+
+    /// <summary>
+    /// Apply a transaction for a given symbol to the portfolio.
+    /// </summary>
+    public void ApplyOrder(BacktestOrder order)
+    {
+        double transactionValue = order.Quantity * order.AverageFillPrice;
+        Positions[order.Symbol] ??= new BacktestPosition(order.Symbol, 0);
+
+        switch (order.Type)
+        {
+            case OrderType.MarketBuy:
+                Cash -= transactionValue;
+                LongPositionsValue += transactionValue;
+                Positions[order.Symbol].Quantity += order.Quantity;
+                break;
+            case OrderType.MarketSell:
+                Cash += transactionValue;
+                ShortPositionsValue -= transactionValue;
+                Positions[order.Symbol].Quantity -= order.Quantity;
+                break;
+            default:
+                throw new NotImplementedException($"Order type {order.Type} not implemented in ApplyOrder.");
+        }
+
+        order.State = OrderState.Filled;
+    }
 }

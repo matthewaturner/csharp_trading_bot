@@ -1,7 +1,7 @@
 
 using Bot;
 using Bot.Analyzers;
-using Bot.Brokers.BackTest;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
 using Bot.Engine;
 using Bot.Models.Engine;
@@ -24,7 +24,7 @@ public class EpChanTests
                 runMode: RunMode.BackTest,
                 universe: new Universe("IGE"),
                 minLogLevel: LogLevel.Error),
-            Broker = new BackTestingBroker(10000), // it should not matter how much capital you begin with
+            Broker = new BacktestBroker(10000), // it should not matter how much capital you begin with
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
             Strategy = new Ex3_4_BuyAndHold("IGE"),

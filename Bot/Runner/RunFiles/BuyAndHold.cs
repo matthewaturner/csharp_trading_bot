@@ -1,5 +1,5 @@
 ﻿
-using Bot.Brokers.BackTest;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Models.Engine;
@@ -21,7 +21,7 @@ public class BuyAndHold
                 start: DateTime.Now.AddYears(-5),
                 end: DateTime.Now,
                 universe: new Universe("MSFT")),
-            Broker = new BackTestingBroker(10000),
+            Broker = new BacktestBroker(10000),
             DataSource = new AlpacaDataSource(),
             Strategy = new BuyAndHoldStrategy("IGE"),
         };

@@ -1,6 +1,6 @@
 ﻿
 using Bot.Analyzers;
-using Bot.Brokers.BackTest;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Models.Engine;
@@ -23,7 +23,7 @@ public class BuyAndHold
                 start: new DateTime(2000, 1, 1),
                 end: DateTime.Now,
                 universe: new Universe("XOM")),
-            Broker = new BackTestingBroker(42.09),
+            Broker = new BacktestBroker(42.09),
             DataSource = new AlpacaDataSource(),
             Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
             Strategy = new Ex3_4_BuyAndHold("XOM"),
