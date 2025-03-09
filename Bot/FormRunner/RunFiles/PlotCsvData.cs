@@ -16,7 +16,11 @@ public class PlotCsvData
         // form a runresult from the raw bars
         var runResult = new RunResult()
         {
-            PortfolioValues = bars.Select(b => new DatedValue(b.Timestamp, (double)b.Close)).ToList()
+            PortfolioSnapshots = bars.Select(b => new PortfolioSnapshot()
+            {
+                Timestamp = b.Timestamp,
+                PortfolioValue = b.AdjClose,
+            }).ToList()
         };
         var form = new ScatterPlotForm(runResult);
 

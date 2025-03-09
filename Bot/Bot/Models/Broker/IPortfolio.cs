@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bot.Models.Results;
+using System;
 
 namespace Bot.Models.Broker;
 
@@ -27,4 +28,6 @@ public interface IPortfolio
     public double RealizedPnL { get; }
 
     public double UnrealizedPnL { get; }
+
+    public PortfolioSnapshot GetSnapshot(DateTime timestamp);
 }

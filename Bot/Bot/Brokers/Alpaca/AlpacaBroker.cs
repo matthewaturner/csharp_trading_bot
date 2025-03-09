@@ -94,7 +94,7 @@ public class AlpacaBroker : IBroker
     /// Gets account information from alpaca.
     /// </summary>
     /// <returns></returns>
-    public IPortfolio GetAccount()
+    public IPortfolio GetPortfolio()
     {
         RestRequest request = new RestRequest("/v2/account", Method.Get);
         RestResponse response = SendAuthenticatedHttpRequest(request);

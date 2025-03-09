@@ -1,6 +1,8 @@
 ﻿
 using Bot.Models.Broker;
+using Bot.Models.Results;
 using Newtonsoft.Json;
+using System;
 
 namespace Bot.Brokers.Alpaca.Models;
 
@@ -42,4 +44,9 @@ public class AlpacaAccount : IPortfolio
     public double UnrealizedPnL => throw new System.NotImplementedException();
 
     double IPortfolio.Cash => throw new System.NotImplementedException();
+
+    public PortfolioSnapshot GetSnapshot(DateTime timestamp)
+    {
+        throw new NotImplementedException();
+    }
 }

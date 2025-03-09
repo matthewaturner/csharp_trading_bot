@@ -2,6 +2,7 @@
 using Bot.Models;
 using Bot.Models.Broker;
 using Bot.Models.MarketData;
+using Bot.Models.Results;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ public class BacktestPortfolio : IPortfolio
     public BacktestPortfolio()
     {
         AccountId = "backtest-account";
+        Positions = new();
         InitialCapital = 0;
         Cash = 0;
     }
@@ -28,12 +30,13 @@ public class BacktestPortfolio : IPortfolio
     public BacktestPortfolio(double initialCapital)
     {
         AccountId = "backtest-account";
+        Positions = new();
         Cash = initialCapital;
     }
 
     public string AccountId { get; set; }
 
-    public IDictionary<string, BacktestPosition> Positions { get; private set; }
+    public Dictionary<string, BacktestPosition> Positions { get; private set; }
 
     public double InitialCapital { get; private set; }
 
@@ -72,8 +75,14 @@ public class BacktestPortfolio : IPortfolio
     public void ApplyOrder(BacktestOrder order)
     {
         double transactionValue = order.Quantity * order.AverageFillPrice;
-        Positions[order.Symbol] ??= new BacktestPosition(order.Symbol, 0);
 
+        if (!Positions.ContainsKey(order.Symbol))
+        {
+            Positions[order.Symbol] = new BacktestPosition(order.Symbol, order.Quantity);
+        }
+
+        // todo: this should work for now but it's wrong in general,
+        // the decision to add the transaction to the positions value should also take into account changes to current positions
         switch (order.Type)
         {
             case OrderType.MarketBuy:
@@ -83,7 +92,6 @@ public class BacktestPortfolio : IPortfolio
                 break;
             case OrderType.MarketSell:
                 Cash += transactionValue;
-                ShortPositionsValue -= transactionValue;
                 Positions[order.Symbol].Quantity -= order.Quantity;
                 break;
             default:
@@ -91,5 +99,26 @@ public class BacktestPortfolio : IPortfolio
         }
 
         order.State = OrderState.Filled;
+    }
+
+    /// <summary>
+    /// Get the snapshot values of this portfolio.
+    /// </summary>
+    public PortfolioSnapshot GetSnapshot(DateTime timestamp)
+    {
+        return new PortfolioSnapshot()
+        {
+            Timestamp = timestamp,
+            Cash = Cash,
+            PortfolioValue = PortfolioValue,
+            LongPositionsValue = LongPositionsValue,
+            ShortPositionsValue = ShortPositionsValue,
+            GrossExposure = GrossExposure,
+            NetExposure = NetExposure,
+            CapitalAtRisk = CapitalAtRisk,
+            Leverage = Leverage,
+            RealizedPnL = RealizedPnL,
+            UnrealizedPnL = UnrealizedPnL
+        };
     }
 }

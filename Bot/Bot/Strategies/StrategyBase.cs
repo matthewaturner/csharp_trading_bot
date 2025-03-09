@@ -19,7 +19,7 @@ public abstract class StrategyBase : IStrategy
 
     public IBroker Broker => Engine.Broker;
 
-    public IPortfolio Account => Broker.GetAccount();
+    public IPortfolio Account => Broker.GetPortfolio();
 
     /// <summary>
     /// Handle initialize event.

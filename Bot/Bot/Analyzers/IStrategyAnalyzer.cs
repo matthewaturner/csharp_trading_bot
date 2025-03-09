@@ -5,5 +5,5 @@ namespace Bot.Analyzers;
 
 public interface IStrategyAnalyzer : IMarketDataReceiver, IInitializeReceiver, IFinalizeReceiver
 {
-    public RunResult RunResults { get; }
+    public RunResult RunResult { get; }
 }

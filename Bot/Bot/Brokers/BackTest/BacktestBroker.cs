@@ -55,7 +55,7 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <summary>
     /// Gets account object.
     /// </summary>
-    public IPortfolio GetAccount()
+    public IPortfolio GetPortfolio()
     {
         return account;
     }
@@ -131,6 +131,7 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
 
         if (executionMode == ExecutionMode.OnCurrentBar)
         {
+            order.AverageFillPrice = DataSource.GetLatestBar(request.Symbol).AdjClose;
             ExecuteOrders();
         }
 
