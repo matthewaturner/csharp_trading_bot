@@ -11,7 +11,7 @@ public class ColoredLogger(ILogger innerLogger) : ILogger
 {
     private readonly ILogger _innerLogger = innerLogger;
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
         return _innerLogger.BeginScope(state);
     }
@@ -21,7 +21,7 @@ public class ColoredLogger(ILogger innerLogger) : ILogger
         return _innerLogger.IsEnabled(logLevel);
     }
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
     {
         if (!IsEnabled(logLevel))
             return;

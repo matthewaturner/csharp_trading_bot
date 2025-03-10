@@ -6,7 +6,9 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="ScottPlot.WinForms" Version="5.0.54" />

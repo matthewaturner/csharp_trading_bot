@@ -63,7 +63,7 @@ public class RunResult
 
         MaximumDrawdown = Drawdown.Min();
         MaximumDrawdownDuration = DrawdownDuration.Max();
-        AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio(annualRiskFreeRate, interval);
+        AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio(interval);
 
         // add the initial zeroes to everything
         Returns.Insert(0, 0);
@@ -77,13 +77,9 @@ public class RunResult
     /// <summary>
     /// Calculate the annualized sharpe ratio.
     /// </summary>
-    /// <param name="annualRiskFreeRate"></param>
-    /// <param name="interval"></param>
-    /// <returns></returns>
-    private double CalculateAnnualizedSharpeRatio(double annualRiskFreeRate, Interval interval)
+    private double CalculateAnnualizedSharpeRatio(Interval interval)
     {
         double periodsPerYear = interval.GetIntervalsPerYear();
-        double riskFreeRate = annualRiskFreeRate != 0 ? annualRiskFreeRate / periodsPerYear : 0;
         double mean = ExcessReturns.Average();
         double stddev = MathHelpers.StdDev(ExcessReturns);
         return (mean / stddev) * Math.Sqrt(periodsPerYear);

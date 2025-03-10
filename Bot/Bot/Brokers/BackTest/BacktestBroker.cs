@@ -10,24 +10,15 @@ using System.Linq;
 
 namespace Bot.Brokers.Backtest;
 
-public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
+public class BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBarClose) 
+    : BrokerBase, IBroker, IMarketDataReceiver
 {
     // private objects
-    private BacktestPortfolio account;
-    private IList<BacktestOrder> openOrders;
-    private ExecutionMode executionMode;
+    private BacktestPortfolio account = new BacktestPortfolio(initialFunds);
+    private List<BacktestOrder> openOrders = new List<BacktestOrder>();
+    private ExecutionMode executionMode = executionMode;
 
     private Bar CurrentBar(string symbol) => Engine.DataSource.GetLatestBar(symbol);
-
-    /// <summary>
-    /// Dependency injection constructor.
-    /// </summary>
-    public BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBarClose)
-    {
-        this.account = new BacktestPortfolio(initialFunds);
-        this.openOrders = new List<BacktestOrder>();
-        this.executionMode = executionMode;
-    }
 
     /// <summary>
     /// Execute orders at the next price.
@@ -158,13 +149,5 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
     public void CancelOrder(string orderId)
     {
         throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Execute all of the outstanding orders at the current bar price.
-    /// </summary>
-    /// <param name="bar"></param>
-    private void ExecuteOrders(MarketSnapshot snapshot)
-    {
     }
 }
