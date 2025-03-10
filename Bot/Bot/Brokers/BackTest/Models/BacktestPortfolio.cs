@@ -72,13 +72,15 @@ public class BacktestPortfolio : IPortfolio
     /// <summary>
     /// Apply a transaction for a given symbol to the portfolio.
     /// </summary>
-    public void ApplyOrder(BacktestOrder order)
+    public void ApplyOrder(BacktestOrder order, double fillPrice)
     {
-        double transactionValue = order.Quantity * order.AverageFillPrice;
+        order.AverageFillPrice = fillPrice;
+
+        double transactionValue = order.Quantity * fillPrice;
 
         if (!Positions.ContainsKey(order.Symbol))
         {
-            Positions[order.Symbol] = new BacktestPosition(order.Symbol, order.Quantity);
+            Positions[order.Symbol] = new BacktestPosition(order.Symbol, 0);
         }
 
         // todo: this should work for now but it's wrong in general,
@@ -92,6 +94,7 @@ public class BacktestPortfolio : IPortfolio
                 break;
             case OrderType.MarketSell:
                 Cash += transactionValue;
+                ShortPositionsValue += transactionValue;
                 Positions[order.Symbol].Quantity -= order.Quantity;
                 break;
             default:

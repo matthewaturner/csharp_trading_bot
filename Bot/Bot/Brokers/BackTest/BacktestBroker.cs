@@ -22,7 +22,7 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <summary>
     /// Dependency injection constructor.
     /// </summary>
-    public BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBar)
+    public BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBarClose)
     {
         this.account = new BacktestPortfolio(initialFunds);
         this.openOrders = new List<BacktestOrder>();
@@ -36,10 +36,17 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// <param name="e"></param>
     public void OnMarketData(object sender, MarketDataEvent e)
     {
-        if (executionMode == ExecutionMode.OnNextBar)
+        if (executionMode == ExecutionMode.OnNextBarOpen)
         {
-            ExecuteOrders();
+            foreach (var order in openOrders)
+            {
+                var fillPrice = e.Snapshot[order.Symbol].Open;
+                account.ApplyOrder(order, fillPrice);
+            }
+            openOrders.Clear();
         }
+
+        account.ApplyMarketData(e.Snapshot);
     }
 
     /// <summary>
@@ -127,12 +134,18 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
         BacktestOrder order = new BacktestOrder(request);
         order.OrderId = Guid.NewGuid().ToString();
         order.PlacementTime = DateTime.Now;
-        openOrders.Add(order);
 
-        if (executionMode == ExecutionMode.OnCurrentBar)
+        switch (executionMode)
         {
-            order.AverageFillPrice = DataSource.GetLatestBar(request.Symbol).AdjClose;
-            ExecuteOrders();
+            case ExecutionMode.OnCurrentBarClose:
+                var fillPrice = DataSource.GetLatestBar(request.Symbol).AdjClose;
+                account.ApplyOrder(order, fillPrice);
+                break;
+            case ExecutionMode.OnNextBarOpen:
+                openOrders.Add(order);
+                break;
+            default:
+                throw new NotImplementedException($"Execution mode {executionMode} not implemented.");
         }
 
         return order;
@@ -151,11 +164,7 @@ public class BacktestBroker : BrokerBase, IBroker, IMarketDataReceiver
     /// Execute all of the outstanding orders at the current bar price.
     /// </summary>
     /// <param name="bar"></param>
-    private void ExecuteOrders()
+    private void ExecuteOrders(MarketSnapshot snapshot)
     {
-        foreach (var order in openOrders)
-        {
-            account.ApplyOrder(order);
-        }
     }
 }

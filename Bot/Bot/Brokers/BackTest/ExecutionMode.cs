@@ -3,6 +3,6 @@ namespace Bot.Brokers.Backtest;
 
 public enum ExecutionMode
 {
-    OnCurrentBar,
-    OnNextBar
+    OnCurrentBarClose = 0,
+    OnNextBarOpen = 1
 }

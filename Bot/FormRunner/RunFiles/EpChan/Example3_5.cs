@@ -24,7 +24,7 @@ public class Example3_5
                 universe: new Universe("IGE", "SPY"),
                 minLogLevel: LogLevel.Debug,
                 shouldWriteCsv: true),
-            Broker = new BacktestBroker(100000), // does not matter how much you start with
+            Broker = new BacktestBroker(10000),
             DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
             Analyzer = new StrategyAnalyzer(), // no risk free rate for fully invested long/short strategy
             Strategy = new Ex3_5_LongShort("IGE", "SPY"),

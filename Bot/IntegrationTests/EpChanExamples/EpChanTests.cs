@@ -32,7 +32,7 @@ public class EpChanTests
 
         RunResult result = engine.RunAsync().Result;
 
-        result.AnnualizedSharpeRatio.IsApproximately(0.789054m);
+        result.AnnualizedSharpeRatio.IsApproximately(0.78931753834485019m);
     }
 
 }

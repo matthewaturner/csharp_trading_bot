@@ -1,4 +1,5 @@
-﻿using Bot.Helpers;
+﻿using Bot.Analyzers;
+using Bot.Helpers;
 using Bot.Models.Engine;
 using System;
 using System.Collections.Generic;
@@ -32,11 +33,22 @@ public class RunResult
     /// <summary>
     /// Calculate all the values.
     /// </summary>
-    public void CalculateResults(double annualRiskFreeRate, Interval interval)
+    public void CalculateResults(ReturnCalculation returnCalculation, double annualRiskFreeRate, Interval interval)
     {
-        IEnumerable<double> portfolioValue = PortfolioSnapshots.Select(s => s.PortfolioValue);
+        switch (returnCalculation)
+        {
+            case ReturnCalculation.SpreadReturns:
+                IEnumerable<double> spreadValue = PortfolioSnapshots.Select(s => s.LongPositionsValue + s.ShortPositionsValue);
+                Returns = [.. spreadValue.Zip(spreadValue.Skip(1), (prev, current) => (current - prev) / prev)];
+                break;
+            case ReturnCalculation.PortfolioReturns:
+                IEnumerable<double> portfolioValue = PortfolioSnapshots.Select(s => s.PortfolioValue);
+                Returns = [.. portfolioValue.Zip(portfolioValue.Skip(1), (prev, current) => (current - prev) / prev)];
+                break;
+            default:
+                throw new NotImplementedException();
+        }
 
-        Returns = [.. portfolioValue.Zip(portfolioValue.Skip(1), (prev, current) => (current - prev) / prev)];
         // this (annual risk free rate / intervals per year) seems like a simplification (no compounding) but it's fine for now
         ExcessReturns = [.. Returns.Select(r => r - (annualRiskFreeRate / interval.GetIntervalsPerYear()))];
 
