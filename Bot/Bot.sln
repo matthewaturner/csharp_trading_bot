@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.gitignore = ..\.gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Runner\Runner.csproj", "{488991C5-CA86-4966-AA0E-80023E0CFF3A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot", "Bot\Bot.csproj", "{ED7E1DF0-958D-43BB-B224-3DEFC113E207}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormRunner", "FormRunner\FormRunner.csproj", "{83314172-D567-48D2-A5C4-FB4D41289298}"
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{488991C5-CA86-4966-AA0E-80023E0CFF3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{488991C5-CA86-4966-AA0E-80023E0CFF3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{488991C5-CA86-4966-AA0E-80023E0CFF3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{488991C5-CA86-4966-AA0E-80023E0CFF3A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ED7E1DF0-958D-43BB-B224-3DEFC113E207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED7E1DF0-958D-43BB-B224-3DEFC113E207}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED7E1DF0-958D-43BB-B224-3DEFC113E207}.Release|Any CPU.ActiveCfg = Release|Any CPU

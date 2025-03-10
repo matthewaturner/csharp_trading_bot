@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Console": {
-      "commandName": "Project",
-      "commandLineArgs": "--fileName BuyAndHold"
-    }
-  }
-}
