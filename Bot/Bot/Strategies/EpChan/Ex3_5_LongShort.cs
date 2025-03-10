@@ -14,10 +14,38 @@ public class Ex3_5_LongShort(string longSymbol, string shortSymbol) : StrategyBa
     {
         if (!invested)
         {
-            double cashPerLeg = Engine.Broker.GetPortfolio().Cash / 2;
-            Engine.Broker.MarketBuy(longSymbol, cashPerLeg / e[longSymbol].AdjClose);
-            Engine.Broker.MarketSell(shortSymbol, cashPerLeg / e[shortSymbol].AdjClose);
+            double targetExposure = Engine.Broker.GetPortfolio().Cash / 2;
+            Engine.Broker.MarketBuy(longSymbol, targetExposure / e[longSymbol].AdjClose);
+            Engine.Broker.MarketSell(shortSymbol, targetExposure / e[shortSymbol].AdjClose);
+
             invested = true;
+        }
+        else
+        {
+            var portfolio = Broker.GetPortfolio();
+            double targetExposure = portfolio.GrossExposure / 2;
+
+            // rebalance long position
+            double longExposureDifference = targetExposure - portfolio.LongPositionsValue;
+            if (longExposureDifference > 0)
+            {
+                Engine.Broker.MarketBuy(longSymbol, longExposureDifference / e[longSymbol].AdjClose);
+            }
+            else if (longExposureDifference < 0)
+            {
+                Engine.Broker.MarketSell(longSymbol, -longExposureDifference / e[longSymbol].AdjClose);
+            }
+
+            // rebalance short position
+            double shortExposureDifference = targetExposure - portfolio.ShortPositionsValue;
+            if (shortExposureDifference > 0)
+            {
+                Engine.Broker.MarketSell(shortSymbol, shortExposureDifference / e[shortSymbol].AdjClose);
+            }
+            else if (shortExposureDifference < 0)
+            {
+                Engine.Broker.MarketBuy(shortSymbol, -shortExposureDifference / e[shortSymbol].AdjClose);
+            }
         }
     }
 }

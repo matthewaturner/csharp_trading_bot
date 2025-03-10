@@ -7,23 +7,12 @@ using System;
 
 namespace Bot.Analyzers;
 
-public enum ReturnCalculation
-{
-    // Returns are only based on the underlying asset returns, ignoring cash
-    SpreadReturns = 0,
-
-    // Returns are based on the actual portfolio returns, accounting for cash in the portfolio
-    PortfolioReturns = 1,
-}
-
 public class StrategyAnalyzer(
-    ReturnCalculation returnCalculation = ReturnCalculation.PortfolioReturns, 
     double annualRiskFreeRate = 0) 
     : IStrategyAnalyzer
 {
     // private
     private ITradingEngine Engine;
-    private ReturnCalculation ReturnCalculation = returnCalculation;
     private double AnnualRiskFreeRate = annualRiskFreeRate;
 
     // public
@@ -62,6 +51,6 @@ public class StrategyAnalyzer(
     /// </summary>
     public void OnFinalize(object sender, EventArgs _)
     {
-        RunResult.CalculateResults(ReturnCalculation, AnnualRiskFreeRate, Interval);
+        RunResult.CalculateResults(AnnualRiskFreeRate, Interval);
     }
 }
