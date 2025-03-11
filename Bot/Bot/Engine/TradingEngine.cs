@@ -39,7 +39,6 @@ public class TradingEngine : ITradingEngine
     // Single strategy object (for now)
     public IStrategy Strategy { get; set; }
 
-
     /// <summary>
     /// Method to create loggers.
     /// </summary>
