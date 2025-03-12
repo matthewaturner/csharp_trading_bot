@@ -6,7 +6,6 @@
 using Bot;
 using Bot.DataSources.Csv;
 using Bot.Models.Engine;
-using Bot.Models.MarketData;
 using Bot.Models.Results;
 using Bot.Strategies.EpChan;
 using Microsoft.Extensions.Logging;
@@ -16,7 +15,7 @@ namespace IntegrationTests.EpChanExamples;
 
 public class EpChanTests
 {
-    [Test]
+    [Fact]
     public void Example3_4()
     {
         var builder = new EngineBuilder()
@@ -25,13 +24,14 @@ public class EpChanTests
                 runMode: RunMode.BackTest,
                 universe: new() { "IGE" },
                 minLogLevel: LogLevel.Debug,
-                shouldWriteCsv: true))
+                shouldWriteCsv: true,
+                annualRiskFreeRate: .04))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0);
 
         var engine = builder.Build();
         RunResult result = engine.RunAsync().Result;
-        Assert.AreEqual(0.789317538, result.AnnualizedSharpeRatio, 9);
+        Assert.Equal(0.789317538, result.AnnualizedSharpeRatio, 9);
     }
 
 }
