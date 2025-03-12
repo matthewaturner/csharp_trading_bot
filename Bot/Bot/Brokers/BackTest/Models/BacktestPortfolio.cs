@@ -4,7 +4,7 @@
 // -----------------------------------------------------------------------
 
 
-using Bot.Models;
+using Bot.Brokers.BackTest.Models;
 using Bot.Models.Broker;
 using Bot.Models.MarketData;
 using Bot.Models.Results;

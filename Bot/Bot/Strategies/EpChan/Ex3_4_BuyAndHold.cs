@@ -3,23 +3,24 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Brokers;
+using Bot.Models.Allocations;
 using Bot.Models.MarketData;
-using Bot.Strategies;
+using System;
 
-namespace Bot.Strategy.EpChan;
+namespace Bot.Strategies.EpChan;
 
-public class Ex3_4_BuyAndHold(string symbol) : StrategyBase
+public class Ex3_4_BuyAndHold : StrategyBase
 {
-    private string symbol = symbol;
-    private bool invested = false;
+    private Allocation alloc;
 
-    public override void OnMarketData(MarketSnapshot snapshot)
+    public Ex3_4_BuyAndHold(string symbol)
     {
-        if (!invested)
-        {
-            Broker.MarketBuy(symbol, Account.Cash / snapshot[symbol].AdjClose);
-            invested = true;
-        }
+        this.alloc = new Allocation();
+        this.alloc.SetAllocation(symbol, 1.0);
+    }
+
+    public override Allocation OnMarketData(MarketSnapshot snapshot)
+    {
+        return alloc;
     }
 }

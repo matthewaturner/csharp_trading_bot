@@ -3,10 +3,8 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Brokers;
 using Bot.Engine;
-using Bot.Events;
-using Bot.Models.Broker;
+using Bot.Models.Allocations;
 using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,33 +13,36 @@ namespace Bot.Strategies;
 
 public abstract class StrategyBase : IStrategy
 {
-    // private
-    private ILogger logger;
+    /// <summary>
+    /// Logger for convenience.
+    /// </summary>
+    private ILogger Logger;
 
-    // public
-    public ITradingEngine Engine { get; private set; }
-
-    public IBroker Broker => Engine.Broker;
-
-    public IPortfolio Account => Broker.GetPortfolio();
+    /// <summary>
+    /// Unique identifier for the strategy.
+    /// </summary>
+    public string Id { get; private set; } = Guid.NewGuid().ToString();
 
     /// <summary>
     /// Handle initialize event.
     /// </summary>
     public void OnInitialize(object sender, EventArgs _)
     {
-        Engine = sender as ITradingEngine;
-        this.logger = Engine.CreateLogger(this.GetType().Name);
+        var engine = sender as ITradingEngine;
+        this.Logger = engine.CreateLogger(this.GetType().Name);
     }
 
     /// <summary>
     /// Handler market data event.
     /// </summary>
-    void IMarketDataReceiver.OnMarketData(object sender, MarketDataEvent e)
+    public Allocation OnMarketDataBase(MarketSnapshot snapshot)
     {
-        logger.LogDebug($"Received snapshot: {e.Snapshot}");
-        OnMarketData(e.Snapshot);
+        Logger.LogDebug($"Received snapshot: {snapshot}");
+        return OnMarketData(snapshot);
     }
 
-    public abstract void OnMarketData(MarketSnapshot bar);
+    /// <summary>
+    /// Implemented by strategy.
+    /// </summary>
+    public abstract Allocation OnMarketData(MarketSnapshot bar);
 }

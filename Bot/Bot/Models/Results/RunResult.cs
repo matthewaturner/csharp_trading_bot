@@ -3,7 +3,6 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Analyzers;
 using Bot.Helpers;
 using Bot.Models.Engine;
 using System;
@@ -17,19 +16,49 @@ namespace Bot.Models.Results;
 /// </summary>
 public class RunResult
 {
-    public List<PortfolioSnapshot> PortfolioSnapshots { get; set; } = new();
+    public List<string> SymbolUniverse { get; private set; }
 
-    public List<double> Returns { get; private set; }
+    public RunResult(List<string> symbolUniverse)
+    {
+        SymbolUniverse = symbolUniverse;
 
-    public List<double> CumulativeReturns { get; private set; }
+        foreach (string symbol in symbolUniverse)
+        {
+            UnderlyingPrices[symbol] = new List<double>();
+            SymbolWeights[symbol] = new List<double>();
+        }
+    }
 
-    public List<double> ExcessReturns { get; private set; }
+    // ####################################################
+    // # Below values are set by the analyzer             #
+    // ####################################################
 
-    public List<double> HighWaterMark { get; private set; }
+    public List<DateTime> Timestamps = new();
 
-    public List<double> Drawdown { get; private set; }
+    // list per symbol in the universe
+    public Dictionary<string, List<double>> UnderlyingPrices = new();
 
-    public List<double> DrawdownDuration { get; private set; }
+    // weights per symbol in the universe
+    public Dictionary<string, List<double>> SymbolWeights = new();
+
+    // ####################################################
+    // # Below values are calculated                      #
+    // ####################################################
+
+    public Dictionary<string, List<double>> UnderlyingReturns = new();
+
+    // overall returns of the strategy
+    public List<double> Returns { get; set; }
+
+    public List<double> CumulativeReturns { get; set; }
+
+    public List<double> ExcessReturns { get; set; }
+
+    public List<double> HighWaterMark { get; set; }
+
+    public List<double> Drawdown { get; set; }
+
+    public List<double> DrawdownDuration { get; set; }
 
     public double AnnualizedSharpeRatio = double.NaN;
     public double MaximumDrawdown = 0;
@@ -40,16 +69,27 @@ public class RunResult
     /// </summary>
     public void CalculateResults(double annualRiskFreeRate, Interval interval)
     {
-        IEnumerable<double> portfolioValue = PortfolioSnapshots.Select(s => s.PortfolioValue);
-        Returns = [.. portfolioValue.Zip(portfolioValue.Skip(1), (prev, current) => (current - prev) / prev)];
+        // returns must start at the right length but all zeros
+        Returns = Enumerable.Repeat(0.0, UnderlyingPrices.Values.First().Count()).ToList();
+
+        foreach (string symbol in SymbolUniverse)
+        {
+            UnderlyingReturns[symbol] = [.. UnderlyingPrices[symbol].Zip(UnderlyingPrices[symbol].Skip(1), (prev, current) => (current - prev) / prev)];
+            var symbolReturns = SymbolWeights[symbol].Zip(UnderlyingReturns[symbol], (w, r) => w * r);
+
+            // add the symbol returns to the strategy returns
+            Returns = [.. Returns.Zip(symbolReturns, (r, sr) => r + sr)];
+        }
+
+        double r = annualRiskFreeRate / interval.GetIntervalsPerYear();
 
         // this (annual risk free rate / intervals per year) seems like a simplification (no compounding) but it's fine for now
         ExcessReturns = [.. Returns.Select(r => r - (annualRiskFreeRate / interval.GetIntervalsPerYear()))];
 
-        CumulativeReturns = [.. ExcessReturns.Aggregate(new List<double> { 0 }, (acc, r) => 
-        { 
-            acc.Add((1 + acc.Last()) * (1 + r) - 1); 
-            return acc; 
+        CumulativeReturns = [.. ExcessReturns.Aggregate(new List<double> { 0 }, (acc, r) =>
+        {
+            acc.Add((1 + acc.Last()) * (1 + r) - 1);
+            return acc;
         }).Skip(1)];
 
         HighWaterMark = [.. CumulativeReturns.Aggregate(new List<double> { 0 }, (acc, r) =>
@@ -90,8 +130,3 @@ public class RunResult
         return (mean / stddev) * Math.Sqrt(periodsPerYear);
     }
 }
-
-/// <summary>
-/// Record that holds a timestamp and a value.
-/// </summary>
-public record DatedValue(DateTime Timestamp, double Value);

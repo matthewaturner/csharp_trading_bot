@@ -16,12 +16,13 @@ public class MetaAllocationTests
         var alloc = new Allocation();
         alloc.SetAllocation("AAPL", 1.0);
 
-        meta.SetAllocation("Strategy1", alloc, 0.5);
+        meta.SetStrategyWeight("Strategy1", 0.5);
+        meta.SetStrategyAllocation("Strategy1", alloc);
 
-        var resultWeight = meta.GetAllocationWeight("Strategy1");
+        var resultWeight = meta.GetStrategyWeight("Strategy1");
         var resultAlloc = meta.GetAllocation("Strategy1");
 
-        Assert.Equal(0.5, resultWeight);
+        Assert.Equal(0.5, resultWeight, 2);
         Assert.Equal(alloc, resultAlloc);
     }
 
@@ -32,8 +33,11 @@ public class MetaAllocationTests
         var alloc1 = new Allocation();
         var alloc2 = new Allocation();
 
-        meta.SetAllocation("Strategy1", alloc1, 0.4);
-        meta.SetAllocation("Strategy2", alloc2, 0.6);
+        meta.SetStrategyWeight("Strategy1", 0.4);
+        meta.SetStrategyAllocation("Strategy1", alloc1);
+
+        meta.SetStrategyWeight("Strategy2", 0.6);
+        meta.SetStrategyAllocation("Strategy2", alloc2);
 
         var totalWeight = meta.TotalWeight();
 
@@ -53,8 +57,11 @@ public class MetaAllocationTests
         alloc2.SetAllocation("AAPL", 0.5);
         alloc2.SetAllocation("GOOG", 0.5);
 
-        meta.SetAllocation("Strategy1", alloc1, 0.5);
-        meta.SetAllocation("Strategy2", alloc2, 0.5);
+        meta.SetStrategyWeight("Strategy1", 0.5);
+        meta.SetStrategyAllocation("Strategy1", alloc1);
+
+        meta.SetStrategyWeight("Strategy2", 0.5);
+        meta.SetStrategyAllocation("Strategy2", alloc2);
 
         var flattened = meta.FlattenAllocations();
 

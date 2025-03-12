@@ -23,7 +23,7 @@ public abstract class DataSourceBase : IDataSource
     /// Stream bars to the engine.
     /// </summary>
     async Task IDataSource.StreamBars(
-        string[] symbols,
+        List<string> symbols,
         Interval interval,
         DateTime start,
         DateTime? end)

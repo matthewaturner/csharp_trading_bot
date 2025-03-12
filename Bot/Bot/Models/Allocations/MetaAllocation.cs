@@ -11,51 +11,79 @@ namespace Bot.Models.Allocations;
 
 public class MetaAllocation
 {
-    private readonly Dictionary<string, (Allocation allocation, double weight)> _metaAllocations = new();
+    private readonly Dictionary<string, double> _strategyWeights = new();
+    private readonly Dictionary<string, Allocation> _strategyAllocations = new();
 
-    // Add or update an allocation with its meta weight and strategy ID
-    public void SetAllocation(string strategyId, Allocation allocation, double weight)
+    /// <summary>
+    /// Set the weight for a given strategy.
+    /// </summary>
+    public void SetStrategyWeight(string strategyId, double weight)
     {
         if (string.IsNullOrWhiteSpace(strategyId))
             throw new ArgumentException("Strategy ID cannot be null or empty");
+        if (weight < 0 || weight > 1)
+            throw new ArgumentOutOfRangeException(nameof(weight), "Strategy weight must be between 0 and 1");
 
-        _metaAllocations[strategyId] = (allocation, weight);
+        _strategyWeights[strategyId] = weight;
     }
 
-    // Get meta weight of a specific strategy ID
-    public double GetAllocationWeight(string strategyId)
+    /// <summary>
+    /// Get the weight of a particular strategy.
+    /// </summary>
+    /// <param name="strategyId"></param>
+    /// <returns></returns>
+    public double GetStrategyWeight(string strategyId)
     {
-        return _metaAllocations.TryGetValue(strategyId, out var entry) ? entry.weight : 0;
+        return _strategyWeights.TryGetValue(strategyId, out double weight) ?
+            weight : throw new KeyNotFoundException($"Strategy id {strategyId} not found.");
     }
 
-    // Get allocation by strategy ID
+    /// <summary>
+    /// Set the allocation for a particular strategy.
+    /// </summary>
+    public void SetStrategyAllocation(string strategyId, Allocation allocation)
+    {
+        if (string.IsNullOrWhiteSpace(strategyId))
+            throw new ArgumentException("Strategy ID cannot be null or empty");
+        if (allocation == null)
+            throw new ArgumentNullException("Allocation was null.");
+
+        _strategyAllocations[strategyId] = allocation;
+    }
+
+    /// <summary>
+    /// Get the allocation for a particular strategy.
+    /// </summary>
     public Allocation GetAllocation(string strategyId)
     {
-        return _metaAllocations.TryGetValue(strategyId, out var entry) ? entry.allocation : null;
+        return _strategyAllocations.TryGetValue(strategyId, out var allocation) ?
+            allocation : throw new KeyNotFoundException($"Strategy id {strategyId} not found.");
     }
 
-    // Return all meta allocations
-    public IReadOnlyDictionary<string, (Allocation allocation, double weight)> GetAllMetaAllocations() => _metaAllocations;
+    /// <summary>
+    /// Sum up the weight of all strategies.
+    /// </summary>
+    public double TotalWeight() => _strategyWeights.Values.Sum();
 
-    // Total weight of all meta allocations (should be 1.0 if valid)
-    public double TotalWeight() => _metaAllocations.Values.Sum(entry => entry.weight);
-
-    // Merge all allocations into a flat symbol -> total weight map
-    public Dictionary<string, double> FlattenAllocations()
+    /// <summary>
+    /// Merge all the different allocations into one large allocation dictionary
+    /// </summary>
+    /// <returns></returns>
+    public Allocation FlattenAllocations()
     {
         var combined = new Dictionary<string, double>();
 
-        foreach (var (strategyId, (alloc, metaWeight)) in _metaAllocations)
+        foreach ((string strategyId, double strategyWeight) in _strategyWeights)
         {
-            foreach (var (symbol, weight) in alloc.GetAllAllocations())
+            foreach ((string symbol, double weight) in _strategyAllocations[strategyId])
             {
                 if (!combined.ContainsKey(symbol))
                     combined[symbol] = 0;
 
-                combined[symbol] += weight * metaWeight;
+                combined[symbol] += weight * strategyWeight;
             }
         }
 
         return combined;
     }
-} 
+}

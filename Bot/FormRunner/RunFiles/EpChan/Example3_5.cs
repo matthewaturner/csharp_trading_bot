@@ -4,15 +4,12 @@
 // -----------------------------------------------------------------------
 
 using Bot;
-using Bot.Analyzers;
-using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
-using Bot.Engine;
 using Bot.Models.Engine;
-using Bot.Models.MarketData;
 using Bot.Models.Results;
-using Bot.Strategy.EpChan;
+using Bot.Strategies.EpChan;
 using Microsoft.Extensions.Logging;
+using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles.EpChan;
 
@@ -20,19 +17,17 @@ public class Example3_5
 {
     public Form Run()
     {
-        var engine = new TradingEngine
-        {
-            RunConfig = new RunConfig(
+        var builder = new EngineBuilder()
+            .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                universe: new Universe("IGE", "SPY"),
+                universe: new() { "IGE", "SPY" },
                 minLogLevel: LogLevel.Debug,
-                shouldWriteCsv: true),
-            Broker = new BacktestBroker(10000),
-            DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
-            Analyzer = new StrategyAnalyzer(), // no risk free rate for fully invested long/short strategy
-            Strategy = new Ex3_5_LongShort("IGE", "SPY"),
-        };
+                shouldWriteCsv: true))
+            .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
+            .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0);
+
+        var engine = builder.Build();
 
         RunResult result = engine.RunAsync().Result;
 

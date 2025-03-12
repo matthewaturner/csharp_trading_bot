@@ -4,12 +4,11 @@
 // -----------------------------------------------------------------------
 
 using Bot.Analyzers;
-using Bot.Brokers;
-using Bot.Brokers.Backtest;
 using Bot.DataSources;
-using Bot.DataSources.Alpaca;
+using Bot.Events;
 using Bot.Helpers;
 using Bot.Logging;
+using Bot.Models.Allocations;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies;
@@ -21,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Bot.Engine;
 
-public class TradingEngine : ITradingEngine
+public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
 {
     private ILoggerFactory loggerFactory;
 
@@ -29,20 +28,12 @@ public class TradingEngine : ITradingEngine
     private event EventHandler<EventArgs> InitializeEventHandlers;
     private event EventHandler<EventArgs> FinalizeEventHandlers;
 
-    // RunConfig object holds all the configuration for the run
-    public RunConfig RunConfig { get; set;  }
-
-    // Broker object
-    public IBroker Broker { get; set; } = new BacktestBroker(10000);
-
-    // Data source object
-    public IDataSource DataSource { get; set; } = new AlpacaDataSource();
-
-    // Single analyzer for now
-    public IStrategyAnalyzer Analyzer { get; set; } = new StrategyAnalyzer();
-
-    // Single strategy object (for now)
-    public IStrategy Strategy { get; set; }
+    // Local variables
+    public RunConfig RunConfig { get; private set; }
+    public MetaAllocation MetaAllocation { get; private set; }
+    public StrategyAnalyzer Analyzer { get; private set; }
+    public IDataSource DataSource { get; private set; }
+    public IStrategy Strategy { get; private set; }
 
     /// <summary>
     /// Method to create loggers.
@@ -69,17 +60,12 @@ public class TradingEngine : ITradingEngine
         });
 
         // register initialize handlers
-        InitializeEventHandlers += Broker.OnInitialize;
         InitializeEventHandlers += Analyzer.OnInitialize;
         InitializeEventHandlers += Strategy.OnInitialize;
 
         // register market data handlers
-        if (Broker is BacktestBroker b)
-        {
-            DataSource.MarketDataReceivers += b.OnMarketData;
-        }
+        DataSource.MarketDataReceivers += this.OnMarketData;
         DataSource.MarketDataReceivers += Analyzer.OnMarketData;
-        DataSource.MarketDataReceivers += Strategy.OnMarketData;
 
         // register finalize handlers
         FinalizeEventHandlers += Analyzer.OnFinalize;
@@ -104,7 +90,7 @@ public class TradingEngine : ITradingEngine
 
             case RunMode.BackTest:
                 await DataSource.StreamBars(
-                    RunConfig.Universe.AllSymbols,
+                    RunConfig.Universe,
                     RunConfig.Interval,
                     RunConfig.Start,
                     RunConfig.End);
@@ -121,5 +107,14 @@ public class TradingEngine : ITradingEngine
         }
 
         return Analyzer.RunResult;
+    }
+
+    /// <summary>
+    /// Handle market data and send it along to the strategy classes.
+    /// </summary>
+    public void OnMarketData(object sender, MarketDataEvent e)
+    {
+        var allocation = Strategy.OnMarketDataBase(e.Snapshot);
+        MetaAllocation.SetStrategyAllocation(Strategy.Id, allocation);
     }
 }

@@ -4,14 +4,13 @@
 // -----------------------------------------------------------------------
 
 using Bot.Analyzers;
-using Bot.Brokers.Backtest;
 using Bot.DataSources.Alpaca;
 using Bot.Engine;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using Bot.Models.Results;
-using Bot.Strategy;
-using Bot.Strategy.EpChan;
+using Bot.Strategies.EpChan;
+using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles;
 
@@ -19,19 +18,17 @@ public class BuyAndHold
 {
     public Form Run()
     {
-        var engine = new TradingEngine
-        {
-            RunConfig = new RunConfig(
+        var builder = new EngineBuilder()
+            .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
                 start: new DateTime(2000, 1, 1),
                 end: DateTime.Now,
-                universe: new Universe("XOM")),
-            Broker = new BacktestBroker(42.09),
-            DataSource = new AlpacaDataSource(),
-            Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new Ex3_4_BuyAndHold("XOM"),
-        };
+                universe: new() { "XOM" }))
+            .WithDataSource(new AlpacaDataSource())
+            .WithStrategy(new Ex3_4_BuyAndHold("XOM"), 1.0);
+
+        var engine = builder.Build();
 
         RunResult result = engine.RunAsync().Result;
 

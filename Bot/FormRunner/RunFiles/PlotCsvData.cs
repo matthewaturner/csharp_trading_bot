@@ -19,13 +19,9 @@ public class PlotCsvData
         var bars = source.GetHistoricalBarsAsync("IGE", Interval.OneDay, DateTime.MinValue, DateTime.MaxValue).Result;
 
         // form a runresult from the raw bars
-        var runResult = new RunResult()
+        var runResult = new RunResult(new List<string>() { "IGE" })
         {
-            PortfolioSnapshots = bars.Select(b => new PortfolioSnapshot()
-            {
-                Timestamp = b.Timestamp,
-                PortfolioValue = b.AdjClose,
-            }).ToList()
+            Returns = [.. bars.Select(b => b.AdjClose)]
         };
         var form = new ScatterPlotForm(runResult);
 

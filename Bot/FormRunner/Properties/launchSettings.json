@@ -2,7 +2,7 @@
   "profiles": {
     "FormRunner": {
       "commandName": "Project",
-      "commandLineArgs": "--fileName Example3_5"
+      "commandLineArgs": "--fileName Example3_4"
     }
   }
 }

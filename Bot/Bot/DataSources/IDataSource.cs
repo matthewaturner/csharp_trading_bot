@@ -7,6 +7,7 @@ using Bot.Events;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Bot.DataSources;
@@ -22,7 +23,7 @@ public interface IDataSource
     /// Stream bars to the engine.
     /// </summary>
     Task StreamBars(
-        string[] symbols,
+        List<string> symbols,
         Interval interval,
         DateTime start,
         DateTime? end);

@@ -25,9 +25,21 @@ public class MarketSnapshot
         Bars = bars.ToDictionary(b => b.Symbol, b => b);
     }
 
-    public Bar this[string symbol] => Bars.ContainsKey(symbol) ? 
+    /// <summary>
+    /// Enumerate the symbols in the snapshot.
+    /// </summary>
+    public IEnumerable<string> Symbols => Bars.Keys;
+
+    /// <summary>
+    /// Get the bar for a given symbol.
+    /// </summary>
+    public Bar this[string symbol] => Bars.ContainsKey(symbol) ?
         Bars[symbol] : throw new KeyNotFoundException($"Symbol {symbol} not found in market snapshot.");
 
+    /// <summary>
+    /// Print the snapshot.
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return $"MarketSnapshot: {Timestamp.StdToString()} - {Bars.Count} bars";

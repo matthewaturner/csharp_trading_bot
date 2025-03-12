@@ -4,15 +4,13 @@
 // -----------------------------------------------------------------------
 
 using Bot;
-using Bot.Analyzers;
-using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
-using Bot.Engine;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using Bot.Models.Results;
-using Bot.Strategy.EpChan;
+using Bot.Strategies.EpChan;
 using Microsoft.Extensions.Logging;
+using static Bot.Engine.TradingEngine;
 
 namespace IntegrationTests.EpChanExamples;
 
@@ -21,22 +19,19 @@ public class EpChanTests
     [Test]
     public void Example3_4()
     {
-        var engine = new TradingEngine()
-        {
-            RunConfig = new RunConfig(
+        var builder = new EngineBuilder()
+            .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                universe: new Universe("IGE"),
-                minLogLevel: LogLevel.Error),
-            Broker = new BacktestBroker(10000), // it should not matter how much capital you begin with
-            DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
-            Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new Ex3_4_BuyAndHold("IGE"),
-        };
+                universe: new() { "IGE" },
+                minLogLevel: LogLevel.Debug,
+                shouldWriteCsv: true))
+            .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
+            .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0);
 
+        var engine = builder.Build();
         RunResult result = engine.RunAsync().Result;
-
-        result.AnnualizedSharpeRatio.IsApproximately(0.78931753834485019m);
+        Assert.AreEqual(0.789317538, result.AnnualizedSharpeRatio, 9);
     }
 
 }

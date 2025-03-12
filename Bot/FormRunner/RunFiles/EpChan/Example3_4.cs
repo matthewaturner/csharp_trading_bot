@@ -4,15 +4,12 @@
 // -----------------------------------------------------------------------
 
 using Bot;
-using Bot.Analyzers;
-using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
-using Bot.Engine;
 using Bot.Models.Engine;
-using Bot.Models.MarketData;
 using Bot.Models.Results;
-using Bot.Strategy.EpChan;
+using Bot.Strategies.EpChan;
 using Microsoft.Extensions.Logging;
+using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles.EpChan;
 
@@ -20,22 +17,19 @@ public class Example3_4
 {
     public Form Run()
     {
-        var engine = new TradingEngine
-        {
-            RunConfig = new RunConfig(
+        var builder = new EngineBuilder()
+            .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                universe: new Universe("IGE"),
+                universe: new() { "IGE" },
                 minLogLevel: LogLevel.Debug,
-                shouldWriteCsv: true),
-            Broker = new BacktestBroker(42.09),
-            DataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder),
-            Analyzer = new StrategyAnalyzer(annualRiskFreeRate: .04),
-            Strategy = new Ex3_4_BuyAndHold("IGE"),
-        };
+                shouldWriteCsv: true,
+                annualRiskFreeRate: .04))
+            .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
+            .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0);
 
+        var engine = builder.Build();
         RunResult result = engine.RunAsync().Result;
-
         return new ScatterPlotForm(result);
     }
 }

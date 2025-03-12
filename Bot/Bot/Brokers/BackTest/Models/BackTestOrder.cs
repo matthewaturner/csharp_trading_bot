@@ -6,7 +6,7 @@
 using Bot.Models.Broker;
 using System;
 
-namespace Bot.Models;
+namespace Bot.Brokers.BackTest.Models;
 
 public class BacktestOrder : IOrder
 {

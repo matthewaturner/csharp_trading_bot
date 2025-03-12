@@ -3,9 +3,9 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -21,8 +21,9 @@ public class RunConfig
         RunMode? runMode = null,
         DateTime? start = null,
         DateTime? end = null,
-        Universe universe = null,
+        List<string> universe = null,
         bool shouldWriteCsv = false,
+        double annualRiskFreeRate = 0.0,
         LogLevel minLogLevel = LogLevel.Debug,
         [CallerFilePath] string callerFilePath = null)
     {
@@ -31,6 +32,7 @@ public class RunConfig
         Start = start ?? DateTime.MinValue;
         End = end ?? DateTime.MaxValue;
         Universe = universe ?? throw new ArgumentNullException("Symbol universe must be defined.");
+        AnnualRiskFreeRate = annualRiskFreeRate;
         ShouldWriteCsvOutput = shouldWriteCsv;
         LogLevel = minLogLevel;
 
@@ -42,7 +44,7 @@ public class RunConfig
     /// <summary>
     /// The interval of data we are running on.
     /// </summary>
-    public Interval Interval { get; } 
+    public Interval Interval { get; }
 
     /// <summary>
     /// The mode to run in. Live, Paper, Backtest.
@@ -60,15 +62,20 @@ public class RunConfig
     public DateTime End { get; }
 
     /// <summary>
-    /// The universer of stocks to run on.
+    /// The universe of all stocks to run on.
     /// </summary>
-    public Universe Universe { get; }
+    public List<string> Universe { get; }
 
     /// <summary>
     /// Whether we should write all analyzer output to a csv at the end of the run.
     /// Mostly useful for debugging backtests.
     /// </summary>
     public bool ShouldWriteCsvOutput { get; }
+
+    /// <summary>
+    /// The annual risk free rate for analyzing the strategy.
+    /// </summary>
+    public double AnnualRiskFreeRate { get; }
 
     /// <summary>
     /// The file name if csv output is enabled.

@@ -11,8 +11,8 @@ public partial class ScatterPlotForm : Form
         this.Text = name;
 
         formsPlot1.Plot.Add.Scatter(
-            runResult.PortfolioSnapshots.Select(v => v.Timestamp.ToOADate()).ToArray(),
-            runResult.PortfolioSnapshots.Select(v => v.PortfolioValue).ToArray());
+            runResult.Timestamps.Select(v => v.ToOADate()).ToArray(),
+            runResult.CumulativeReturns.ToArray());
         formsPlot1.Plot.Axes.DateTimeTicksBottom();
         formsPlot1.Refresh();
 

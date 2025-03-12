@@ -3,8 +3,8 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Brokers;
 using Bot.DataSources;
+using Bot.Models.Allocations;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies;
@@ -26,14 +26,14 @@ public interface ITradingEngine
     public IDataSource DataSource { get; }
 
     /// <summary>
-    /// Get current broker.
-    /// </summary>
-    public IBroker Broker { get; }
-
-    /// <summary>
     /// Gets current strategy.
     /// </summary>
     public IStrategy Strategy { get; }
+
+    /// <summary>
+    /// The entire set of allocations from all strategies.
+    /// </summary>
+    public MetaAllocation MetaAllocation { get; }
 
     /// <summary>
     /// Create a logger for use in a downstream class.

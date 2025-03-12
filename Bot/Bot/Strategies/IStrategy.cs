@@ -4,11 +4,15 @@
 // -----------------------------------------------------------------------
 
 using Bot.Events;
+using Bot.Models.Allocations;
 using Bot.Models.MarketData;
+using System;
 
 namespace Bot.Strategies;
 
-public interface IStrategy : IInitializeReceiver, IMarketDataReceiver
+public interface IStrategy : IInitializeReceiver
 {
-    void OnMarketData(MarketSnapshot snapshot);
+    string Id { get; }
+
+    Allocation OnMarketDataBase(MarketSnapshot snapshot);
 }

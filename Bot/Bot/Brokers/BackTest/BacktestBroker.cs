@@ -4,8 +4,8 @@
 // -----------------------------------------------------------------------
 
 using Bot.Brokers.Backtest.Models;
+using Bot.Brokers.BackTest.Models;
 using Bot.Events;
-using Bot.Models;
 using Bot.Models.Broker;
 using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Bot.Brokers.Backtest;
 
-public class BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBarClose) 
+public class BacktestBroker(double initialFunds, ExecutionMode executionMode = ExecutionMode.OnCurrentBarClose)
     : BrokerBase, IBroker, IMarketDataReceiver
 {
     // private objects

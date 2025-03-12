@@ -3,35 +3,20 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Brokers;
 using Bot.Engine;
 using Bot.Events;
+using Bot.Models.Allocations;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using System;
 
 namespace Bot.Analyzers;
 
-public class StrategyAnalyzer(
-    double annualRiskFreeRate = 0) 
-    : IStrategyAnalyzer
+public class StrategyAnalyzer() : IStrategyAnalyzer
 {
-    // private
     private ITradingEngine Engine;
-    private double AnnualRiskFreeRate = annualRiskFreeRate;
 
-    // public
-    public RunResult RunResult { get; private set; } = new();
-
-    /// <summary>
-    /// Broker shorthand.
-    /// </summary>
-    private IBroker Broker => Engine.Broker;
-
-    /// <summary>
-    /// Interval shorthand.
-    /// </summary>
-    private Interval Interval => Engine.RunConfig.Interval;
+    public RunResult RunResult { get; private set; }
 
     /// <summary>
     /// Handle initialize event.
@@ -39,6 +24,7 @@ public class StrategyAnalyzer(
     public void OnInitialize(object sender, EventArgs _)
     {
         Engine = sender as ITradingEngine;
+        RunResult = new RunResult(Engine.RunConfig.Universe);
     }
 
     /// <summary>
@@ -46,8 +32,15 @@ public class StrategyAnalyzer(
     /// </summary>
     public void OnMarketData(object sender, MarketDataEvent e)
     {
-        PortfolioSnapshot snapshot = Broker.GetPortfolio().GetSnapshot(e.Snapshot.Timestamp);
-        RunResult.PortfolioSnapshots.Add(snapshot);
+        Allocation flatAllocations = Engine.MetaAllocation.FlattenAllocations();
+
+        foreach (string symbol in e.Snapshot.Symbols)
+        {
+            RunResult.Timestamps.Add(e.Snapshot.Timestamp);
+            RunResult.UnderlyingPrices[symbol].Add(e.Snapshot[symbol].AdjClose);
+            RunResult.SymbolWeights[symbol].Add(flatAllocations[symbol]);
+
+        }
     }
 
     /// <summary>
@@ -56,6 +49,6 @@ public class StrategyAnalyzer(
     /// </summary>
     public void OnFinalize(object sender, EventArgs _)
     {
-        RunResult.CalculateResults(AnnualRiskFreeRate, Interval);
+        RunResult.CalculateResults(Engine.RunConfig.AnnualRiskFreeRate, Engine.RunConfig.Interval);
     }
 }
