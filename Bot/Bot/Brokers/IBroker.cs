@@ -1,4 +1,9 @@
-﻿using Bot.Events;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Events;
 using Bot.Models.Broker;
 using System;
 using System.Collections.Generic;

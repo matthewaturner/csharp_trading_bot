@@ -1,4 +1,9 @@
-﻿using System.Runtime.Serialization;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using System.Runtime.Serialization;
 
 namespace Bot.Models.Broker;
 

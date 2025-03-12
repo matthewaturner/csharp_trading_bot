@@ -1,10 +1,14 @@
-﻿
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+
 using Bot.Models;
 using Bot.Models.Broker;
 using Bot.Models.MarketData;
 using Bot.Models.Results;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 

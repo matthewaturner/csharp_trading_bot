@@ -1,4 +1,9 @@
-﻿using Bot.Models.Broker;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Models.Broker;
 using Newtonsoft.Json;
 
 namespace Bot.Brokers.Alpaca.Models;

@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace Bot.Logging;

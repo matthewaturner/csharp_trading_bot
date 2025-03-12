@@ -1,4 +1,9 @@
-﻿using Bot.Brokers;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Brokers;
 using Bot.DataSources;
 using Bot.Models.Engine;
 using Bot.Models.Results;

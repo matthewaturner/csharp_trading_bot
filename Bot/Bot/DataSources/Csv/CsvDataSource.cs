@@ -1,4 +1,9 @@
-﻿using Bot.DataSources.Csv.Models;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.DataSources.Csv.Models;
 using Bot.Models.Engine;
 using Bot.Models.MarketData;
 using CsvHelper;

@@ -1,4 +1,9 @@
-﻿using Bot.Models.MarketData;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Models.MarketData;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;

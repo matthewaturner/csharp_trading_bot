@@ -1,4 +1,9 @@
-﻿using Bot;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot;
 using Bot.DataSources.Csv;
 using Bot.Models.Engine;
 using Bot.Models.Results;

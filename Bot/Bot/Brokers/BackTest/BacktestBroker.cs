@@ -1,4 +1,9 @@
-﻿using Bot.Brokers.Backtest.Models;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Brokers.Backtest.Models;
 using Bot.Events;
 using Bot.Models;
 using Bot.Models.Broker;
