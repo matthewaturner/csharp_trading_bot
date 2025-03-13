@@ -71,7 +71,7 @@ public class MetaAllocation
     /// <returns></returns>
     public Allocation FlattenAllocations()
     {
-        var combined = new Dictionary<string, double>();
+        var combined = new Allocation();
 
         foreach ((string strategyId, double strategyWeight) in _strategyWeights)
         {

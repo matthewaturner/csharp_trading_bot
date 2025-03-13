@@ -15,8 +15,11 @@ namespace IntegrationTests.EpChanExamples;
 
 public class EpChanTests
 {
+    // number of decimal places to compare the results to
+    const int ACCURACY = 12;
+
     [Fact]
-    public void Example3_4()
+    public async Task Example3_4()
     {
         var builder = new EngineBuilder()
             .WithConfig(new RunConfig(
@@ -24,14 +27,31 @@ public class EpChanTests
                 runMode: RunMode.BackTest,
                 universe: new() { "IGE" },
                 minLogLevel: LogLevel.Debug,
-                shouldWriteCsv: true,
                 annualRiskFreeRate: .04))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0);
 
         var engine = builder.Build();
-        RunResult result = engine.RunAsync().Result;
-        Assert.Equal(0.789317538, result.AnnualizedSharpeRatio, 9);
+        RunResult result = await engine.RunAsync();
+        Assert.Equal(0.789317538344851, result.AnnualizedSharpeRatio, ACCURACY);
+    }
+
+    [Fact]
+    public async Task Example3_5()
+    {
+        var builder = new EngineBuilder()
+         .WithConfig(new RunConfig(
+             interval: Interval.OneDay,
+             runMode: RunMode.BackTest,
+             universe: new() { "IGE", "SPY" },
+             minLogLevel: LogLevel.Debug,
+             shouldWriteCsv: true))
+         .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
+         .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0);
+
+        var engine = builder.Build();
+        RunResult result = await engine.RunAsync();
+        Assert.Equal(0.78368110018119, result.AnnualizedSharpeRatio, ACCURACY);
     }
 
 }

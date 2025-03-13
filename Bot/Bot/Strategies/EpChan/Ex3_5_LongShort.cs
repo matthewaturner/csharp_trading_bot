@@ -5,17 +5,15 @@
 
 using Bot.Models.Allocations;
 using Bot.Models.MarketData;
-using System;
 
 namespace Bot.Strategies.EpChan;
 
 public class Ex3_5_LongShort(string longSymbol, string shortSymbol) : StrategyBase
 {
-    private string longSymbol = longSymbol;
-    private string shortSymbol = shortSymbol;
+    Allocation allocation = new Allocation { [longSymbol] = 0.5, [shortSymbol] = -.5 };
 
     public override Allocation OnMarketData(MarketSnapshot e)
     {
-        throw new NotImplementedException();
+        return allocation;
     }
 }

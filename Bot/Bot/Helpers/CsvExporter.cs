@@ -25,15 +25,21 @@ public class CsvExporter
         using (var writer = new StreamWriter(filePath))
         {
             // header row
-            writer.Write($"Timestamp,{string.Join(",", runResult.SymbolUniverse)},");
+            writer.Write($"Timestamp,");
+            foreach (string symbol in runResult.SymbolUniverse)
+            {
+                writer.Write($"{symbol},{symbol}_Return,");
+            }
             writer.Write("Returns,CumulativeReturns,ExcessReturns,HighWaterMark,Drawdown,DrawdownDuration\n");
 
+            // for every timestamp
             for (int i = 0; i < runResult.Returns.Count; i++)
             {
                 writer.Write(runResult.Timestamps[i].ToString("yyyy-MM-ddT HH:mm") + ",");
                 foreach (string symbol in runResult.SymbolUniverse)
                 {
                     writer.Write(runResult.UnderlyingPrices[symbol][i] + ",");
+                    writer.Write(runResult.UnderlyingReturns[symbol][i] + ",");
                 }
 
                 // calculated values

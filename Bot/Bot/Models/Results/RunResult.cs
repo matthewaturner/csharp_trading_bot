@@ -81,8 +81,6 @@ public class RunResult
             Returns = [.. Returns.Zip(symbolReturns, (r, sr) => r + sr)];
         }
 
-        double r = annualRiskFreeRate / interval.GetIntervalsPerYear();
-
         // this (annual risk free rate / intervals per year) seems like a simplification (no compounding) but it's fine for now
         ExcessReturns = [.. Returns.Select(r => r - (annualRiskFreeRate / interval.GetIntervalsPerYear()))];
 
@@ -111,6 +109,7 @@ public class RunResult
         AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio(interval);
 
         // add the initial zeroes to everything
+        foreach (string symbol in SymbolUniverse) { UnderlyingReturns[symbol].Insert(0, 0); }
         Returns.Insert(0, 0);
         ExcessReturns.Insert(0, 0);
         CumulativeReturns.Insert(0, 0);
