@@ -125,7 +125,7 @@ public class RunResult
     {
         double periodsPerYear = interval.GetIntervalsPerYear();
         double mean = ExcessReturns.Average();
-        double stddev = MathHelpers.StdDev(ExcessReturns);
+        double stddev = MathFunctions.StdDev(ExcessReturns);
         return (mean / stddev) * Math.Sqrt(periodsPerYear);
     }
 }

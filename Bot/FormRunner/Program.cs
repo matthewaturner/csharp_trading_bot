@@ -87,9 +87,9 @@ internal static class Program
         ApplicationConfiguration.Initialize();
 
         // Run(), with no params
-        var mainForm = (Form)method.Invoke(instance, null)!;
+        method.Invoke(instance, null);
 
         // The application will end when the main form is closed
-        Application.Run(mainForm);
+        Application.Run();
     }
 }
