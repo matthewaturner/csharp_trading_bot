@@ -39,6 +39,7 @@ public abstract class DataSourceBase : IDataSource
         }
 
         var snapshots = barsDict.SelectMany(kv => kv.Value)
+            .Where(b => b.Timestamp >= start && b.Timestamp < end)
             .GroupBy(b => b.Timestamp)
             .OrderBy(g => g.Key)
             .Select(g => new MarketSnapshot(g.Key, g.ToArray()));

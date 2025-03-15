@@ -7,12 +7,15 @@ using Bot;
 using Bot.DataSources.Csv;
 using Bot.Helpers;
 using Bot.Models.Engine;
+using Bot.Strategies.EpChan;
+using Microsoft.Extensions.Logging;
+using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles.EpChan;
 
 public class Example3_6
 {
-    public Form Run()
+    public void Run()
     {
         // format the train set data
         var dataSource = new CsvDataSource(GlobalConfig.EpChanDataFolder);
@@ -37,6 +40,23 @@ public class Example3_6
         var spreadForm = ScatterPlotForm.ReturnsOverTime(sharedTimestampsOADate, spread, "Spread Returns: GLD - m*GDX");
         spreadForm.Show();
 
-        return olsForm;
+        // run backtest on the training set
+        double spreadMean = spread.Average();
+        double spreadStdDev = MathFunctions.StdDev(spread);
+
+        var trainResult = new EngineBuilder()
+            .WithConfig(new RunConfig(
+                interval: Interval.OneDay,
+                runMode: RunMode.BackTest,
+                start: sharedTimestamps.First(),
+                end: sharedTimestamps.Last().AddDays(1),
+                universe: new() { "GLD", "GDX" },
+                minLogLevel: LogLevel.Debug,
+                shouldWriteCsv: true))
+            .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
+            .WithStrategy(new Ex3_6_OlsPairsTrade("GDX", "GLD", m, spreadMean, spreadStdDev), 1.0)
+            .Build().RunAsync().Result;
+        var trainResultform = new BacktestResultForm(trainResult);
+        trainResultform.Show();
     }
 }
