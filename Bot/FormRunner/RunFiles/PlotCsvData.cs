@@ -23,7 +23,7 @@ public class PlotCsvData
         {
             Returns = [.. bars.Select(b => b.AdjClose)]
         };
-        var form = new ScatterPlotForm(runResult);
+        var form = new BacktestResultForm(runResult);
 
         return form;
     }

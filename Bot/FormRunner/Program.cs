@@ -37,6 +37,15 @@ internal static class Program
     }
 
     /// <summary>
+    /// Method that allocates a console if the runfile needs it.
+    /// </summary>
+    public static void AddConsole()
+    {
+        AllocConsole();
+        EnableAnsiColors();
+    }
+
+    /// <summary>
     /// The main entry point for the application.
     /// </summary>
     [STAThread]
@@ -73,17 +82,14 @@ internal static class Program
             return;
         }
 
-        // Always run a console app
-        AllocConsole();
-        EnableAnsiColors();
-
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
 
         // Run(), with no params
-        Form form = (Form)method.Invoke(instance, null)!;
+        var mainForm = (Form)method.Invoke(instance, null)!;
 
-        Application.Run(form);
+        // The application will end when the main form is closed
+        Application.Run(mainForm);
     }
 }

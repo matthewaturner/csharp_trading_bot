@@ -2,7 +2,7 @@
 
 namespace FormRunner
 {
-    partial class ScatterPlotForm
+    partial class BacktestResultForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -54,7 +54,6 @@ namespace FormRunner
             sharpeRatioValue.Name = "sharpeRatioValue";
             sharpeRatioValue.Size = new Size(150, 23);
             sharpeRatioValue.TabIndex = 1;
-            sharpeRatioValue.TextChanged += textBox1_TextChanged;
             // 
             // label1
             // 
@@ -64,7 +63,6 @@ namespace FormRunner
             label1.Size = new Size(70, 15);
             label1.TabIndex = 2;
             label1.Text = "SharpeRatio";
-            label1.Click += label1_Click;
             // 
             // label2
             // 
@@ -114,7 +112,6 @@ namespace FormRunner
             Controls.Add(formsPlot1);
             Name = "ScatterPlotForm";
             Text = "Form1";
-            Load += ScatterPlotForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }

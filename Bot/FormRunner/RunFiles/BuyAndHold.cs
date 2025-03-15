@@ -32,6 +32,6 @@ public class BuyAndHold
 
         RunResult result = engine.RunAsync().Result;
 
-        return new ScatterPlotForm(result);
+        return new BacktestResultForm(result);
     }
 }

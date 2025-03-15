@@ -31,6 +31,6 @@ public class Example3_5
 
         RunResult result = engine.RunAsync().Result;
 
-        return new ScatterPlotForm(result);
+        return new BacktestResultForm(result);
     }
 }

@@ -30,6 +30,6 @@ public class Example3_4
 
         var engine = builder.Build();
         RunResult result = engine.RunAsync().Result;
-        return new ScatterPlotForm(result);
+        return new BacktestResultForm(result);
     }
 }
