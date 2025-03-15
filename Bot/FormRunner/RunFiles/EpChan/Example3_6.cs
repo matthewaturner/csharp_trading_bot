@@ -54,7 +54,7 @@ public class Example3_6
                 minLogLevel: LogLevel.Debug,
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
-            .WithStrategy(new Ex3_6_OlsPairsTrade("GDX", "GLD", m, spreadMean, spreadStdDev), 1.0)
+            .WithStrategy(new Ex3_6_OlsPairsTrade("GLD", "GDX", m, spreadMean, spreadStdDev), 1.0)
             .Build().RunAsync().Result;
         var trainResultform = new BacktestResultForm(trainResult);
         trainResultform.Show();
