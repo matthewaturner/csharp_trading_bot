@@ -28,7 +28,7 @@ public class CsvExporter
             writer.Write($"Timestamp,");
             foreach (string symbol in runResult.SymbolUniverse)
             {
-                writer.Write($"{symbol},{symbol}_Return,");
+                writer.Write($"{symbol},{symbol}_Return,{symbol}_Weight,");
             }
             writer.Write("Returns,CumulativeReturns,ExcessReturns,HighWaterMark,Drawdown,DrawdownDuration\n");
 
@@ -40,6 +40,7 @@ public class CsvExporter
                 {
                     writer.Write(runResult.UnderlyingPrices[symbol][i] + ",");
                     writer.Write(runResult.UnderlyingReturns[symbol][i] + ",");
+                    writer.Write(runResult.SymbolWeights[symbol][i] + ",");
                 }
 
                 // calculated values

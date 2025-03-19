@@ -9,18 +9,36 @@ using System;
 
 namespace Bot.Strategies.EpChan;
 
-public class Ex3_6_OlsPairsTrade(
-    string longSymbol, 
-    string shortSymbol, 
-    double hedgeRatio, 
-    double spreadMean, 
-    double spreadStdDev)
-    : StrategyBase
+public class Ex3_6_OlsPairsTrade : StrategyBase
 {
-    private Allocation longAllocation = new Allocation { [longSymbol] = 1, [shortSymbol] = -hedgeRatio };
-    private Allocation shortAllocation = new Allocation { [longSymbol] = -1, [shortSymbol] = hedgeRatio };
-    private Allocation neutralAllocation = new Allocation { [longSymbol] = 0, [shortSymbol] = 0 };
+    private readonly string longSymbol;
+    private readonly string shortSymbol;
+    private readonly double spreadMean;
+    private readonly double spreadStdDev;
+    private readonly double hedgeRatio;
+
+    private Allocation longAllocation;
+    private Allocation shortAllocation;
+    private Allocation neutralAllocation;
     private Allocation alloc = null;
+
+    public Ex3_6_OlsPairsTrade(
+        string longSymbol, 
+        string shortSymbol, 
+        double hedgeRatio, 
+        double spreadMean, 
+        double spreadStdDev)
+    {
+        this.longSymbol = longSymbol;
+        this.shortSymbol = shortSymbol;
+        this.spreadMean = spreadMean;
+        this.spreadStdDev = spreadStdDev;
+        this.hedgeRatio = hedgeRatio;
+
+        this.longAllocation = GetUnitPortfolioLongToShort(longSymbol, shortSymbol, hedgeRatio);
+        this.shortAllocation = -longAllocation;
+        this.neutralAllocation = Allocation.Empty(longSymbol, shortSymbol);
+    }
 
     public override Allocation OnMarketData(MarketSnapshot bar)
     {
@@ -36,5 +54,15 @@ public class Ex3_6_OlsPairsTrade(
 
         return alloc;
     }
+
+    private static Allocation GetUnitPortfolioLongToShort(
+        string longSymbol,
+        string shortSymbol,
+        double hedgeRatio)
+    {
+        double totalWeight = 1 + Math.Abs(hedgeRatio);
+        return new Allocation { [longSymbol] = 1 / totalWeight, [shortSymbol] = -hedgeRatio / totalWeight };
+    }
+
 }
 

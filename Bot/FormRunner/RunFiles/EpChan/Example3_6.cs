@@ -13,6 +13,12 @@ using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles.EpChan;
 
+/// <summary>
+/// Not getting exactly the same results as are shown in quantitative trading.
+/// I think the issue is that the strategy described in the book does not match what is programmed in python in the
+/// example code. It's a shame I can't get the same results, but they are good results anyway and I'll keep it 
+/// working as is.
+/// </summary>
 public class Example3_6
 {
     public void Run()
@@ -34,15 +40,20 @@ public class Example3_6
         var olsForm = ScatterPlotForm.DotPlotOLS(gdxTrainSet, gldTrainSet, m, "OLS: x_axis=GDX y_axis=GLD");
         olsForm.Show();
 
-        // calculate the spread of the portfolio formed using the hedge ratio we calculated
-        var spread = gldTrainSet.Zip(gdxTrainSet, (gld, gdx) => gld - m * gdx).ToArray();
         var sharedTimestampsOADate = sharedTimestamps.Select(t => t.ToOADate()).ToArray();
-        var spreadForm = ScatterPlotForm.ReturnsOverTime(sharedTimestampsOADate, spread, "Spread Returns: GLD - m*GDX");
+
+        // calculate the spread of the portfolio formed using the hedge ratio we calculated
+        var trainSetSpread = gldTrainSet.Zip(gdxTrainSet, (gld, gdx) => gld - m * gdx).ToArray();
+        var spreadForm = ScatterPlotForm.ReturnsOverTime(sharedTimestampsOADate, trainSetSpread, "Train Set Spread Returns: GLD - m*GDX");
+        spreadForm.Show();
+
+        var testSetSpread = gldTrainSet.Zip(gdxTrainSet, (gld, gdx) => gld - m * gdx).ToArray();
+        var testSetSpreadForm = ScatterPlotForm.ReturnsOverTime(sharedTimestampsOADate, testSetSpread, "Train Set Spread Returns: GLD - m*GDX");
         spreadForm.Show();
 
         // run backtest on the training set
-        double spreadMean = spread.Average();
-        double spreadStdDev = MathFunctions.StdDev(spread);
+        double spreadMean = trainSetSpread.Average();
+        double spreadStdDev = MathFunctions.StdDev(trainSetSpread);
 
         var trainResult = new EngineBuilder()
             .WithConfig(new RunConfig(
