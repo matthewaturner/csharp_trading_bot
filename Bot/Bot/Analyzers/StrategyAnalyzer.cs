@@ -33,13 +33,12 @@ public class StrategyAnalyzer() : IStrategyAnalyzer
     public void OnMarketData(object sender, MarketDataEvent e)
     {
         Allocation flatAllocations = Engine.MetaAllocation.FlattenAllocations();
+        RunResult.Timestamps.Add(e.Snapshot.Timestamp);
 
         foreach (string symbol in e.Snapshot.Symbols)
         {
-            RunResult.Timestamps.Add(e.Snapshot.Timestamp);
             RunResult.UnderlyingPrices[symbol].Add(e.Snapshot[symbol].AdjClose);
             RunResult.SymbolWeights[symbol].Add(flatAllocations[symbol]);
-
         }
     }
 
