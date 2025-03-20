@@ -1,101 +1,62 @@
-using Bot.Events;
+// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
 using Bot.Exceptions;
 using Bot.Indicators;
-using Bot.Models.MarketData;
-using System;
-using System.Collections.Generic;
-using Xunit;
+using Bot.Indicators.Common;
 
 namespace Bot.Tests.Indicators;
 
 public class SimpleMovingAverageTests
 {
-    private static Random random = new Random();
-
-    private MarketDataEvent CreateRandomMarketSnapshot(string symbol)
-    {
-        var bar = new Bar(
-            DateTime.Now,
-            symbol,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.Next(1000, 10000),
-            random.NextDouble() * 100
-        );
-
-        return new MarketDataEvent(new MarketSnapshot(DateTime.Now, bar));
-    }
-
     [Fact]
-    public void SimpleMovingAverage_NotHydrated_Throws()
+    public void Sma_Hydrates_After_Period()
     {
-        int lookback = 5;
-        var sma = new SimpleMovingAverage(lookback, snapshot => snapshot["TEST"].AdjClose);
-
-        var events = new List<MarketDataEvent>();
-        for (int i = 0; i < lookback - 1; i++)
-        {
-            events.Add(CreateRandomMarketSnapshot("TEST"));
-        }
+        var period = 3;
+        var sma = new SimpleMovingAverage(period);
 
         Assert.False(sma.IsHydrated);
-        Assert.Throws<NotHydratedException>(() => sma.Value);
+
+        sma.Add(1.0);
+        Assert.False(sma.IsHydrated);
+
+        sma.Add(2.0);
+        Assert.False(sma.IsHydrated);
+
+        sma.Add(3.0);
+        Assert.True(sma.IsHydrated);
+
+        Assert.Equal(2.0, sma.Value);
     }
 
     [Fact]
-    public void SimpleMovingAverage_CalculatesCorrectly()
+    public void Sma_Throws_If_Not_Hydrated()
     {
-        int lookback = 5;
-        var sma = new SimpleMovingAverage(lookback, snapshot => snapshot["TEST"].AdjClose);
+        var period = 3;
+        var sma = new SimpleMovingAverage(period);
 
-        var events = new List<MarketDataEvent>();
-        for (int i = 0; i < lookback; i++)
-        {
-            events.Add(CreateRandomMarketSnapshot("TEST"));
-        }
+        sma.Add(1.0);
+        Assert.False(sma.IsHydrated);
 
-        double expectedSum = 0;
-        foreach (var @event in events)
-        {
-            expectedSum += @event.Snapshot["TEST"].AdjClose;
-            sma.OnMarketData(this, @event);
-        }
-
-        double expectedAverage = expectedSum / lookback;
-        Assert.Equal(expectedAverage, sma.Value, 4);
-        Assert.True(sma.IsHydrated);
+        Assert.Throws<NotHydratedException>(() => _ = sma.Value);
     }
 
     [Fact]
-    public void SimpleMovingAverage_HandlesMoreThanLookback()
+    public void Chained_Sma_Composition_Works()
     {
-        int lookback = 5;
-        var sma = new SimpleMovingAverage(lookback, snapshot => snapshot["TEST"].AdjClose);
+        var sma = new SimpleMovingAverage(3);
+        var smaOfSquares = sma.Of(x => x*x);
 
-        var events = new List<MarketDataEvent>();
-        for (int i = 0; i < lookback + 2; i++)
+        var inputs = new[] { 1.0, 2.0, 3.0, 4.0 };
+
+        foreach (var input in inputs)
         {
-            events.Add(CreateRandomMarketSnapshot("TEST"));
+            smaOfSquares.Add(input);
         }
 
-        double expectedSum = 0;
-        for (int i = 0; i < lookback; i++)
-        {
-            expectedSum += events[i].Snapshot["TEST"].AdjClose;
-            sma.OnMarketData(this, events[i]);
-        }
-
-        for (int i = lookback; i < events.Count; i++)
-        {
-            expectedSum += events[i].Snapshot["TEST"].AdjClose;
-            expectedSum -= events[i - lookback].Snapshot["TEST"].AdjClose;
-            sma.OnMarketData(this, events[i]);
-        }
-
-        double expectedAverage = expectedSum / lookback;
-        Assert.Equal(expectedAverage, sma.Value, 4);
-        Assert.True(sma.IsHydrated);
+        var expected = inputs[^3..].Select(i => i * i).Average();
+        Assert.Equal(expected, smaOfSquares.Value);
     }
 }
