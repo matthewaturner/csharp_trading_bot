@@ -18,7 +18,7 @@ public class MovingStdDev(int lookback) : IndicatorBase<double, double>(lookback
 
     public override void OnAdd(double input)
     {
-        _window.OnAdd(input);
+        _window.Add(input);
 
         if (_window.IsHydrated)
         {

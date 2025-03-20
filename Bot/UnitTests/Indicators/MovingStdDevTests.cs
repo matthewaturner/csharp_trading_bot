@@ -7,44 +7,20 @@ using Bot.Events;
 using Bot.Exceptions;
 using Bot.Helpers;
 using Bot.Indicators;
-using Bot.Models.MarketData;
-using System;
-using System.Collections.Generic;
-using Xunit;
 
 namespace UnitTests.Indicators;
 
-/*
 public class MovingStdDevTests
 {
-    private static Random random = new Random();
-
-    private MarketDataEvent CreateRandomMarketSnapshot(string symbol)
-    {
-        var bar = new Bar(
-            DateTime.Now,
-            symbol,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.NextDouble() * 100,
-            random.Next(1000, 10000),
-            random.NextDouble() * 100
-        );
-
-        return new MarketDataEvent(new MarketSnapshot(DateTime.Now, bar));
-    }
-
     [Fact]
     public void MovingStdDev_NotHydrated_Throws()
     {
         int lookback = 5;
-        var stdDev = new MovingStdDev(lookback, snapshot => snapshot["TEST"].AdjClose);
+        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
-        var events = new List<MarketDataEvent>();
         for (int i = 0; i < lookback - 1; i++)
         {
-            events.Add(CreateRandomMarketSnapshot("TEST"));
+            stdDev.Add(TestHelpers.CreateRandomSnapshot("TEST"));
         }
 
         Assert.False(stdDev.IsHydrated);
@@ -55,19 +31,19 @@ public class MovingStdDevTests
     public void MovingStdDev_CalculatesCorrectly()
     {
         int lookback = 5;
-        var stdDev = new MovingStdDev(lookback, snapshot => snapshot["TEST"].AdjClose);
+        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback; i++)
         {
-            var @event = CreateRandomMarketSnapshot("TEST");
-            values.Add(@event.Snapshot["TEST"].AdjClose);
-            stdDev.OnMarketData(this, @event);
+            var snapshot = TestHelpers.CreateRandomSnapshot("TEST");
+            stdDev.Add(snapshot);
+            values.Add(snapshot["TEST"].AdjClose);
         }
 
-        double expectedStdDev = MathFunctions.StdDev(values[^lookback..]);
+        double expectedStdDev = MathFunctions.StdDev(values);
 
-        Assert.Equal(expectedStdDev, stdDev.Value, 4);
+        Assert.Equal(expectedStdDev, stdDev.Value, 9);
         Assert.True(stdDev.IsHydrated);
     }
 
@@ -75,20 +51,19 @@ public class MovingStdDevTests
     public void MovingStdDev_HandlesMoreThanLookback()
     {
         int lookback = 5;
-        var stdDev = new MovingStdDev(lookback, snapshot => snapshot["TEST"].AdjClose);
+        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback + 2; i++)
         {
-            var @event = CreateRandomMarketSnapshot("TEST");
-            values.Add(@event.Snapshot["TEST"].AdjClose);
-            stdDev.OnMarketData(this, @event);
+            var snapshot = TestHelpers.CreateRandomSnapshot("TEST");
+            stdDev.Add(snapshot);
+            values.Add(snapshot["TEST"].AdjClose);
         }
 
         double expectedStdDev = MathFunctions.StdDev(values[^lookback..]);
 
-        Assert.Equal(expectedStdDev, stdDev.Value, 4);
+        Assert.Equal(expectedStdDev, stdDev.Value, 9);
         Assert.True(stdDev.IsHydrated);
     }
 }
-*/

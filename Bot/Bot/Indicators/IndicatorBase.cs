@@ -30,6 +30,11 @@ public abstract class IndicatorBase<T_in, T_out>(int lookback = 1) : IIndicator<
     }
 
     /// <summary>
+    /// Abstract on add to be implemented by the child class.
+    /// </summary>
+    public abstract void OnAdd(T_in input);
+
+    /// <summary>
     /// Compose from another indicator, with a transformation in between.
     /// </summary>
     public IIndicator<T_new_in, T_out> Of<T_new_in, T_new_out>(IIndicator<T_new_in, T_new_out> source, Func<T_new_out, T_in> selector)
@@ -56,7 +61,18 @@ public abstract class IndicatorBase<T_in, T_out>(int lookback = 1) : IIndicator<
     }
 
     /// <summary>
-    /// Abstract on add to be implemented by the child class.
+    /// Compose into another indicator, with a transformation in between.
     /// </summary>
-    public abstract void OnAdd(T_in input);
+    public IIndicator<T_in, T_new_out> Into<T_new_in, T_new_out>(IIndicator<T_new_in, T_new_out> target, Func<T_out, T_new_in> selector)
+    {
+        return new ChainedIndicator<T_in, T_out, T_new_in, T_new_out>(this, target, selector);
+    }
+
+    /// <summary>
+    /// Compose into another indicator, with no transformation.
+    /// </summary>
+    public IIndicator<T_in, T_new_out> Into<T_new_out>(IIndicator<T_out, T_new_out> target)
+    {
+        return new ChainedIndicator<T_in, T_out, T_out, T_new_out>(this, target, s => s);
+    }
 }

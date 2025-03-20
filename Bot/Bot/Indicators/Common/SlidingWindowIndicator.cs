@@ -11,7 +11,7 @@ public class SlidingWindowIndicator<T>(int lookback)
     public override void OnAdd(T input)
     {
         _window.Enqueue(input);
-        if (_window.Count == _lookback) _window.Dequeue();
+        if (_window.Count == _lookback + 1) _window.Dequeue();
 
         _value = _window.ToArray();
     }

@@ -5,7 +5,6 @@
 
 using Bot.Exceptions;
 using Bot.Indicators;
-using Bot.Indicators.Common;
 
 namespace UnitTests.Indicators;
 
@@ -15,7 +14,7 @@ public class SimpleMovingAverageTests
     public void Sma_Hydrates_After_Period()
     {
         var period = 3;
-        var sma = new SimpleMovingAverage(period);
+        var sma = Ind.SMA(period);
 
         Assert.False(sma.IsHydrated);
 
@@ -35,7 +34,7 @@ public class SimpleMovingAverageTests
     public void Sma_Throws_If_Not_Hydrated()
     {
         var period = 3;
-        var sma = new SimpleMovingAverage(period);
+        var sma = Ind.SMA(period);
         sma.Add(1.0);
 
         Assert.False(sma.IsHydrated);
@@ -45,8 +44,7 @@ public class SimpleMovingAverageTests
     [Fact]
     public void Sma_of_squares()
     {
-        var sma = new SimpleMovingAverage(3);
-        var smaOfSquares = sma.Of(x => x*x);
+        var smaOfSquares = Ind.SMA(3).Of(x => x*x);
 
         var inputs = new[] { 1.0, 2.0, 3.0, 4.0 };
 
@@ -62,9 +60,7 @@ public class SimpleMovingAverageTests
     [Fact]
     public void Squares_of_sma()
     {
-        var sma = new SimpleMovingAverage(3);
-        var squares = new FuncIndicator<double, double>(x => x*x, 0);
-        var squaresOfSma = squares.Of(sma);
+        var squaresOfSma = Ind.Func((double x) => x*x).Of(Ind.SMA(3));
 
         var inputs = new[] { 1.0, 2.0, 3.0, 4.0 };
 

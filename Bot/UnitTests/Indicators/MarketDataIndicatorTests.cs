@@ -1,4 +1,5 @@
-﻿using Bot.Indicators.Common;
+﻿using Bot.Indicators;
+using Bot.Indicators.Common;
 using Bot.Models.MarketData;
 
 namespace UnitTests.Indicators;
@@ -11,9 +12,28 @@ public class MarketDataIndicatorTests
     [Fact]
     public void AdjClose()
     {
-        var marketDataIndicator = MarketDataIndicator<double>.AdjClose(Sym);
+        var marketDataIndicator = Ind.MarketData.AdjClose(Sym);
         marketDataIndicator.Add(TestSnapshot);
-        Assert.Equal(TestSnapshot[Sym].AdjClose, marketDataIndicator.Value);
+        Assert.Equal(TestSnapshot[Sym].AdjClose, marketDataIndicator.Value, 9);
         Assert.True(marketDataIndicator.IsHydrated);
+    }
+
+    [Fact]
+    public void AdjClose_Composed()
+    {
+        var indicator = Ind.SMA(5).Of(Ind.MarketData.AdjClose(Sym));
+
+        List<double> values = new List<double>();
+        for (int i = 0; i < 10; i++)
+        {
+            var snapshot = TestHelpers.CreateRandomSnapshot(Sym);
+            indicator.Add(snapshot);
+            values.Add(snapshot[Sym].AdjClose);
+        }
+
+        double expectedValue = values[^5..].Average();
+
+        Assert.Equal(expectedValue, indicator.Value, 9);
+        Assert.True(indicator.IsHydrated);
     }
 }

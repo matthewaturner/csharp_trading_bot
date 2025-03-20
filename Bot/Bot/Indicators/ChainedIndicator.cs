@@ -41,4 +41,15 @@ public class ChainedIndicator<T1_in, T1_out, T2_in, T2_out>(
     {
         return new ChainedIndicator<T1_in, T1_in, T1_in, T2_out>(new FuncIndicator<T1_in, T1_in>(source), this, s => s);
     }
+
+    public IIndicator<T1_in, T_new_out> Into<T_new_in, T_new_out>(IIndicator<T_new_in, T_new_out> target, Func<T2_out, T_new_in> selector)
+    {
+        return new ChainedIndicator<T1_in, T2_out, T_new_in, T_new_out>(this, target, selector);
+    }
+
+    public IIndicator<T1_in, T_new_out> Into<T_new_out>(IIndicator<T2_out, T_new_out> target)
+    {
+        return new ChainedIndicator<T1_in, T2_out, T2_out, T_new_out>(this, target, s => s);
+    }
+
 }
