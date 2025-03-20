@@ -3,7 +3,7 @@ using System;
 
 namespace Bot.Indicators;
 
-public abstract class IndicatorBase<T_in, T_out>(int lookback) : IIndicator<T_in, T_out>
+public abstract class IndicatorBase<T_in, T_out>(int lookback = 1) : IIndicator<T_in, T_out>
 {
     private readonly int _lookback = lookback;
     private int _count = 0;

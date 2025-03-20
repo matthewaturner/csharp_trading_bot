@@ -7,7 +7,7 @@ using Bot.Exceptions;
 using Bot.Indicators;
 using Bot.Indicators.Common;
 
-namespace Bot.Tests.Indicators;
+namespace UnitTests.Indicators;
 
 public class SimpleMovingAverageTests
 {
@@ -36,15 +36,14 @@ public class SimpleMovingAverageTests
     {
         var period = 3;
         var sma = new SimpleMovingAverage(period);
-
         sma.Add(1.0);
-        Assert.False(sma.IsHydrated);
 
+        Assert.False(sma.IsHydrated);
         Assert.Throws<NotHydratedException>(() => _ = sma.Value);
     }
 
     [Fact]
-    public void Chained_Sma_Composition_Works()
+    public void Sma_of_squares()
     {
         var sma = new SimpleMovingAverage(3);
         var smaOfSquares = sma.Of(x => x*x);
@@ -57,6 +56,24 @@ public class SimpleMovingAverageTests
         }
 
         var expected = inputs[^3..].Select(i => i * i).Average();
-        Assert.Equal(expected, smaOfSquares.Value);
+        Assert.Equal(expected, smaOfSquares.Value, 9);
+    }
+
+    [Fact]
+    public void Squares_of_sma()
+    {
+        var sma = new SimpleMovingAverage(3);
+        var squares = new FuncIndicator<double, double>(x => x*x, 0);
+        var squaresOfSma = squares.Of(sma);
+
+        var inputs = new[] { 1.0, 2.0, 3.0, 4.0 };
+
+        foreach (var input in inputs)
+        {
+            squaresOfSma.Add(input);
+        }
+
+        var avg = inputs[^3..].Average();
+        Assert.Equal(avg*avg, squaresOfSma.Value, 9);
     }
 }

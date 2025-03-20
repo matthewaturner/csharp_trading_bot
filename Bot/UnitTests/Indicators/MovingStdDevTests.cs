@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Bot.Tests.Indicators;
+namespace UnitTests.Indicators;
 
 /*
 public class MovingStdDevTests

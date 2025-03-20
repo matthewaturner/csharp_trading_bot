@@ -22,8 +22,4 @@
     <ProjectReference Include="..\Bot\Bot.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Indicators\" />
-  </ItemGroup>
-
 </Project>
