@@ -3,7 +3,6 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
-using Bot.Events;
 using Bot.Exceptions;
 using Bot.Helpers;
 using Bot.Indicators;
@@ -16,11 +15,11 @@ public class MovingStdDevTests
     public void MovingStdDev_NotHydrated_Throws()
     {
         int lookback = 5;
-        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         for (int i = 0; i < lookback - 1; i++)
         {
-            stdDev.Add(TestHelpers.CreateRandomSnapshot("TEST"));
+            stdDev.Next(TestHelpers.CreateRandomSnapshot("TEST"));
         }
 
         Assert.False(stdDev.IsHydrated);
@@ -31,13 +30,13 @@ public class MovingStdDevTests
     public void MovingStdDev_CalculatesCorrectly()
     {
         int lookback = 5;
-        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback; i++)
         {
             var snapshot = TestHelpers.CreateRandomSnapshot("TEST");
-            stdDev.Add(snapshot);
+            stdDev.Next(snapshot);
             values.Add(snapshot["TEST"].AdjClose);
         }
 
@@ -51,13 +50,13 @@ public class MovingStdDevTests
     public void MovingStdDev_HandlesMoreThanLookback()
     {
         int lookback = 5;
-        var stdDev = Ind.StDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback + 2; i++)
         {
             var snapshot = TestHelpers.CreateRandomSnapshot("TEST");
-            stdDev.Add(snapshot);
+            stdDev.Next(snapshot);
             values.Add(snapshot["TEST"].AdjClose);
         }
 

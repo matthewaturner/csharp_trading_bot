@@ -1,4 +1,9 @@
-﻿using System;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using System;
 
 namespace Bot.Indicators;
 
@@ -14,14 +19,14 @@ public class ChainedIndicator<T1_in, T1_out, T2_in, T2_out>(
     public T2_out Value => _second.Value;
     public bool IsHydrated => _second.IsHydrated;
 
-    public void Add(T1_in input)
+    public void Next(T1_in input)
     {
-        _first.Add(input);
+        _first.Next(input);
 
         if (_first.IsHydrated)
         {
             var mid = _selector(_first.Value);
-            _second.Add(mid);
+            _second.Next(mid);
         }
     }
 

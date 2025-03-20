@@ -1,5 +1,9 @@
-﻿using Bot.Indicators;
-using Bot.Indicators.Common;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Indicators;
 using Bot.Models.MarketData;
 
 namespace UnitTests.Indicators;
@@ -13,7 +17,7 @@ public class MarketDataIndicatorTests
     public void AdjClose()
     {
         var marketDataIndicator = Ind.MarketData.AdjClose(Sym);
-        marketDataIndicator.Add(TestSnapshot);
+        marketDataIndicator.Next(TestSnapshot);
         Assert.Equal(TestSnapshot[Sym].AdjClose, marketDataIndicator.Value, 9);
         Assert.True(marketDataIndicator.IsHydrated);
     }
@@ -27,7 +31,7 @@ public class MarketDataIndicatorTests
         for (int i = 0; i < 10; i++)
         {
             var snapshot = TestHelpers.CreateRandomSnapshot(Sym);
-            indicator.Add(snapshot);
+            indicator.Next(snapshot);
             values.Add(snapshot[Sym].AdjClose);
         }
 

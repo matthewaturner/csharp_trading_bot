@@ -1,4 +1,9 @@
-﻿using Bot.Indicators.Common;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Indicators.Common;
 using System;
 
 namespace Bot.Indicators;
@@ -20,7 +25,7 @@ public static class Ind
 
     public static SimpleMovingAverage SMA(int lookback) => new SimpleMovingAverage(lookback);
 
-    public static MovingStdDev StDev(int lookback) => new MovingStdDev(lookback);
+    public static StdDev StdDev(int lookback) => new StdDev(lookback);
 
     public static FuncIndicator<T_in, T_out> Func<T_in, T_out>(Func<T_in, T_out> f) => new FuncIndicator<T_in, T_out>(f);
 }

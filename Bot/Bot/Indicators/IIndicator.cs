@@ -13,7 +13,7 @@ public interface IIndicator<T_in, T_out>
 
     T_out Value { get; }
 
-    void Add(T_in input);
+    void Next(T_in input);
 
     /// <summary>
     /// Compose from another indicator. prev -> this

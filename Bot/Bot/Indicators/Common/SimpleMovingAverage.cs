@@ -13,7 +13,7 @@ public class SimpleMovingAverage(int lookback)
     private readonly int _lookback = lookback;
     private readonly Queue<double> _inputData = new Queue<double>(lookback);
 
-    public override void OnAdd(double input)
+    public override void OnNext(double input)
     {
         _inputData.Enqueue(input);
         _value += input / _lookback;

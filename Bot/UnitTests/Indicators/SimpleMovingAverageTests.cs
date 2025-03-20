@@ -18,13 +18,13 @@ public class SimpleMovingAverageTests
 
         Assert.False(sma.IsHydrated);
 
-        sma.Add(1.0);
+        sma.Next(1.0);
         Assert.False(sma.IsHydrated);
 
-        sma.Add(2.0);
+        sma.Next(2.0);
         Assert.False(sma.IsHydrated);
 
-        sma.Add(3.0);
+        sma.Next(3.0);
         Assert.True(sma.IsHydrated);
 
         Assert.Equal(2.0, sma.Value);
@@ -35,7 +35,7 @@ public class SimpleMovingAverageTests
     {
         var period = 3;
         var sma = Ind.SMA(period);
-        sma.Add(1.0);
+        sma.Next(1.0);
 
         Assert.False(sma.IsHydrated);
         Assert.Throws<NotHydratedException>(() => _ = sma.Value);
@@ -50,7 +50,7 @@ public class SimpleMovingAverageTests
 
         foreach (var input in inputs)
         {
-            smaOfSquares.Add(input);
+            smaOfSquares.Next(input);
         }
 
         var expected = inputs[^3..].Select(i => i * i).Average();
@@ -66,7 +66,7 @@ public class SimpleMovingAverageTests
 
         foreach (var input in inputs)
         {
-            squaresOfSma.Add(input);
+            squaresOfSma.Next(input);
         }
 
         var avg = inputs[^3..].Average();

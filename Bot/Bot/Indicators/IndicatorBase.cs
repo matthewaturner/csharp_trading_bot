@@ -1,4 +1,9 @@
-﻿using Bot.Exceptions;
+﻿// -----------------------------------------------------------------------
+//     Copyright (c) 2025 Matthew Turner.
+//     Licensed under the MIT-NC License (Non-Commercial).
+// -----------------------------------------------------------------------
+
+using Bot.Exceptions;
 using System;
 
 namespace Bot.Indicators;
@@ -22,17 +27,17 @@ public abstract class IndicatorBase<T_in, T_out>(int lookback = 1) : IIndicator<
     /// <summary>
     /// Base add method.
     /// </summary>
-    public  void Add(T_in input)
+    public  void Next(T_in input)
     {
         _count++;
-        OnAdd(input);
+        OnNext(input);
         IsHydrated = _count >= _lookback;
     }
 
     /// <summary>
     /// Abstract on add to be implemented by the child class.
     /// </summary>
-    public abstract void OnAdd(T_in input);
+    public abstract void OnNext(T_in input);
 
     /// <summary>
     /// Compose from another indicator, with a transformation in between.
