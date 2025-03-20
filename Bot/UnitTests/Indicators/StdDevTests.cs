@@ -30,7 +30,7 @@ public class StdDevTests
     public void MovingStdDev_CalculatesCorrectly()
     {
         int lookback = 5;
-        var stdDev = Ind.FastStdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback; i++)
@@ -50,7 +50,7 @@ public class StdDevTests
     public void MovingStdDev_HandlesMoreThanLookback()
     {
         int lookback = 5;
-        var stdDev = Ind.FastStdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback + 7; i++)
