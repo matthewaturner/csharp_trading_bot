@@ -11,14 +11,16 @@ namespace Bot.Helpers;
 
 public static class MathFunctions
 {
+    /// <summary>
     /// Standard deviation calculation.
     /// </summary>
-    /// <param name="values"></param>
-    /// <returns></returns>
-    public static double StdDev(IEnumerable<double> values)
+    /// <param name="values">Values to calculate on.</param>
+    /// <param name="useBesselCorrection">Used when we want "sample" stdev as opposed to "population".</param>
+    public static double StdDev(IEnumerable<double> values, bool useBesselCorrection = true)
     {
         double avg = values.Average();
-        return Math.Sqrt(values.Sum(v => Math.Pow(v - avg, 2)) / (values.Count() - 1));
+        double variance = values.Sum(v => Math.Pow(v - avg, 2)) / (useBesselCorrection ? values.Count() - 1 : values.Count());
+        return Math.Sqrt(variance);
     }
 
     /// <summary>

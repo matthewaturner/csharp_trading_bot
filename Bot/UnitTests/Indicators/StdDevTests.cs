@@ -9,7 +9,7 @@ using Bot.Indicators;
 
 namespace UnitTests.Indicators;
 
-public class MovingStdDevTests
+public class StdDevTests
 {
     [Fact]
     public void MovingStdDev_NotHydrated_Throws()
@@ -30,7 +30,7 @@ public class MovingStdDevTests
     public void MovingStdDev_CalculatesCorrectly()
     {
         int lookback = 5;
-        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.FastStdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
         for (int i = 0; i < lookback; i++)
@@ -40,7 +40,7 @@ public class MovingStdDevTests
             values.Add(snapshot["TEST"].AdjClose);
         }
 
-        double expectedStdDev = MathFunctions.StdDev(values);
+        double expectedStdDev = MathFunctions.StdDev(values, false);
 
         Assert.Equal(expectedStdDev, stdDev.Value, 9);
         Assert.True(stdDev.IsHydrated);
@@ -50,17 +50,17 @@ public class MovingStdDevTests
     public void MovingStdDev_HandlesMoreThanLookback()
     {
         int lookback = 5;
-        var stdDev = Ind.StdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
+        var stdDev = Ind.FastStdDev(lookback).Of(Ind.MarketData.AdjClose("TEST"));
 
         var values = new List<double>();
-        for (int i = 0; i < lookback + 2; i++)
+        for (int i = 0; i < lookback + 7; i++)
         {
             var snapshot = TestHelpers.CreateRandomSnapshot("TEST");
             stdDev.Next(snapshot);
             values.Add(snapshot["TEST"].AdjClose);
         }
 
-        double expectedStdDev = MathFunctions.StdDev(values[^lookback..]);
+        double expectedStdDev = MathFunctions.StdDev(values[^lookback..], false);
 
         Assert.Equal(expectedStdDev, stdDev.Value, 9);
         Assert.True(stdDev.IsHydrated);
