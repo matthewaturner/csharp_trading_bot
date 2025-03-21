@@ -28,7 +28,7 @@ public class OlsPairsTradeStrategy : StrategyBase
         this.symbol2 = shortSymbol;
 
         var ols = Ind.OLS(lookback).Of(Ind.MarketData.Pair(shortSymbol, longSymbol));
-        smoothOls = Ind.EMA(5).Of(ols);
+        smoothOls = Ind.EMA(3).Of(ols);
 
         priceWindow1 = Ind.PriceWindow(lookback).Of(Ind.MarketData.AdjClose(longSymbol));
         priceWindow2 = Ind.PriceWindow(lookback).Of(Ind.MarketData.AdjClose(shortSymbol));
@@ -57,12 +57,12 @@ public class OlsPairsTradeStrategy : StrategyBase
         double spreadStdDev = Math.Sqrt(spread.Sum(x => Math.Pow(x - spreadMean, 2)) / (spread.Length - 1));
         double zScore = (spread.Last() - spreadMean) / spreadStdDev;
 
-        if (zScore > 2)
+        if (zScore > 1.8)
         {
             currentAlloc = new Allocation() { [symbol1] = -1, [symbol2] = hedgeRatio };
             currentAlloc.ToUnitPortfolio();
         }
-        else if (zScore < -2)
+        else if (zScore < -1.8)
         {
             currentAlloc = new Allocation() { [symbol1] = 1, [symbol2] = -hedgeRatio };
             currentAlloc.ToUnitPortfolio();

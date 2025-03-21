@@ -19,7 +19,7 @@ public class OlsPairsTrade
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
-                start: new DateTime(2000, 1, 1),
+                start: new DateTime(2021, 1, 1),
                 end: DateTime.Now,
                 universe: new() { "GLD", "GDX" },
                 shouldWriteCsv: true))
