@@ -8,7 +8,7 @@ using Bot.Indicators;
 
 namespace UnitTests.Indicators;
 
-public class SimpleMovingAverageTests
+public class SMATests
 {
     [Fact]
     public void Sma_Hydrates_After_Period()

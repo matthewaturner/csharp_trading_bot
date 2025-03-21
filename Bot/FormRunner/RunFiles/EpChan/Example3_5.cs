@@ -15,9 +15,9 @@ namespace FormRunner.RunFiles.EpChan;
 
 public class Example3_5
 {
-    public Form Run()
+    public void Run()
     {
-        var builder = new EngineBuilder()
+        var engine = new EngineBuilder()
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
@@ -25,12 +25,11 @@ public class Example3_5
                 minLogLevel: LogLevel.Debug,
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
-            .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0);
-
-        var engine = builder.Build();
+            .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0)
+            .Build();
 
         RunResult result = engine.RunAsync().Result;
-
-        return new BacktestResultForm(result);
+        var form = new BacktestResultForm(result);
+        form.Show();
     }
 }
