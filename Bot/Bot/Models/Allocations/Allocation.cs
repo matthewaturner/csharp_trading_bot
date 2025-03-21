@@ -3,6 +3,7 @@
 //     Licensed under the MIT-NC License (Non-Commercial).
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -36,6 +37,17 @@ public class Allocation : Dictionary<string, double>
     }
 
     public double TotalWeight() => this.Values.Sum();
+
+    public double AbsoluteWeight() => this.Values.Select(s => Math.Abs(s)).Sum();
+
+    public Allocation ToUnitPortfolio()
+    {
+        foreach (string symbol in this.Keys)
+        {
+            SetAllocation(symbol, this[symbol] / AbsoluteWeight());
+        }
+        return this;
+    }
 
     // Math Operations
 

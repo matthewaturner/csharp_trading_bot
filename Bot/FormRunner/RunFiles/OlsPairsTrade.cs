@@ -6,12 +6,12 @@
 using Bot.DataSources.Alpaca;
 using Bot.Models.Engine;
 using Bot.Models.Results;
-using Bot.Strategies.EpChan;
+using Bot.Strategies.Custom;
 using static Bot.Engine.TradingEngine;
 
 namespace FormRunner.RunFiles;
 
-public class BuyAndHold
+public class OlsPairsTrade
 {
     public void Run()
     {
@@ -21,9 +21,10 @@ public class BuyAndHold
                 runMode: RunMode.BackTest,
                 start: new DateTime(2000, 1, 1),
                 end: DateTime.Now,
-                universe: new() { "XOM" }))
+                universe: new() { "GLD", "GDX" },
+                shouldWriteCsv: true))
             .WithDataSource(new AlpacaDataSource())
-            .WithStrategy(new Ex3_4_BuyAndHold("XOM"), 1.0)
+            .WithStrategy(new OlsPairsTradeStrategy("GLD", "GDX", 60), 1.0)
             .Build();
 
         RunResult result = engine.RunAsync().Result;

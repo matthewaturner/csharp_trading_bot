@@ -9,6 +9,8 @@ namespace Bot.Indicators;
 
 public interface IIndicator<T_in, T_out>
 {
+    int Lookback { get; }
+
     bool IsHydrated { get; }
 
     T_out Value { get; }
@@ -29,19 +31,7 @@ public interface IIndicator<T_in, T_out>
         IIndicator<T_new_in, T_in> source);
 
     /// <summary>
-    /// Compose from another indicator.
+    /// Compose from a func indicator.
     /// </summary>
     public IIndicator<T_in, T_out> Of(Func<T_in, T_in> source);
-
-    /// <summary>
-    /// Compose into another indicator. this -> next
-    /// </summary>
-    public IIndicator<T_in, T_new_out> Into<T_new_in, T_new_out>(
-        IIndicator<T_new_in, T_new_out> target,
-        Func<T_out, T_new_in> selector);
-
-    /// <summary>
-    /// Compose into another indicator. this -> next
-    /// </summary>
-    public IIndicator<T_in, T_new_out> Into<T_new_out>(IIndicator<T_out, T_new_out> target);
 }

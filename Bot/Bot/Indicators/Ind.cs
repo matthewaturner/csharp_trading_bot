@@ -32,9 +32,13 @@ public static class Ind
 
     public static SimpleMovingAverage SMA(int lookback) => new SimpleMovingAverage(lookback);
 
+    public static ExponentialMovingAverage EMA(int lookback) => new ExponentialMovingAverage(lookback);
+
     public static StdDev StdDev(int lookback) => new StdDev(lookback);
 
     public static OLSIndicator OLS(int lookback) => new OLSIndicator(lookback);
+
+    public static SlidingWindowIndicator<double> PriceWindow(int lookback) => new SlidingWindowIndicator<double>(lookback);
 
     public static FuncIndicator<T_in, T_out> Func<T_in, T_out>(Func<T_in, T_out> f) => new FuncIndicator<T_in, T_out>(f);
 }

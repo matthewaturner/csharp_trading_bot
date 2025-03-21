@@ -15,14 +15,20 @@ public abstract class IndicatorBase<T_in, T_out>(int lookback) : IIndicator<T_in
     protected T_out _value;
 
     /// <summary>
-    /// Safely get the actual value of the indicator.
+    /// The lookback of this indicator.
     /// </summary>
-    public T_out Value => IsHydrated ? _value : throw new NotHydratedException();
-    
+    public int Lookback => _lookback;
+
     /// <summary>
     /// Whether the indicator is hydrated or not.
     /// </summary>
     public bool IsHydrated { get; protected set; }
+
+    /// <summary>
+    /// Safely get the actual value of the indicator.
+    /// </summary>
+    public T_out Value => IsHydrated ? _value : throw new NotHydratedException();
+    
 
     /// <summary>
     /// Base add method.

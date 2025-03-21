@@ -19,9 +19,13 @@ public class ChainedIndicator<T1_in, T1_out, T2_in, T2_out>(
     private readonly IIndicator<T1_in, T1_out> _first = first;
     private readonly IIndicator<T2_in, T2_out> _second = second;
     private readonly Func<T1_out, T2_in> _selector = selector;
+    private readonly int _totalLookback = first.Lookback + second.Lookback;
+
+    public int Lookback => _totalLookback;
+
+    public bool IsHydrated => _second.IsHydrated;
 
     public T2_out Value => _second.Value;
-    public bool IsHydrated => _second.IsHydrated;
 
     public void Next(T1_in input)
     {
@@ -50,15 +54,4 @@ public class ChainedIndicator<T1_in, T1_out, T2_in, T2_out>(
     {
         return new ChainedIndicator<T1_in, T1_in, T1_in, T2_out>(new FuncIndicator<T1_in, T1_in>(source), this, s => s);
     }
-
-    public IIndicator<T1_in, T_new_out> Into<T_new_in, T_new_out>(IIndicator<T_new_in, T_new_out> target, Func<T2_out, T_new_in> selector)
-    {
-        return new ChainedIndicator<T1_in, T2_out, T_new_in, T_new_out>(this, target, selector);
-    }
-
-    public IIndicator<T1_in, T_new_out> Into<T_new_out>(IIndicator<T2_out, T_new_out> target)
-    {
-        return new ChainedIndicator<T1_in, T2_out, T2_out, T_new_out>(this, target, s => s);
-    }
-
 }

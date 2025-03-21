@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Bot.Indicators.Common;
 
 public class SlidingWindowIndicator<T>(int lookback)
-    : IndicatorBase<T, IReadOnlyList<T>>(lookback)
+    : IndicatorBase<T, T[]>(lookback)
 {
     private readonly Queue<T> _window = new Queue<T>(lookback);
     private readonly int _lookback = lookback;

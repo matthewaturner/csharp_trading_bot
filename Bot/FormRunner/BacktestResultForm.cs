@@ -24,5 +24,12 @@ public partial class BacktestResultForm : Form
         sharpeRatioValue.Text = runResult.AnnualizedSharpeRatio.ToString();
         maxDrawdownValue.Text = runResult.MaximumDrawdown.ToString();
         maxDrawdownDurationValue.Text = runResult.MaximumDrawdownDuration.ToString();
+
+        this.FormClosing += OnAnyFormClosing;
+    }
+
+    private void OnAnyFormClosing(object? sender, FormClosingEventArgs e)
+    {
+        Application.Exit();
     }
 }

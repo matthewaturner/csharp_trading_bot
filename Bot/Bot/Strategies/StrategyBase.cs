@@ -24,6 +24,11 @@ public abstract class StrategyBase : IStrategy
     public string Id { get; private set; } = Guid.NewGuid().ToString();
 
     /// <summary>
+    /// Lookback of the strategy.
+    /// </summary>
+    public int Lookback { get; private set; }
+
+    /// <summary>
     /// Handle initialize event.
     /// </summary>
     public void OnInitialize(object sender, EventArgs _)
