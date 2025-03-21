@@ -11,8 +11,8 @@ namespace UnitTests.Indicators;
 
 public class OLSTests
 {
-    string SYM1 = "TEST1";
-    string SYM2 = "TEST2";
+    readonly string SYM1 = "TEST1";
+    readonly string SYM2 = "TEST2";
 
     [Fact]
     public void MovingOLS_NotHydrated_Throws()
