@@ -7,6 +7,10 @@ using System;
 
 namespace Bot.Indicators;
 
+/// <summary>
+/// Indicator that combines two indicators into a single indicator. Can be used repeatedly to form
+/// long chains of custom indicators and really any form of data manipulation that is needed.
+/// </summary>
 public class ChainedIndicator<T1_in, T1_out, T2_in, T2_out>(
     IIndicator<T1_in, T1_out> first,
     IIndicator<T2_in, T2_out> second,

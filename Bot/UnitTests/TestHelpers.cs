@@ -11,9 +11,9 @@ public static class TestHelpers
 {
     private static readonly Random Rng = new Random();
 
-    public static MarketSnapshot CreateRandomSnapshot(string symbol)
+    public static Bar CreateRandomBar(string symbol)
     {
-        var bar = new Bar(
+        return new Bar(
             DateTime.Now,
             symbol,
             Rng.NextDouble() * 100,
@@ -21,9 +21,12 @@ public static class TestHelpers
             Rng.NextDouble() * 100,
             Rng.NextDouble() * 100,
             Rng.Next(1000, 10000),
-            Rng.NextDouble() * 100
-        );
+            Rng.NextDouble() * 100);
+    }
 
-        return new MarketSnapshot(DateTime.Now, bar);
+    public static MarketSnapshot CreateRandomSnapshot(params string[] symbols)
+    {
+        var bars = symbols.Select(CreateRandomBar).ToArray();
+        return new MarketSnapshot(DateTime.Now, bars);
     }
 }
