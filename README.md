@@ -16,7 +16,8 @@ adjustments and places trades.
  - For correctness, I have followed along with Ernest Chan's Quantitative Trading which gives data and known good values for example backtests and things
 like Sharpe Ratio so I have high confidence that my math is actually correct.
   - Backtests are _intentionally_ omitting trading fees, etc. simply because that's how Quantitative Trading does it. I originally implemented trading fees
-and compounded returns daily but found it was different from the book (no fees no compounding) so I scrapped it and would reimplement it again later.
+and compounded returns daily but found it was different from the book (no fees no compounding, at least up to the examples I have implmented) so I scrapped
+it and will reimplement it again later.
 
 # Roadmap
 Eventually I want to add the following:
