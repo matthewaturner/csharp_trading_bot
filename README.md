@@ -8,7 +8,7 @@ https://m.imgur.com/a/dHfkE7O
 
 # Interesting Capabilities
  - Fluent, composable indicators that allow you to build silly things like "3-Day simple moving average of the squares of prices" with a single line
-`var smaOfSquares = Ind.SMA(3).Of(x => x*x);`
+`var smaOfSquares = Ind.SMA(3).Of(x => x*x);`. These can be chained to arbitrary complexity. Check out the Indicators folder and the tests.
  - Built around the idea that a strategy should be completely separate from the portfolio containing it. Strategies simply output the _desired allocations_
 for the symbols in their universe. The allocations would get aggregated and a separate worker merges all the allocations from different strategies and
 places trades.
