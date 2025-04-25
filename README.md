@@ -13,8 +13,8 @@ https://m.imgur.com/a/dHfkE7O
 for the symbols in their universe. The allocations would be aggregated (paper/live trading not yet implemented) by a separate component which handles risk
 adjustments and places trades.
  - Everything is interfaced. Easily swap new data sources, strategies, etc.
- - For correctness, I have followed along with Ernest Chan's Quantitative Trading which gives data and known good values for things like Sharpe Ratio
-so I have high confidence that my math is actually correct.
+ - For correctness, I have followed along with Ernest Chan's Quantitative Trading which gives data and known good values for example backtests and things
+like Sharpe Ratio so I have high confidence that my math is actually correct.
   - Backtests are _intentionally_ omitting trading fees, etc. simply because that's how Quantitative Trading does it. I originally implemented trading fees
 and compounded returns daily but found it was different from the book (no fees no compounding) so I scrapped it and would reimplement it again later.
 
