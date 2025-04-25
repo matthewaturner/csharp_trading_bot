@@ -10,8 +10,8 @@ https://m.imgur.com/a/dHfkE7O
  - Fluent, composable indicators that allow you to build silly things like "3-Day simple moving average of the squares of prices" with a single line
 `var smaOfSquares = Ind.SMA(3).Of(x => x*x);`. These can be chained to arbitrary complexity. Check out the Indicators folder and the tests.
  - Built around the idea that a strategy should be completely separate from the portfolio containing it. Strategies simply output the _desired allocations_
-for the symbols in their universe. The allocations would get aggregated and a separate worker merges all the allocations from different strategies and
-places trades.
+for the symbols in their universe. The allocations would be aggregated (paper/live trading not yet implemented) by a separate component which handles risk
+adjustments and places trades.
  - Everything is interfaced. Easily swap new data sources, strategies, etc.
  - For correctness, I have followed along with Ernest Chan's Quantitative Trading which gives data and known good values for things like Sharpe Ratio
 so I have high confidence that my math is actually correct.
