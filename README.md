@@ -18,6 +18,17 @@ so I have high confidence that my math is actually correct.
   - Backtests are _intentionally_ omitting trading fees, etc. simply because that's how Quantitative Trading does it. I originally implemented trading fees
 and compounded returns daily but found it was different from the book (no fees no compounding) so I scrapped it and would reimplement it again later.
 
+# Roadmap
+Eventually I want to add the following:
+ - Strategies should be able to be implemented in many different languages. Using event pattern for sending market data and other init, finalize events
+should make this easy later on to swap to something like GRPC or any other mechanism. This will allow me to use stats packages from python, R, etc.
+without having to implement arcane stationarity tests myself.
+ - Currently the bot is backtesting only, there is a lot of work needed to plug it into a real system. First would come paper trading, then live trading.
+ - Store my own tick data in something like Kusto, a database that is optimized for write-once-read-many workloads. This will enable me to build what I
+ would call "discovery" strategies which query the universe of stocks for things like "all stocks that dropped 10% yesterday" and reliably backtest them.
+ - Parse financial data from sec website. Wouldn't want to make this very complicated, probably just feed XBRL into an AI tool to standardize the accounting
+to some version of GAAP and hope for the best.
+
 # Screenshots
 Just some proof of what the bot does, roughly how it works and why it is neat.
 
