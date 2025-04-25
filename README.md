@@ -20,8 +20,8 @@ and compounded returns daily but found it was different from the book (no fees n
 
 # Roadmap
 Eventually I want to add the following:
- - Strategies should be able to be implemented in many different languages. Using event pattern for sending market data and other init, finalize events
-should make this easy later on to swap to something like GRPC or any other mechanism. This will allow me to use stats packages from python, R, etc.
+ - Strategies should be able to be implemented in many different languages. I have already used the event pattern for sending market data and other init,
+finalize events which will make this easy later on. Can swap to GRPC or any other mechanism. This will allow me to use stats packages from python, R, etc.
 without having to implement arcane stationarity tests myself.
  - Currently the bot is backtesting only, there is a lot of work needed to plug it into a real system. First would come paper trading, then live trading.
  - Store my own tick data in something like Kusto, a database that is optimized for write-once-read-many workloads. This will enable me to build what I
