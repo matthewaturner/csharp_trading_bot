@@ -21,10 +21,11 @@ it and will reimplement it again later.
 
 # Roadmap
 Eventually I want to add the following:
- - Strategies should be able to be implemented in many different languages. I have already used the event pattern for sending market data and other init,
-finalize events which will make this easy later on. Can swap to GRPC or any other mechanism. This will allow me to use stats packages from python, R, etc.
-without having to implement arcane stationarity tests myself.
- - Currently the bot is backtesting only, there is a lot of work needed to plug it into a real system. First would come paper trading, then live trading.
+ - Strategies can be implemented in many different languages. I have already used the event pattern for sending market data, init, and finalize events which
+will make this easy later on. Can swap to GRPC or any other mechanism. This will allow me to use stats packages from python, R, etc. without having to implement
+arcane stationarity tests myself.
+ - Currently the bot is backtesting only, there is a lot of work needed to plug it into a real system but it is built in such a way that it is possible.
+First would come paper trading, then live trading. The nice thing with the design is the exact same strategy code would run in backtest vs. live modes.
  - Store my own tick data in something like Kusto, a database that is optimized for write-once-read-many workloads. This will enable me to build what I
  would call "discovery" strategies which query the universe of stocks for things like "all stocks that dropped 10% yesterday" and reliably backtest them.
  - Parse financial data from sec website. Wouldn't want to make this very complicated, probably just feed XBRL into an AI tool to standardize the accounting
