@@ -1,8 +1,4 @@
-﻿// -----------------------------------------------------------------------
-//     Copyright (c) 2025 Matthew Turner.
-//     Licensed under the MIT-NC License (Non-Commercial).
-// -----------------------------------------------------------------------
-
+﻿
 using Bot.DataSources;
 using Bot.Models.Allocations;
 using Bot.Models.Engine;
