@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="450"
+        x:Class="UX.Views.BacktestResultWindow"
+        Title="Run Result"
+        Width="960" Height="450">
+    
+    <Grid ColumnDefinitions="*,200" Margin="10">
+        <!-- Plot area -->
+        <scottPlot:AvaPlot x:Name="Plot" Grid.Column="0" Margin="0,0,10,0"/>
+        
+        <!-- Stats panel -->
+        <StackPanel Grid.Column="1" Spacing="15">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Sharpe Ratio" FontWeight="SemiBold"/>
+                <TextBox x:Name="SharpeRatioValue" IsReadOnly="True" Background="#000000ff"/>
+            </StackPanel>
+            
+            <StackPanel Spacing="5">
+                <TextBlock Text="Max Drawdown" FontWeight="SemiBold"/>
+                <TextBox x:Name="MaxDrawdownValue" IsReadOnly="True" Background="#000000ff"/>
+            </StackPanel>
+            
+            <StackPanel Spacing="5">
+                <TextBlock Text="Max Drawdown Duration" FontWeight="SemiBold"/>
+                <TextBox x:Name="MaxDrawdownDurationValue" IsReadOnly="True" Background="#000000ff"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+    
+</Window>

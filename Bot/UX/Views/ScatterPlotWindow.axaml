@@ -1,0 +1,25 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scottPlot="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1070" d:DesignHeight="490"
+        x:Class="UX.Views.ScatterPlotWindow"
+        Title="ScatterPlotWindow"
+        Width="1070" Height="490">
+    
+    <Grid ColumnDefinitions="*,230" Margin="10">
+        <!-- Plot area -->
+        <scottPlot:AvaPlot x:Name="Plot" Grid.Column="0" Margin="0,0,10,0"/>
+        
+        <!-- Info panel -->
+        <TextBox x:Name="InfoTextBox" 
+                 Grid.Column="1" 
+                 IsReadOnly="True" 
+                 Background="#000000ff"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Stretch"/>
+    </Grid>
+    
+</Window>
