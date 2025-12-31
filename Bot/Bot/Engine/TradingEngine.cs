@@ -60,6 +60,10 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
         // register initialize handlers
         InitializeEventHandlers += ExecutionEngine.OnInitialize;
         InitializeEventHandlers += Strategy.OnInitialize;
+        if (DataSource is IInitializeReceiver dataSourceReceiver)
+        {
+            InitializeEventHandlers += dataSourceReceiver.OnInitialize;
+        }
         if (Broker != null)
         {
             InitializeEventHandlers += Broker.OnInitialize;

@@ -18,6 +18,10 @@ public static class GlobalConfig
 
     public static LogLevel MinimumLogLevel { get; set; } = LogLevel.Information;
 
+    public static string DataFolder = Path.Combine(
+        AppContext.BaseDirectory,
+        "..", "..", "..", "..", "..", "Data");
+
     public static string EpChanDataFolder = Path.Combine(
         AppContext.BaseDirectory,
         "..", "..", "..", "..", "..", "Data", "epchan");

@@ -52,4 +52,23 @@ public class Interval
         IntervalType.Minute => $"{_num}T",
         _ => throw new ArgumentOutOfRangeException()
     };
+
+    /// <summary>
+    /// Gets the granularity level for this interval (for cache comparison purposes).
+    /// Returns: 0=Month/Week/Day, 1=Hour, 2=Minute
+    /// </summary>
+    internal int GetGranularityLevel() => _type switch
+    {
+        IntervalType.Month => 0,
+        IntervalType.Week => 0,
+        IntervalType.Day => 0,
+        IntervalType.Hour => 1,
+        IntervalType.Minute => 2,
+        _ => throw new ArgumentOutOfRangeException()
+    };
+
+    /// <summary>
+    /// Gets the number of units in this interval.
+    /// </summary>
+    internal int GetIntervalNumber() => _num;
 }

@@ -20,7 +20,7 @@ public class RunConfig
         List<string> universe = null,
         bool shouldWriteCsv = false,
         double annualRiskFreeRate = 0.0,
-        LogLevel minLogLevel = LogLevel.Debug,
+        LogLevel logLevel = LogLevel.Debug,
         [CallerFilePath] string callerFilePath = null)
     {
         Interval = interval ?? Interval.OneDay;
@@ -30,7 +30,7 @@ public class RunConfig
         Universe = universe ?? throw new ArgumentNullException("Symbol universe must be defined.");
         AnnualRiskFreeRate = annualRiskFreeRate;
         ShouldWriteCsvOutput = shouldWriteCsv;
-        LogLevel = minLogLevel;
+        LogLevel = logLevel;
 
         string dateTimeStr = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
         string callerClass = Path.GetFileNameWithoutExtension(callerFilePath);

@@ -20,12 +20,14 @@ public class CsvDataSource : DataSourceBase
 {
     private readonly string DataPath;
 
+    protected override string CacheDatabaseName => "csv.sqlite";
+
     public CsvDataSource(string dataFolderPath)
     {
         DataPath = dataFolderPath;
     }
 
-    public override Task<List<Bar>> GetHistoricalBarsAsync(string symbol, Interval interval, DateTime start, DateTime end)
+    protected override Task<List<Bar>> GetHistoricalBarsInternalAsync(string symbol, Interval interval, DateTime start, DateTime end)
     {
         string fileName = Path.Combine(DataPath, $"{symbol}_{interval}.csv");
 

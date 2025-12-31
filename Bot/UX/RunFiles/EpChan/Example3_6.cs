@@ -62,7 +62,7 @@ public class Example3_6
                 start: sharedTimestamps.First(),
                 end: sharedTimestamps.Last().AddDays(1),
                 universe: new() { "GLD", "GDX" },
-                minLogLevel: LogLevel.Debug,
+                logLevel: LogLevel.Debug,
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_6_OlsPairsTrade("GLD", "GDX", m, spreadMean, spreadStdDev), 1.0)

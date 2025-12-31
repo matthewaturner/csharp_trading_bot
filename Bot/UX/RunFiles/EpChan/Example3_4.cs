@@ -24,7 +24,7 @@ public class Example3_4
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
                 universe: new() { "IGE" },
-                minLogLevel: LogLevel.Debug,
+                logLevel: LogLevel.Debug,
                 shouldWriteCsv: true,
                 annualRiskFreeRate: .04))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))

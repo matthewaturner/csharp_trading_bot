@@ -153,4 +153,53 @@ public static class DateTimeHelper
         DateTime easterSunday = new DateTime(year, month, day);
         return date.Date.CompareTo(easterSunday.Date.AddDays(-2)) == 0;
     }
+
+    /// <summary>
+    /// Normalizes a DateTime to the appropriate granularity for the given interval.
+    /// This ensures proper cache comparison based on interval type.
+    /// </summary>
+    /// <param name="dt">The DateTime to normalize</param>
+    /// <param name="interval">The interval determining the granularity</param>
+    /// <returns>Normalized DateTime</returns>
+    public static DateTime NormalizeForInterval(this DateTime dt, Bot.Models.Engine.Interval interval)
+    {
+        var granularity = interval.GetGranularityLevel();
+        var intervalNum = interval.GetIntervalNumber();
+
+        return granularity switch
+        {
+            // Day/Week/Month: Compare by date only
+            0 => dt.Date,
+            
+            // Hour: Round to the nearest interval hour
+            1 => new DateTime(dt.Year, dt.Month, dt.Day, (dt.Hour / intervalNum) * intervalNum, 0, 0, dt.Kind),
+            
+            // Minute: Round to the nearest interval minute
+            2 => new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, (dt.Minute / intervalNum) * intervalNum, 0, dt.Kind),
+            
+            _ => dt
+        };
+    }
+
+    /// <summary>
+    /// Checks if the current time is at least 1 hour after US market close (4:00 PM ET).
+    /// This indicates that end-of-day data should be available.
+    /// </summary>
+    /// <returns>True if it's 1+ hours after market close</returns>
+    public static bool IsAfterMarketCloseWithBuffer()
+    {
+        var nowUtc = DateTime.UtcNow;
+        
+        // Market closes at 4:00 PM ET
+        // ET is UTC-5 (EST) or UTC-4 (EDT)
+        // Approximate DST: second Sunday in March to first Sunday in November
+        bool isDst = nowUtc.Month > 3 && nowUtc.Month < 11;
+        
+        // Market close in UTC: 21:00 (EST) or 20:00 (EDT)
+        int marketCloseHourUtc = isDst ? 20 : 21;
+        var marketCloseUtc = new DateTime(nowUtc.Year, nowUtc.Month, nowUtc.Day, marketCloseHourUtc, 0, 0, DateTimeKind.Utc);
+        
+        // Check if we're at least 1 hour past market close
+        return nowUtc >= marketCloseUtc.AddHours(1);
+    }
 }

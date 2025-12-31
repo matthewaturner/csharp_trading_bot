@@ -31,7 +31,7 @@ public class QuantitativeTrading_EpChan_Backtests
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
                 universe: new() { "IGE" },
-                minLogLevel: LogLevel.Debug,
+                logLevel: LogLevel.Debug,
                 annualRiskFreeRate: .04))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0)
@@ -54,7 +54,7 @@ public class QuantitativeTrading_EpChan_Backtests
              interval: Interval.OneDay,
              runMode: RunMode.BackTest,
              universe: new() { "IGE", "SPY" },
-             minLogLevel: LogLevel.Debug))
+             logLevel: LogLevel.Debug))
          .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
          .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0)
          .WithExecutionEngine(broker);

@@ -7,6 +7,10 @@
 Epchan_Examples/
 Output/
 
+# SQLite cache files
+Data/*.sqlite
+Data/*.sqlite-*
+
 # User-specific files
 *.rsuser
 *.suo

@@ -22,7 +22,7 @@ public class Example3_5
                 interval: Interval.OneDay,
                 runMode: RunMode.BackTest,
                 universe: new() { "IGE", "SPY" },
-                minLogLevel: LogLevel.Debug,
+                logLevel: LogLevel.Debug,
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0)

@@ -5,6 +5,7 @@ using Bot.Models.Broker;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies.EpChan;
+using Microsoft.Extensions.Logging;
 using UX.Views;
 using static Bot.Engine.TradingEngine;
 
@@ -25,7 +26,8 @@ public class BuyAndHold
                     runMode: RunMode.BackTest,
                     start: new DateTime(2020, 1, 1),
                     end: DateTime.Now,
-                    universe: new() { "XOM" }))
+                    universe: new() { "XOM" },
+                    logLevel: LogLevel.Information))
                 .WithDataSource(new AlpacaDataSource())
                 .WithStrategy(new Ex3_4_BuyAndHold("XOM"), 1.0)
                 .WithExecutionEngine(broker, rebalanceThreshold: 0.01)

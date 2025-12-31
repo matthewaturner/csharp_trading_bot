@@ -16,6 +16,8 @@ public class AlpacaDataSource : DataSourceBase
 {
     private readonly HttpClient _httpClient;
 
+    protected override string CacheDatabaseName => "alpaca.sqlite";
+
     public AlpacaDataSource()
     {
         string apiKeyId = GlobalConfig.GetValue("Alpaca:KeyId");
@@ -27,9 +29,9 @@ public class AlpacaDataSource : DataSourceBase
     }
 
     /// <summary>
-    /// Get historical bar data.
+    /// Get historical bar data from Alpaca API.
     /// </summary>
-    public override async Task<List<Bar>> GetHistoricalBarsAsync(string symbol, Interval interval, DateTime start, DateTime end)
+    protected override async Task<List<Bar>> GetHistoricalBarsInternalAsync(string symbol, Interval interval, DateTime start, DateTime end)
     {
         var results = new List<Bar>();
         string nextPageToken = null;
@@ -43,7 +45,7 @@ public class AlpacaDataSource : DataSourceBase
 
             var json = await response.Content.ReadAsStringAsync();
             var barsResult = JsonSerializer.Deserialize<Ap.BarsResponse>(json)
-                ?? throw new JsonException($"{nameof(GetHistoricalBarsAsync)}: Failed to deserialize response.");
+                ?? throw new JsonException($"{nameof(GetHistoricalBarsInternalAsync)}: Failed to deserialize response.");
 
             results.AddRange(barsResult?.Bars.Select(b => b.ToBotModel(symbol)));
             nextPageToken = barsResult.NextPageToken;
