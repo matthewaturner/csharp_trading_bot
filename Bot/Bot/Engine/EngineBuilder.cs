@@ -20,9 +20,10 @@ public partial class TradingEngine
     {
         private RunConfig _runConfig;
         private MetaAllocation _metaAllocation = new MetaAllocation();
-        private IStrategyAnalyzer _analyzer = new StrategyAnalyzer();
+        private IExecutionEngine _executionEngine;
         private IDataSource _dataSource;
         private List<IStrategy> _strategies = new();
+        private IBroker _broker;
 
         // add a config
         public EngineBuilder WithConfig(RunConfig config)
@@ -52,14 +53,15 @@ public partial class TradingEngine
         // add an execution engine with a broker
         public EngineBuilder WithExecutionEngine(IBroker broker, double rebalanceThreshold = 0.01)
         {
-            _analyzer = new ExecutionEngine(broker, rebalanceThreshold);
+            _broker = broker;
+            _executionEngine = new ExecutionEngine(broker, rebalanceThreshold);
             return this;
         }
 
         // use the default strategy analyzer (for theoretical performance)
         public EngineBuilder WithStrategyAnalyzer()
         {
-            _analyzer = new StrategyAnalyzer();
+            _executionEngine = new StrategyAnalyzer() as IExecutionEngine;
             return this;
         }
 
@@ -68,13 +70,20 @@ public partial class TradingEngine
         /// </summary>
         public TradingEngine Build()
         {
+            // Default to StrategyAnalyzer if no execution engine specified
+            if (_executionEngine == null)
+            {
+                _executionEngine = new StrategyAnalyzer() as IExecutionEngine;
+            }
+
             return new TradingEngine()
             {
                 RunConfig = _runConfig,
                 MetaAllocation = _metaAllocation,
-                Analyzer = _analyzer,
+                ExecutionEngine = _executionEngine,
                 DataSource = _dataSource,
-                Strategy = _strategies.First() // todo
+                Strategy = _strategies.First(), // todo
+                Broker = _broker
             };
         }
     }

@@ -19,6 +19,7 @@ public class BuyAndHold
         try
         {
             // Option 1: Use StrategyAnalyzer (default - theoretical perfect execution)
+            /*
             var engine = new EngineBuilder()
                 .WithConfig(new RunConfig(
                     interval: Interval.OneDay,
@@ -29,10 +30,10 @@ public class BuyAndHold
                 .WithDataSource(new AlpacaDataSource())
                 .WithStrategy(new Ex3_4_BuyAndHold("XOM"), 1.0)
                 .Build();
+            */
 
             // Option 2: Use ExecutionEngine (simulated order execution)
             // Uncomment to test with actual order fills and portfolio tracking:
-            /*
             var broker = new BacktestBroker(100000, ExecutionMode.OnNextBarOpen);
             var engine = new EngineBuilder()
                 .WithConfig(new RunConfig(
@@ -45,7 +46,6 @@ public class BuyAndHold
                 .WithStrategy(new Ex3_4_BuyAndHold("XOM"), 1.0)
                 .WithExecutionEngine(broker, rebalanceThreshold: 0.01)
                 .Build();
-            */
 
             Console.WriteLine("Running backtest...");
             RunResult result = await engine.RunAsync();

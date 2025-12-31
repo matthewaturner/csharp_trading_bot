@@ -23,6 +23,9 @@ public class RunResult
             UnderlyingPrices[symbol] = new List<double>();
             SymbolWeights[symbol] = new List<double>();
         }
+
+        // Initialize lists for ExecutionEngine usage
+        Returns = new List<double>();
     }
 
     // ####################################################

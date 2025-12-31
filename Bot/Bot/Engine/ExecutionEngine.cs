@@ -16,7 +16,7 @@ namespace Bot.Engine;
 /// Translates strategy allocations into actual trades and tracks realized performance.
 /// Works for both backtesting (with simulated execution) and live trading.
 /// </summary>
-public class ExecutionEngine : IStrategyAnalyzer
+public class ExecutionEngine : IExecutionEngine
 {
     private ITradingEngine Engine;
     private IBroker Broker;

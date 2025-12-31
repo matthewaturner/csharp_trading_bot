@@ -1,10 +1,10 @@
 ﻿
+using Bot.Engine;
 using Bot.Events;
 using Bot.Models.Results;
 
 namespace Bot.Analyzers;
 
-public interface IStrategyAnalyzer : IMarketDataReceiver, IInitializeReceiver, IFinalizeReceiver
+public interface IStrategyAnalyzer : IExecutionEngine
 {
-    public RunResult RunResult { get; }
 }

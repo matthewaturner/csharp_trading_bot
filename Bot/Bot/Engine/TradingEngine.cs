@@ -1,5 +1,6 @@
 ﻿
 using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.DataSources;
 using Bot.Events;
 using Bot.Helpers;
@@ -27,9 +28,10 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
     // Local variables
     public RunConfig RunConfig { get; private set; }
     public MetaAllocation MetaAllocation { get; private set; }
-    public IStrategyAnalyzer Analyzer { get; private set; }
+    public IExecutionEngine ExecutionEngine { get; private set; }
     public IDataSource DataSource { get; private set; }
     public IStrategy Strategy { get; private set; }
+    public IBroker Broker { get; private set; }
 
     /// <summary>
     /// Method to create loggers.
@@ -56,15 +58,24 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
         });
 
         // register initialize handlers
-        InitializeEventHandlers += Analyzer.OnInitialize;
+        InitializeEventHandlers += ExecutionEngine.OnInitialize;
         InitializeEventHandlers += Strategy.OnInitialize;
+        if (Broker != null)
+        {
+            InitializeEventHandlers += Broker.OnInitialize;
+        }
 
         // register market data handlers
+        // ORDER MATTERS: Broker must update portfolio first, then strategy can calculate, then ExecutionEngine can place orders
+        if (Broker is IMarketDataReceiver brokerReceiver)
+        {
+            DataSource.MarketDataReceivers += brokerReceiver.OnMarketData;
+        }
         DataSource.MarketDataReceivers += this.OnMarketData;
-        DataSource.MarketDataReceivers += Analyzer.OnMarketData;
+        DataSource.MarketDataReceivers += ExecutionEngine.OnMarketData;
 
         // register finalize handlers
-        FinalizeEventHandlers += Analyzer.OnFinalize;
+        FinalizeEventHandlers += ExecutionEngine.OnFinalize;
 
         // send initialize event
         InitializeEventHandlers?.Invoke(this, new EventArgs());
@@ -107,11 +118,11 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             string fullFileName = Path.Join(GlobalConfig.OutputFolder, $"{timestamp} {RunConfig.CsvOutputFileName}");
-            CsvExporter.ExportToCSV(Analyzer.RunResult, fullFileName);
+            CsvExporter.ExportToCSV(ExecutionEngine.RunResult, fullFileName);
         }
 
         Console.WriteLine("[TradingEngine] RunAsync completed.");
-        return Analyzer.RunResult;
+        return ExecutionEngine.RunResult;
     }
 
     /// <summary>
