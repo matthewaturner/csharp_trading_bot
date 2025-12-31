@@ -1,5 +1,6 @@
 ﻿
 using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.DataSources;
 using Bot.Models.Allocations;
 using Bot.Models.Engine;
@@ -19,7 +20,7 @@ public partial class TradingEngine
     {
         private RunConfig _runConfig;
         private MetaAllocation _metaAllocation = new MetaAllocation();
-        private StrategyAnalyzer _analyzer = new StrategyAnalyzer();
+        private IStrategyAnalyzer _analyzer = new StrategyAnalyzer();
         private IDataSource _dataSource;
         private List<IStrategy> _strategies = new();
 
@@ -45,6 +46,20 @@ public partial class TradingEngine
 
             _strategies.Add(strategy);
             _metaAllocation.SetStrategyWeight(strategy.Id, strategyWeight);
+            return this;
+        }
+
+        // add an execution engine with a broker
+        public EngineBuilder WithExecutionEngine(IBroker broker, double rebalanceThreshold = 0.01)
+        {
+            _analyzer = new ExecutionEngine(broker, rebalanceThreshold);
+            return this;
+        }
+
+        // use the default strategy analyzer (for theoretical performance)
+        public EngineBuilder WithStrategyAnalyzer()
+        {
+            _analyzer = new StrategyAnalyzer();
             return this;
         }
 

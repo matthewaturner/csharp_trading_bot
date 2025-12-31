@@ -115,6 +115,67 @@ public class RunResult
     }
 
     /// <summary>
+    /// Calculate all derived metrics when Returns are already populated (e.g., from ExecutionEngine).
+    /// This is used when returns come from actual P&L rather than being calculated from prices/weights.
+    /// </summary>
+    public void CalculateResultsFromReturns(double annualRiskFreeRate, Interval interval)
+    {
+        // Returns are already populated by ExecutionEngine from actual portfolio value changes
+        // Just calculate the derived metrics
+
+        // Calculate underlying returns for analysis (if prices are available)
+        foreach (string symbol in SymbolUniverse)
+        {
+            if (UnderlyingPrices[symbol].Count > 1)
+            {
+                UnderlyingReturns[symbol] = [.. UnderlyingPrices[symbol].Zip(UnderlyingPrices[symbol].Skip(1), (prev, current) => (current - prev) / prev)];
+            }
+        }
+
+        // Calculate excess returns
+        ExcessReturns = [.. Returns.Select(r => r - (annualRiskFreeRate / interval.GetIntervalsPerYear()))];
+
+        CumulativeReturns = [.. ExcessReturns.Aggregate(new List<double> { 0 }, (acc, r) =>
+        {
+            acc.Add((1 + acc.Last()) * (1 + r) - 1);
+            return acc;
+        }).Skip(1)];
+
+        HighWaterMark = [.. CumulativeReturns.Aggregate(new List<double> { 0 }, (acc, r) =>
+        {
+            acc.Add(Math.Max(acc.Last(), r));
+            return acc;
+        }).Skip(1)];
+
+        Drawdown = [.. CumulativeReturns.Zip(HighWaterMark, (c, h) => (1 + c) / (1 + h) - 1)];
+
+        DrawdownDuration = [.. Drawdown.Aggregate(new List<double> { 0 }, (acc, d) =>
+        {
+            acc.Add(d < 0 ? acc.Last() + 1 : 0);
+            return acc;
+        }).Skip(1)];
+
+        MaximumDrawdown = Drawdown.Min();
+        MaximumDrawdownDuration = DrawdownDuration.Max();
+        AnnualizedSharpeRatio = CalculateAnnualizedSharpeRatio(interval);
+
+        // Add the initial zeroes to everything
+        foreach (string symbol in SymbolUniverse)
+        {
+            if (UnderlyingReturns.ContainsKey(symbol) && UnderlyingReturns[symbol].Count > 0)
+            {
+                UnderlyingReturns[symbol].Insert(0, 0);
+            }
+        }
+        Returns.Insert(0, 0);
+        ExcessReturns.Insert(0, 0);
+        CumulativeReturns.Insert(0, 0);
+        HighWaterMark.Insert(0, 0);
+        Drawdown.Insert(0, 0);
+        DrawdownDuration.Insert(0, 0);
+    }
+
+    /// <summary>
     /// Calculate the annualized sharpe ratio.
     /// </summary>
     private double CalculateAnnualizedSharpeRatio(Interval interval)

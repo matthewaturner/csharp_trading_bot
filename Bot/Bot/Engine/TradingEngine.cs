@@ -27,7 +27,7 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
     // Local variables
     public RunConfig RunConfig { get; private set; }
     public MetaAllocation MetaAllocation { get; private set; }
-    public StrategyAnalyzer Analyzer { get; private set; }
+    public IStrategyAnalyzer Analyzer { get; private set; }
     public IDataSource DataSource { get; private set; }
     public IStrategy Strategy { get; private set; }
 
@@ -75,7 +75,12 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
     /// </summary>
     public async Task<RunResult> RunAsync()
     {
+        Console.WriteLine("[TradingEngine] Starting Setup...");
         Setup();
+
+        Console.WriteLine($"[TradingEngine] RunMode: {RunConfig.RunMode}");
+        Console.WriteLine($"[TradingEngine] Universe: {string.Join(", ", RunConfig.Universe)}");
+        Console.WriteLine($"[TradingEngine] Date range: {RunConfig.Start:yyyy-MM-dd} to {RunConfig.End:yyyy-MM-dd}");
 
         switch (RunConfig.RunMode)
         {
@@ -85,14 +90,17 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
                 throw new NotImplementedException("Not implemented.");
 
             case RunMode.BackTest:
+                Console.WriteLine("[TradingEngine] Starting data stream...");
                 await DataSource.StreamBars(
                     RunConfig.Universe,
                     RunConfig.Interval,
                     RunConfig.Start,
                     RunConfig.End);
+                Console.WriteLine("[TradingEngine] Data stream completed.");
                 break;
         }
 
+        Console.WriteLine("[TradingEngine] Running finalize handlers...");
         FinalizeEventHandlers?.Invoke(this, new EventArgs());
 
         if (RunConfig.ShouldWriteCsvOutput)
@@ -102,6 +110,7 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
             CsvExporter.ExportToCSV(Analyzer.RunResult, fullFileName);
         }
 
+        Console.WriteLine("[TradingEngine] RunAsync completed.");
         return Analyzer.RunResult;
     }
 

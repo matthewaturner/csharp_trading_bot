@@ -14,6 +14,8 @@ public class Example3_4
 {
     public async void Run()
     {
+        Console.WriteLine("Testing");
+
         var engine = new EngineBuilder()
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,

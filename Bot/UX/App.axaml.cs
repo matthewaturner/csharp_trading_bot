@@ -17,13 +17,18 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        Console.WriteLine("[App] OnFrameworkInitializationCompleted called");
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            Console.WriteLine("[App] Invoking Run method...");
             // Execute the Run method which will show the appropriate window
             // The window will set itself as MainWindow when Show() is called
             RunMethod?.Invoke(RunInstance, null);
+            Console.WriteLine("[App] Run method invoked");
         }
 
         base.OnFrameworkInitializationCompleted();
+        Console.WriteLine("[App] OnFrameworkInitializationCompleted finished");
     }
 }
