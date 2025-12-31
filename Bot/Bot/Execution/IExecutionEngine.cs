@@ -1,7 +1,7 @@
 using Bot.Events;
 using Bot.Models.Results;
 
-namespace Bot.Engine;
+namespace Bot.Execution;
 
 /// <summary>
 /// Interface for execution engines that translate strategy allocations into trades

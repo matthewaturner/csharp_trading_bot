@@ -1,7 +1,7 @@
 ﻿
-using Bot.Analyzers;
 using Bot.Brokers;
 using Bot.DataSources;
+using Bot.Execution;
 using Bot.Models.Allocations;
 using Bot.Models.Engine;
 using Bot.Strategies;
@@ -58,22 +58,14 @@ public partial class TradingEngine
             return this;
         }
 
-        // use the default strategy analyzer (for theoretical performance)
-        public EngineBuilder WithStrategyAnalyzer()
-        {
-            _executionEngine = new StrategyAnalyzer() as IExecutionEngine;
-            return this;
-        }
-
         /// <summary>
         /// Build the engine.
         /// </summary>
         public TradingEngine Build()
         {
-            // Default to StrategyAnalyzer if no execution engine specified
             if (_executionEngine == null)
             {
-                _executionEngine = new StrategyAnalyzer() as IExecutionEngine;
+                throw new InvalidOperationException("ExecutionEngine must be configured. Call WithExecutionEngine() before Build().");
             }
 
             return new TradingEngine()

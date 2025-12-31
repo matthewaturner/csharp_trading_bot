@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Bot;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
+using Bot.Models.Broker;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies.EpChan;
@@ -14,6 +16,7 @@ public class Example3_5
 {
     public async void Run()
     {
+        var broker = new BacktestBroker(100000, ExecutionMode.OnCurrentBarClose);
         var engine = new EngineBuilder()
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
@@ -23,6 +26,7 @@ public class Example3_5
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0)
+            .WithExecutionEngine(broker)
             .Build();
 
         RunResult result = await engine.RunAsync();

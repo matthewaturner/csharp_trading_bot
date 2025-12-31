@@ -1,6 +1,8 @@
 
 using Bot;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
+using Bot.Models.Broker;
 using Bot.Models.Engine;
 using Bot.Models.Results;
 using Bot.Strategies.EpChan;
@@ -23,6 +25,7 @@ public class QuantitativeTrading_EpChan_Backtests
     [Fact]
     public async Task Example3_4()
     {
+        var broker = new BacktestBroker(100000, ExecutionMode.OnCurrentBarClose);
         var builder = new EngineBuilder()
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
@@ -31,7 +34,8 @@ public class QuantitativeTrading_EpChan_Backtests
                 minLogLevel: LogLevel.Debug,
                 annualRiskFreeRate: .04))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
-            .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0);
+            .WithStrategy(new Ex3_4_BuyAndHold("IGE"), 1.0)
+            .WithExecutionEngine(broker);
 
         var engine = builder.Build();
         RunResult result = await engine.RunAsync();
@@ -44,6 +48,7 @@ public class QuantitativeTrading_EpChan_Backtests
     [Fact]
     public async Task Example3_5()
     {
+        var broker = new BacktestBroker(100000, ExecutionMode.OnCurrentBarClose);
         var builder = new EngineBuilder()
          .WithConfig(new RunConfig(
              interval: Interval.OneDay,
@@ -51,7 +56,8 @@ public class QuantitativeTrading_EpChan_Backtests
              universe: new() { "IGE", "SPY" },
              minLogLevel: LogLevel.Debug))
          .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
-         .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0);
+         .WithStrategy(new Ex3_5_LongShort("IGE", "SPY"), 1.0)
+         .WithExecutionEngine(broker);
 
         var engine = builder.Build();
         RunResult result = await engine.RunAsync();

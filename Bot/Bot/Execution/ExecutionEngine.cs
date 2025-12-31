@@ -1,5 +1,5 @@
-using Bot.Analyzers;
 using Bot.Brokers;
+using Bot.Engine;
 using Bot.Events;
 using Bot.Models.Allocations;
 using Bot.Models.Broker;
@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Bot.Engine;
+namespace Bot.Execution;
 
 /// <summary>
 /// Translates strategy allocations into actual trades and tracks realized performance.
