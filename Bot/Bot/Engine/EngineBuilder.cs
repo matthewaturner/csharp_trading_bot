@@ -1,6 +1,7 @@
 ﻿
-using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.DataSources;
+using Bot.Execution;
 using Bot.Models.Allocations;
 using Bot.Models.Engine;
 using Bot.Strategies;
@@ -19,9 +20,10 @@ public partial class TradingEngine
     {
         private RunConfig _runConfig;
         private MetaAllocation _metaAllocation = new MetaAllocation();
-        private StrategyAnalyzer _analyzer = new StrategyAnalyzer();
+        private IExecutionEngine _executionEngine;
         private IDataSource _dataSource;
         private List<IStrategy> _strategies = new();
+        private IBroker _broker;
 
         // add a config
         public EngineBuilder WithConfig(RunConfig config)
@@ -48,18 +50,32 @@ public partial class TradingEngine
             return this;
         }
 
+        // add an execution engine with a broker
+        public EngineBuilder WithExecutionEngine(IBroker broker, double rebalanceThreshold = 0.01)
+        {
+            _broker = broker;
+            _executionEngine = new ExecutionEngine(broker, rebalanceThreshold);
+            return this;
+        }
+
         /// <summary>
         /// Build the engine.
         /// </summary>
         public TradingEngine Build()
         {
+            if (_executionEngine == null)
+            {
+                throw new InvalidOperationException("ExecutionEngine must be configured. Call WithExecutionEngine() before Build().");
+            }
+
             return new TradingEngine()
             {
                 RunConfig = _runConfig,
                 MetaAllocation = _metaAllocation,
-                Analyzer = _analyzer,
+                ExecutionEngine = _executionEngine,
                 DataSource = _dataSource,
-                Strategy = _strategies.First() // todo
+                Strategy = _strategies.First(), // todo
+                Broker = _broker
             };
         }
     }

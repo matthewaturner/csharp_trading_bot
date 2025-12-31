@@ -1,7 +1,8 @@
 ﻿
-using Bot.Analyzers;
+using Bot.Brokers;
 using Bot.DataSources;
 using Bot.Events;
+using Bot.Execution;
 using Bot.Helpers;
 using Bot.Logging;
 using Bot.Models.Allocations;
@@ -27,9 +28,10 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
     // Local variables
     public RunConfig RunConfig { get; private set; }
     public MetaAllocation MetaAllocation { get; private set; }
-    public StrategyAnalyzer Analyzer { get; private set; }
+    public IExecutionEngine ExecutionEngine { get; private set; }
     public IDataSource DataSource { get; private set; }
     public IStrategy Strategy { get; private set; }
+    public IBroker Broker { get; private set; }
 
     /// <summary>
     /// Method to create loggers.
@@ -56,15 +58,24 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
         });
 
         // register initialize handlers
-        InitializeEventHandlers += Analyzer.OnInitialize;
+        InitializeEventHandlers += ExecutionEngine.OnInitialize;
         InitializeEventHandlers += Strategy.OnInitialize;
+        if (Broker != null)
+        {
+            InitializeEventHandlers += Broker.OnInitialize;
+        }
 
         // register market data handlers
+        // ORDER MATTERS: Broker must update portfolio first, then strategy can calculate, then ExecutionEngine can place orders
+        if (Broker is IMarketDataReceiver brokerReceiver)
+        {
+            DataSource.MarketDataReceivers += brokerReceiver.OnMarketData;
+        }
         DataSource.MarketDataReceivers += this.OnMarketData;
-        DataSource.MarketDataReceivers += Analyzer.OnMarketData;
+        DataSource.MarketDataReceivers += ExecutionEngine.OnMarketData;
 
         // register finalize handlers
-        FinalizeEventHandlers += Analyzer.OnFinalize;
+        FinalizeEventHandlers += ExecutionEngine.OnFinalize;
 
         // send initialize event
         InitializeEventHandlers?.Invoke(this, new EventArgs());
@@ -75,7 +86,12 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
     /// </summary>
     public async Task<RunResult> RunAsync()
     {
+        Console.WriteLine("[TradingEngine] Starting Setup...");
         Setup();
+
+        Console.WriteLine($"[TradingEngine] RunMode: {RunConfig.RunMode}");
+        Console.WriteLine($"[TradingEngine] Universe: {string.Join(", ", RunConfig.Universe)}");
+        Console.WriteLine($"[TradingEngine] Date range: {RunConfig.Start:yyyy-MM-dd} to {RunConfig.End:yyyy-MM-dd}");
 
         switch (RunConfig.RunMode)
         {
@@ -85,24 +101,28 @@ public partial class TradingEngine : ITradingEngine, IMarketDataReceiver
                 throw new NotImplementedException("Not implemented.");
 
             case RunMode.BackTest:
+                Console.WriteLine("[TradingEngine] Starting data stream...");
                 await DataSource.StreamBars(
                     RunConfig.Universe,
                     RunConfig.Interval,
                     RunConfig.Start,
                     RunConfig.End);
+                Console.WriteLine("[TradingEngine] Data stream completed.");
                 break;
         }
 
+        Console.WriteLine("[TradingEngine] Running finalize handlers...");
         FinalizeEventHandlers?.Invoke(this, new EventArgs());
 
         if (RunConfig.ShouldWriteCsvOutput)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
             string fullFileName = Path.Join(GlobalConfig.OutputFolder, $"{timestamp} {RunConfig.CsvOutputFileName}");
-            CsvExporter.ExportToCSV(Analyzer.RunResult, fullFileName);
+            CsvExporter.ExportToCSV(ExecutionEngine.RunResult, fullFileName);
         }
 
-        return Analyzer.RunResult;
+        Console.WriteLine("[TradingEngine] RunAsync completed.");
+        return ExecutionEngine.RunResult;
     }
 
     /// <summary>

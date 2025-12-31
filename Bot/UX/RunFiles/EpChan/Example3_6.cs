@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using Bot;
+using Bot.Brokers.Backtest;
 using Bot.DataSources.Csv;
 using Bot.Helpers;
+using Bot.Models.Broker;
 using Bot.Models.Engine;
 using Bot.Strategies.EpChan;
 using Microsoft.Extensions.Logging;
@@ -52,6 +54,7 @@ public class Example3_6
         double spreadMean = trainSetSpread.Average();
         double spreadStdDev = MathFunctions.StdDev(trainSetSpread);
 
+        var trainBroker = new BacktestBroker(100000, ExecutionMode.OnCurrentBarClose);
         var trainResult = await new EngineBuilder()
             .WithConfig(new RunConfig(
                 interval: Interval.OneDay,
@@ -63,6 +66,7 @@ public class Example3_6
                 shouldWriteCsv: true))
             .WithDataSource(new CsvDataSource(GlobalConfig.EpChanDataFolder))
             .WithStrategy(new Ex3_6_OlsPairsTrade("GLD", "GDX", m, spreadMean, spreadStdDev), 1.0)
+            .WithExecutionEngine(trainBroker)
             .Build().RunAsync();
         var trainResultWindow = new BacktestResultWindow(trainResult);
         trainResultWindow.Show();
